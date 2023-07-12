@@ -17,20 +17,28 @@ class UserSeeder extends Seeder
     {
         $arr = [
             [
-                'name' => 'Fernando Queta',
+                'nome' => 'Fernando Queta',
                 'email' => 'fernando@maisaqui.com.br',
                 'password' => Hash::make('ferqueta'),
                 'status' => 'actived',
-                'profile' => 'dev',
+                'verificado' => 's',
                 'id_permission' => '1',
             ],
             [
-                'name' => 'Usuario de teste',
-                'email' => 'teste@databrasil.app.br',
+                'nome' => 'Leandro Lopardi',
+                'email' => 'contato@aeroclubejf.com.br',
+                'password' => Hash::make('a8240e82'),
+                'status' => 'actived',
+                'verificado' => 's',
+                'id_permission' => '2',
+            ],
+            [
+                'nome' => 'primeiro cliente de teste',
+                'email' => 'teste@aeroclubejf.com.br',
                 'password' => Hash::make('mudar123'),
                 'status' => 'actived',
-                'profile' => 'admin',
-                'id_permission' => '2',
+                'verificado' => 's',
+                'id_permission' => '5',
             ],
         ];
         foreach ($arr as $key => $value) {

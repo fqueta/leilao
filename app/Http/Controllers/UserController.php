@@ -7,6 +7,8 @@ use App\Models\_upload;
 use App\Models\User;
 use stdClass;
 use App\Qlib\Qlib;
+use App\Rules\FullName;
+use App\Rules\RightCpf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -125,12 +127,40 @@ class UserController extends Controller
         ];
         return $ret;
     }
-    public function campos($dados=false){
+    public function campos($dados=false,$local='index'){
         $user = Auth::user();
         $permission = new admin\UserPermissions($user);
-
+        if(isset($dados['tipo_pessoa']) && $dados['tipo_pessoa']){
+            $_GET['tipo'] = $dados['tipo_pessoa'];
+        }
+        $sec = isset($_GET['tipo'])?$_GET['tipo']:'pf';
+        if($sec=='pf'){
+            $lab_nome = 'Nome completo *';
+            $lab_cpf = 'CPF *';
+            $displayPf = '';
+            $displayPj = 'd-none';
+        }elseif($sec=='pj'){
+            $lab_nome = 'Nome do responsável *';
+            $lab_cpf = 'CPF do responsável*';
+            $displayPf = 'd-none';
+            $displayPj = '';
+        }else{
+            $lab_nome = 'Nome completo *';
+            $lab_cpf = 'CPF *';
+            $displayPf = '';
+            $displayPj = 'd-none';
+        }
         $ret = [
             'id'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Informe os dados').'</h4><hr>','script_show'=>''],
+            'nome'=>['label'=>'Nome completo','active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
+            'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'config[celular]'=>['label'=>'Telefone celular','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
+            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'6'],
+            'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
+            'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Documentos').'</h4><hr>','script_show'=>''],
+            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf','tam'=>'3'],
+            'sep2'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Configurações').'</h4><hr>','script_show'=>''],
             'id_permission'=>[
                 'label'=>'Permissão*',
                 'active'=>true,
@@ -145,13 +175,8 @@ class UserController extends Controller
                     'label'=>'Permissão',
                 ],'arr_opc'=>Qlib::sql_array("SELECT id,name FROM permissions WHERE active='s' AND id >='".$user->id_permission."'",'name','id'),'exibe_busca'=>'d-block',
                 'event'=>'',
-                'tam'=>'6',
-            ],
-            'name'=>['label'=>'Nome completo','active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'6'],
-            'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
-            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'6'],
-            'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'4'],
-            'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'2','arr_opc'=>['s'=>'Sim','n'=>'Não']],
+                'tam'=>'12',
+            ],'ativo'=>['label'=>'Liberar acesso','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
             //'email'=>['label'=>'Observação','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
         ];
         return $ret;
@@ -215,7 +240,13 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => ['required','string','unique:users'],
+            'nome' => ['required','string',new FullName],
+            'email' => ['required','string','unique:users'],
+            'cpf'   =>[new RightCpf]
+        ],[
+                'nome.required'=>__('O nome é obrigatório'),
+                'nome.string'=>__('É necessário conter letras no nome'),
+                'email.unique'=>__('E-mail já cadastrado'),
         ]);
         $dados = $request->all();
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
@@ -227,13 +258,9 @@ class UserController extends Controller
                 unset($dados['password']);
             }
         }
-
         $salvar = User::create($dados);
+        $dados['id'] = $salvar->id;
         $route = $this->routa.'.index';
-         //REGISTRAR EVENTOS
-        (new EventController)->listarEvent(['tab'=>$this->tab,'id'=>$salvar->id,'this'=>$this]);
-
-
         $ret = [
             'mens'=>$this->label.' cadastrada com sucesso!',
             'color'=>'success',
@@ -241,9 +268,11 @@ class UserController extends Controller
             'exec'=>true,
             'dados'=>$dados
         ];
-
         if($ajax=='s'){
+            //REGISTRAR EVENTOS
+           (new EventController)->listarEvent(['tab'=>$this->tab,'id'=>$salvar->id,'this'=>$this]);
             $ret['return'] = route($route).'?idCad='.$salvar->id;
+            $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
             return response()->json($ret);
         }else{
             return redirect()->route($route,$ret);
@@ -382,8 +411,6 @@ class UserController extends Controller
             ];
             //REGISTRAR EVENTOS
             (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this,'id'=>$id]);
-
-
             return view($routa.'.createedit',$ret);
         }else{
             $ret = [
@@ -396,8 +423,10 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'name' => ['required'],
+            'nome' => ['required',new FullName],
+            'cpf'   =>[new RightCpf]
         ]);
+
         $data = [];
         $dados = $request->all();
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';

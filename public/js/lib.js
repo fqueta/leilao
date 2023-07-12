@@ -807,7 +807,46 @@ function excluirArquivo(id,ajaxurl){
 function carregaDropZone(seletor){
     $(seletor).dropzone({ url: "/file/post" });
 }
-function submitFormulario(objForm,funCall,funError){
+function submitFormulario(objForm,funCall,funError,compleUrl){
+    if(typeof funCall == 'undefined'){
+        funCall = function(res){
+            console.log(res);
+        }
+    }
+    if(typeof funError == 'undefined'){
+        funError = function(res){
+            lib_funError(res);
+        }
+    }
+    if(typeof compleUrl == 'undefined'){
+        compleUrl='';
+    }
+    var route = objForm.attr('action');
+    //console.log(route);
+    $.ajax({
+        type: 'POST',
+        url: route,
+        data: objForm.serialize()+'&ajax=s'+compleUrl,
+        dataType: 'json',
+        beforeSend: function(){
+            $('#preload').fadeIn();
+        },
+        success: function (data) {
+            $('#preload').fadeOut("fast");
+            funCall(data);
+        },
+        error: function (data) {
+            $('#preload').fadeOut("fast");
+            if(data.responseJSON.errors){
+                funError(data.responseJSON.errors);
+                console.log(data.responseJSON.errors);
+            }else{
+                lib_formatMensagem('.mens','Erro','danger');
+            }
+        }
+    });
+}
+function submitFormulario_bk(objForm,funCall,funError){
     if(typeof funCall == 'undefined'){
         funCall = function(res){
             console.log(res);

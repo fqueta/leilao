@@ -21,13 +21,21 @@ class User extends Authenticatable
      */
     // protected $connection = 'tenant';
     protected $fillable = [
-        'name',
+        'tipo_pessoa',
+        'nome',
+        'razao',
         'email',
         'password',
+        'cpf',
+        'cnpj',
         'status',
-        'profile',
-        'image',
+        'genero',
+        'token',
+        'foto_perfil',
+        'verificado',
         'id_permission',
+        'config',
+        'preferencias',
         'ativo',
     ];
 
@@ -48,5 +56,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'config' => 'array',
+        'preferencias' => 'array',
     ];
 }

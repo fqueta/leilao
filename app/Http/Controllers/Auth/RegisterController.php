@@ -6,9 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
 use App\Qlib\Qlib;
+use App\Rules\FullName;
+use App\Rules\RightCpf;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+
 
 class RegisterController extends Controller
 {
@@ -48,13 +52,23 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data)
+    protected function validator(Array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255',new FullName],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+        // $data = $request->all();
+        // $validatedData = $request->validate([
+        //     'nome' => ['required','string',new FullName],
+        //     'email' => ['required','string','unique:users'],
+        //     // 'cpf'   =>[new RightCpf]
+        // ],[
+        //         'nome.required'=>__('O nome é obrigatório'),
+        //         'nome.string'=>__('É necessário conter letras no nome'),
+        //         'email.unique'=>__('E-mail já cadastrado'),
+        // ]);
     }
 
     /**
@@ -72,11 +86,11 @@ class RegisterController extends Controller
              ]
         ]);
         return User::create([
-            'name' => $data['name'],
+            'nome' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'status' => 'pre_registred',
-            'profile' => 'user',
+            'cpf' => @$data['email'],
             'id_permission' => '5',
         ]);
     }

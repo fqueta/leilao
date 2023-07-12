@@ -21,7 +21,6 @@
                 </div>
             </div>
             <div class="card-body">
-
                 {{App\Qlib\Qlib::formulario([
                     'campos'=>$campos,
                     'config'=>$config,
@@ -56,7 +55,7 @@
 @stop
 
 @section('css')
-    <link rel="stylesheet" href=" {{url('/')}}/css/lib.css">
+    @include('qlib.csslib')
 @stop
 
 @section('js')
@@ -67,6 +66,10 @@
                 openPageLink(e,$(this).attr('href'),"{{date('Y')}}");
             });
             $('#inp-password').val('');
+            $('[mask-cpf]').inputmask('999.999.999-99');
+            $('[mask-cnpj]').inputmask('99.999.999/9999-99');
+            $('[mask-data]').inputmask('99/99/9999');
+            $('[mask-cep]').inputmask('99.999-999');
           });
     </script>
     @include('qlib.js_submit')
