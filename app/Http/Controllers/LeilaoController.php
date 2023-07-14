@@ -29,10 +29,11 @@ class LeilaoController extends Controller
     }
     /**Metodo para gerar o formulario no front pode ser iniciado com o short_de [sc ac="form_leilao"] */
     public function form_leilao($post_id=false,$dados=false,$leilao_id=false){
-        if(!Gate::allows('is_logado')){
+        if(Gate::allows('is_admin2')||Gate::allows('is_customer_logado')){
+            $seg2 = request()->segment(2);
+        }else{
             return false;
         }
-        $seg2 = request()->segment(2);
         $leilao_id = $leilao_id ? $leilao_id : $seg2;
         if($leilao_id){
             $ac = 'alt';
@@ -49,13 +50,18 @@ class LeilaoController extends Controller
             $dados = Post::Find($post_id);
         }
         $route = $this->post_type;
+        $title = __('Cadastro de Leilão');
+        $titulo = $title;
         $config = [
             'ac'=>$ac,
             'frm_id'=>'frm-posts',
             'route'=>$route,
             'view'=>'site.leiloes',
+            'file_submit'=>'site.leiloes.js_submit',
             'arquivos'=>'jpeg,jpg,png',
-            'redirect'=>'/leilao-list',
+            'redirect'=>url('/').'/'.Qlib::get_slug_post_by_id(18),
+            'title'=>$title,
+            'titulo'=>$titulo,
         ];
         if(isset($dadosLeilao['ID'])){
             $config['id'] = $dadosLeilao['ID'];
@@ -70,8 +76,6 @@ class LeilaoController extends Controller
         $listFiles = false;
         $post_type = $this->post_type;
         $campos = $pst->campos_leilao($leilao_id,$post_type,$dadosLeilao);
-        $title = 'Leilão';
-        $titulo = $title;
 
         $ret = [
             'value'=>$dadosLeilao,
@@ -86,8 +90,10 @@ class LeilaoController extends Controller
     }
     /**Metodo para listar os leilões no console do usuario do site no front pode ser iniciado com o short_de [sc ac="list_leilao"] */
 
-    public function list_leilao($post_id=false,$dados=false){
-        if(!Gate::allows('is_logado')){
+    public function list_leilao($dados=false){
+        if(Gate::allows('is_admin2')||Gate::allows('is_customer_logado')){
+            $pst = false;
+        }else{
             return false;
         }
         $pst = new PostController;
@@ -96,7 +102,7 @@ class LeilaoController extends Controller
         $route = $this->post_type;
         $title = 'Leilão';
         $titulo = $title;
-        $view   = '/leilao-list';
+        $view   = '/'.Qlib::get_slug_post_by_id(18);
         //if(isset($queryPost['post']));
         $ret = [
             'dados'=>$queryPost['post'],
@@ -117,9 +123,34 @@ class LeilaoController extends Controller
 
         return view('site.leiloes.list',$ret);
     }
+    /**
+     * Metodo para listar os leiloes publicados no site
+     */
     public function index()
     {
-        //
+        // $pst = new PostController;
+        // $queryPost = $pst->queryPost($_GET,false,$this->post_type);
+        // $queryPost['config']['exibe'] = 'html';
+        // $route = $this->post_type;
+        // $title = 'Leilão';
+        // $titulo = $title;
+        // $view   = '/'.Qlib::get_slug_post_by_id(18);
+        // //if(isset($queryPost['post']));
+        // $ret = [
+        //     'dados'=>$queryPost['post'],
+        //     'title'=>$title,
+        //     'titulo'=>$titulo,
+        //     'campos_tabela'=>$queryPost['campos'],
+        //     'post_totais'=>$queryPost['post_totais'],
+        //     'titulo_tabela'=>$queryPost['tituloTabela'],
+        //     'arr_titulo'=>$queryPost['arr_titulo'],
+        //     'config'=>$queryPost['config'],
+        //     'routa'=>$route,
+        //     'view'=>$view,
+        //     'i'=>0,
+        // ];
+        // return view('site.index',$ret);
+        return redirect('/leiloes-publicos');
     }
 
     /**
@@ -291,6 +322,34 @@ class LeilaoController extends Controller
             }
         }
         return $ret;
+    }
+    public function leiloes_publicos($dados=false){
+        $pst = new PostController;
+        $queryPost = $pst->queryPost($_GET,$dados,$this->post_type);
+        $queryPost['config']['exibe'] = 'html';
+        $route = $this->post_type;
+        $title = 'Leilão';
+        $titulo = $title;
+        $view   = '/'.Qlib::get_slug_post_by_id(18);
+        //if(isset($queryPost['post']));
+        $ret = [
+            'dados'=>$queryPost['post'],
+            'title'=>$title,
+            'titulo'=>$titulo,
+            'campos_tabela'=>$queryPost['campos'],
+            'post_totais'=>$queryPost['post_totais'],
+            'titulo_tabela'=>$queryPost['tituloTabela'],
+            'arr_titulo'=>$queryPost['arr_titulo'],
+            'config'=>$queryPost['config'],
+            'routa'=>$route,
+            'view'=>$view,
+            'i'=>0,
+        ];
+
+        //REGISTRAR EVENTOS
+        // (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
+
+        return view('site.leiloes.list',$ret);
     }
 
 }

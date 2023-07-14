@@ -1,6 +1,7 @@
 @php
 $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
-
+$seg1 = request()->segment(1); //link da página em questão
+$urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
 @endphp
 <style>
     .div-salvar {
@@ -10,47 +11,56 @@ $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
 </style>
 <div class="row mt-5">
     <div class="col-md-12" id="lista">
-        <div class="card">
-          <div class="card-header">
-              <h4 class="card-title">
-                  @if (!empty($arr_titulo))
-                      Lista de:
+        @if($seg1==$urlB)
+            @php
+                $ret = view('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config]);
+                echo $ret;
+            @endphp
+        @else
+            <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    @if (!empty($arr_titulo))
+                        Lista de:
 
-                      @foreach ($arr_titulo as $k=>$pTitulo)
-                          <label for=""> Todo com {{ $k }}</label> = {{ $pTitulo }}, e
-                      @endforeach
-                  @else
-                      {{ $titulo_tabela }}
-                  @endif
-              </h4>
+                        @foreach ($arr_titulo as $k=>$pTitulo)
+                            <label for=""> Todo com {{ $k }}</label> = {{ $pTitulo }}, e
+                        @endforeach
+                    @else
+                        {{ $titulo_tabela }}
+                    @endif
+                    <div class="float-end"><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(2)}}" class="btn btn-primary"> <i class="fas fa-plus"></i> {{__('Novo cadastro')}}</a></div>
+                    </h4>
 
-              {{-- @can('is_admin_logado')
-              <div class="card-tools d-flex d-print-none">
-                      @include('familias.dropdow_actions')
-                      @include('qlib.dropdow_acaomassa')
-              </div>
-              @endcan --}}
-          </div>
-          <div class="card-body">
-              <div class="table-responsive">
-                  {{
-                      App\Qlib\Qlib::listaTabela([
-                      'campos_tabela'=>$campos_tabela,
-                      'config'=>$config,
-                      'dados'=>$dados,
-                      'routa'=>$routa,
-                    //   'fileLista'=>'listaTabelaSite',
-                  ])}}
-              </div>
-          </div>
-          <div class="card-footer d-print-none">
-              <div class="table-responsive">
-                  @if ($config['limit']!='todos')
-                  {{ $dados->appends($_GET)->links() }}
-                  @endif
-              </div>
-          </div>
-        </div>
+                {{-- @can('is_admin_logado')
+                <div class="card-tools d-flex d-print-none">
+                        @include('familias.dropdow_actions')
+                        @include('qlib.dropdow_acaomassa')
+                </div>
+                @endcan --}}
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    {{
+                        App\Qlib\Qlib::listaTabela([
+                        'campos_tabela'=>$campos_tabela,
+                        'config'=>$config,
+                        'dados'=>$dados,
+                        'routa'=>$routa,
+                        //   'fileLista'=>'listaTabelaSite',
+                    ])}}
+                </div>
+            </div>
+            <div class="card-footer d-print-none">
+                <div class="table-responsive">
+                    @if ($config['limit']!='todos')
+                    {{ $dados->appends($_GET)->links() }}
+                    @endif
+                </div>
+            </div>
+            </div>
+        @endif
+
     </div>
 </div>
 <script>

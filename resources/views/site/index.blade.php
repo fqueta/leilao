@@ -33,4 +33,11 @@
     @include('qlib.jslib')
     <script src="{{url('/')}}/js/select2.min.js" ></script>
     <script src="{{url('/')}}/DataTables/datatables.min.js" ></script>
+    <script>
+        $('#inp-password').val('');
+        $('[mask-cpf]').inputmask('999.999.999-99');
+        $('[mask-cnpj]').inputmask('99.999.999/9999-99');
+        $('[mask-data]').inputmask('99/99/9999');
+        $('[mask-cep]').inputmask('99.999-999');
+    </script>
 @stop

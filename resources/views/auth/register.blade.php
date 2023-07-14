@@ -115,6 +115,7 @@
         </button>
 
     </form>
+
 @stop
 
 @section('auth_footer')
@@ -123,4 +124,12 @@
             {{ __('adminlte::adminlte.i_already_have_a_membership') }}
         </a>
     </p>
+@stop
+@section('js')
+@include('qlib.jslib')
+<script>
+    $(function(){
+        $('[name="cpf"]').inputmask('999.999.999-99');
+    });
+</script>
 @stop

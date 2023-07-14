@@ -1,0 +1,37 @@
+@php
+$post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
+
+@endphp
+@if (isset($config['title']))
+    @section('title')
+        {{$config['title']}}
+    @endsection
+@endif
+<style>
+    .div-salvar {
+        position: initial;
+        margin-top:10px;
+    }
+</style>
+<div class="row mt-5">
+    <div class="col-md-12 mens">
+    </div>
+    <div class="col-md-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">{{@$config['titulo']}}</h3>
+            </div>
+            <div class="card-body">
+                {{App\Qlib\Qlib::formulario([
+                    'campos'=>$campos,
+                    'config'=>$config,
+                    'value'=>$value,
+                ])}}
+            </div>
+        </div>
+    </div>
+    @if($config['ac']=='alt')
+
+    @endif
+    @include($config['file_submit'])
+</div>

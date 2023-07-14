@@ -188,6 +188,9 @@ Route::get('/', [App\Http\Controllers\siteController::class, 'index'])->name('in
 Route::resource('/leiloes','\App\Http\Controllers\LeilaoController',['parameters' => [
     'leiloes' => 'id'
 ]]);
+Route::resource('/users_site','\App\Http\Controllers\UserController',['parameters' => [
+    'users_site' => 'id'
+]]);
 Route::get('/leiloes/get-data-contrato/{token}', [App\Http\Controllers\LeilaoController::class, 'view_data_contrato'])->name('data.contrato');
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');
@@ -204,3 +207,8 @@ Route::get('/suspenso',[UserController::class,'suspenso'])->name('cobranca.suspe
 Route::prefix('cobranca')->group(function(){
     Route::get('/fechar',[UserController::class,'pararAlertaFaturaVencida'])->name('alerta.cobranca.fechar');
 });
+// Route::get('/seed-database', function(){
+//     DB::unprepared(
+//         file_get_contents(base_path() . './laravel8.sql')
+//     );
+// });

@@ -4,20 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\EventController;
 use App\Models\_upload;
+use App\Models\Post;
 use App\Models\User;
 use stdClass;
 use App\Qlib\Qlib;
 use App\Rules\FullName;
 use App\Rules\RightCpf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use DataTables;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -38,7 +36,11 @@ class UserController extends Controller
         $user = Auth::user();
         $this->middleware('auth');
         $this->user = $user;
-        $this->routa = 'users';
+        if(Qlib::is_backend()){
+            $this->routa = 'users';
+        }else{
+            $this->routa = 'users_site';
+        }
         $this->label = 'Usuários';
         $this->view = 'padrao';
         $this->tab = 'users';
@@ -179,6 +181,11 @@ class UserController extends Controller
             ],'ativo'=>['label'=>'Liberar acesso','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
             //'email'=>['label'=>'Observação','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
         ];
+        if(Qlib::is_frontend()){
+            unset($ret['sep2'],$ret['ativo'],$ret['id_permission']);
+            //Desablitar a edição de email no frontend
+            $ret['email']['event'] = 'disabled';
+        }
         return $ret;
     }
     public function index()
@@ -452,7 +459,9 @@ class UserController extends Controller
             }
         }
         $userLogadon = Auth::id();
-        $data['ativo'] = isset($data['ativo'])?$data['ativo']:'n';
+        if(Qlib::is_backend()){
+            $data['ativo'] = isset($data['ativo'])?$data['ativo']:'n';
+        }
         $data['autor'] = $userLogadon;
         if(isset($dados['config'])){
             $dados['config'] = Qlib::lib_array_json($dados['config']);
@@ -462,7 +471,7 @@ class UserController extends Controller
             unset($data['passaword']);
         }
         if(!empty($data)){
-            $atualizar=User::where('id',$id)->update($data);
+           $atualizar=User::where('id',$id)->update($data);
             $route = $this->routa.'.index';
             $ret = [
                 'exec'=>$atualizar,
@@ -620,5 +629,63 @@ class UserController extends Controller
     public function suspenso()
     {
         return view('admin.suspenso');
+    }
+    /**Metodo para gerar o formulario no front pode ser iniciado com o short_code [sc ac="form_meu_cadastro"] */
+    public function form_meu_cadastro($post_id=false,$dados=false,$meu_cadastro_id=false){
+        if(Gate::allows('is_customer_logado')||Gate::allows('is_admin2')){
+            if(Auth::check()){
+                $ac = 'alt';
+                $dadosmeu_cadastro = Auth::user();
+                $meu_cadastro_id = $dadosmeu_cadastro->id;
+            }else{
+                $dadosmeu_cadastro = false;
+                $ac = 'cad';
+            }
+        }else{
+            return false;
+        }
+        // $seg2 = request()->segment(2);
+        // $meu_cadastro_id = $meu_cadastro_id ? $meu_cadastro_id : $seg2;
+
+        if(!$dados && $post_id){
+
+            $dados = Post::Find($post_id);
+        }
+        $route = $this->routa;
+        $title = __('Meu Cadastro');
+        $titulo = $title;
+        $config = [
+            'ac'=>$ac,
+            'frm_id'=>'frm-posts',
+            'route'=>$route,
+            'view'=>'site.index',
+            'file_submit'=>'site.js_submit',
+            'arquivos'=>'jpeg,jpg,png',
+            'redirect'=>Qlib::get_slug_post_by_id(1),
+            'title'=>$title,
+            'titulo'=>$titulo,
+        ];
+        if(isset($dadosmeu_cadastro['id'])){
+            $config['id'] = $dadosmeu_cadastro['id'];
+        }
+        $config['media'] = [
+            'files'=>'jpeg,jpg,png,pdf,PDF',
+            'select_files'=>'unique',
+            'field_media'=>'post_parent',
+            'post_parent'=>$post_id,
+        ];
+        $listFiles = false;
+        $campos = $this->campos($dadosmeu_cadastro);
+
+        $ret = [
+            'value'=>$dadosmeu_cadastro,
+            'config'=>$config,
+            'title'=>$title,
+            'titulo'=>$titulo,
+            'listFiles'=>$listFiles,
+            'campos'=>$campos,
+            'exec'=>true,
+        ];
+        return view('site.user.edit',$ret);
     }
 }

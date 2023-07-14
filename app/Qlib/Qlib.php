@@ -877,6 +877,28 @@ class Qlib
         }
         return $ret;
     }
+    static function get_the_permalink($post_id=false,$dados=false){
+        $ret = url('/');
+        if(!$dados && $post_id){
+            $dados = Post::Find($post_id);
+        }
+        if($dados->count() > 0){
+            $seg1 = request()->segment(1);
+            if($seg1){
+                if($dados['post_type'] == 'leiloes_adm' && $seg1==self::get_slug_post_by_id(37)){
+                    $ret .= '/'.$seg1.'/'.$dados['ID'];
+                }
+            }
+            // dd($dados);
+            // $ret = 'link'
+            // $imgd = Post::where('ID', '=', $dados['post_parent'])->where('post_status','=','publish')->get();
+            //     if( $imgd->count() > 0 ){
+            //         // dd($imgd[0]['guid']);
+            //         $ret = Qlib::qoption('storage_path'). '/'.$imgd[0]['guid'];
+            //     }
+        }
+        return $ret;
+    }
     // static function add_shortcode( $tag, $callback ) {
     //     global $shortcode_tags;
 

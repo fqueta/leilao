@@ -65,11 +65,16 @@ class PostController extends Controller
         ];
         $post_type = $post_type?$post_type:$this->post_type;
         if($post_type){
-            // if($post_type=='leiloes_adm'){
-
-            // }
             if(Qlib::is_frontend()){
-                $post =  Post::where('post_author','=',Auth::id())->where('post_status','!=','inherit')->where('post_status','!=','trash')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
+                $seg1 = request()->segment(1); //link da página em questão
+                $urlB = Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
+                if($seg1==$urlB){
+                    //Exibir apenas leiloes publicos
+                    $post =  Post::where('post_status','!=','inherit')->where('post_status','=','publish')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
+                }else{
+                    $post =  Post::where('post_author','=',Auth::id())->where('post_status','!=','inherit')->where('post_status','!=','trash')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
+                }
+
             }else{
                 $post =  Post::where('post_status','!=','inherit')->where('post_status','!=','trash')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
             }
@@ -214,6 +219,7 @@ class PostController extends Controller
         $ac = 'alt';
         $lc = new LeilaoController;
         $event_status = 'required';
+        $arr_itens=[];
         if(Qlib::is_backend()){
             $event_status = ' onchange=exibeStatus(this);';
             $arr_itens = $lc->array_contratos();
@@ -232,7 +238,8 @@ class PostController extends Controller
                     $ac = 'cad';
                 }
             }
-            $arr_itens = $lc->array_contratos($user->id);
+            if(isset($user->id))
+                $arr_itens = $lc->array_contratos($user->id);
         }
         if($ac=='cad'){
             @$data['token'] = uniqid();
@@ -300,7 +307,7 @@ class PostController extends Controller
             // 'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
         ];
         if(Qlib::is_backend()){
-            $ret['post_status'] = ['label'=>'Situação','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
+            $ret['post_status'] = ['label'=>'Publicação','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
         }
         if(Qlib::is_frontend()){
             $value_author = false;
@@ -408,6 +415,7 @@ class PostController extends Controller
         $type = $type?$type:$this->post_type;
         if($type=='produtos'){
             $ret = $this->campos_produtos($post_id);
+
         }elseif($type=='menus'){
             $ret = $this->campos_menus($post_id);
         }elseif($type=='paginas'){
@@ -678,7 +686,7 @@ class PostController extends Controller
         $dados = Post::findOrFail($id);
         $this->authorize('ler', $this->routa);
         if(!empty($dados)){
-            $title = 'Visualização da decretos';
+            $title = 'Visualização da leilões';
             $titulo = $title;
             //dd($dados);
             $dados['ac'] = 'alt';

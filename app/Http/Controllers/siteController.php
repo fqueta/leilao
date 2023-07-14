@@ -58,14 +58,16 @@ class siteController extends Controller
         $ret = false;
         if($post_id){
             $dados = Post::Find($post_id);
-
             if(isset($dados['post_content'])){
 
                 $ret = $dados['post_content'];
                 $lc = new LeilaoController;
+                $uc = new UserController;
                 $ret = Qlib::short_code_global($ret,'sc',[
                     'form_leilao' => $lc->form_leilao($post_id,$dados),
                     'list_leilao' => $lc->list_leilao($post_id,$dados),
+                    'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
+                    'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
                     'teste' => 'teste de conteudo do formulario para gadastr',
                 ]);
             }
