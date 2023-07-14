@@ -55,11 +55,9 @@
         <ul>
           <li><a class="active " href="{{route('index')}}">Home</a></li>
           <li><a href="about.html">Sobre nós</a></li>
-          <li><a href="services.html">Serviços</a></li>
+          <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">Leilões</a></li>
           <li><a href="portfolio.html">Produtos</a></li>
-          {{-- <li><a href="team.html">Team</a></li> --}}
           <li><a href="contact.html">Contato</a></li>
-          {{-- @can('is_customer_logado') --}}
           @can('is_logado')
           @if (Gate::allows('is_admin2') || Gate::allows('is_customer_logado'))
           <li class="dropdown dropdown-menu-right"><a href="#"><span><i class="fas fa-user-circle fa-2x   "></i></span> <i class="bi bi-chevron-down"></i></a>
@@ -154,7 +152,7 @@
             <ul>
               <li><i class="bx bx-chevron-right"></i> <a href="#">Home</a></li>
               <li><i class="bx bx-chevron-right"></i> <a href="#">About us</a></li>
-              <li><i class="bx bx-chevron-right"></i> <a href="#">Services</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">Leilões</a></li>
               <li><i class="bx bx-chevron-right"></i> <a href="#">Terms of service</a></li>
               <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy policy</a></li>
             </ul>
