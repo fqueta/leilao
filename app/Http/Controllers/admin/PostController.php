@@ -178,7 +178,7 @@ class PostController extends Controller
                 'label'=>'Nome do cliente*',
                 'active'=>true,
                 'type'=>'select',
-                'arr_opc'=>Qlib::sql_array("SELECT id,name FROM users WHERE ativo='s' AND id_permission>'4'",'nome','id'),'exibe_busca'=>'d-block',
+                'arr_opc'=>Qlib::sql_array("SELECT id,nome FROM users WHERE ativo='s' AND id_permission>'4'",'nome','id'),'exibe_busca'=>'d-block',
                 'event'=>'required',
                 'tam'=>'7',
                 'exibe_busca'=>true,

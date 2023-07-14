@@ -550,6 +550,7 @@ class Qlib
     }
     static public function buscaValorDb0($tab,$campo_bus,$valor,$select,$compleSql=false,$debug=false)
     {
+        $ret = false;
         if($tab && $campo_bus && $valor && $select){
             $sql = "SELECT $select FROM $tab WHERE $campo_bus='$valor' $compleSql";
             if(isset($debug)&&$debug){
