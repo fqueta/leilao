@@ -63,13 +63,23 @@ class siteController extends Controller
                 $ret = $dados['post_content'];
                 $lc = new LeilaoController;
                 $uc = new UserController;
-                $ret = Qlib::short_code_global($ret,'sc',[
+                $arr_shortC = [
                     'form_leilao' => $lc->form_leilao($post_id,$dados),
                     'list_leilao' => $lc->list_leilao($post_id,$dados),
                     'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
                     'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
                     'teste' => 'teste de conteudo do formulario para gadastr',
-                ]);
+                ];
+                $arr_short = [];
+                $arr_k = explode('[sc ac="',$ret);
+                if(isset($arr_k[1]) && !empty($arr_k[1])){
+                    $arr_k1 = explode('"]',$arr_k[1]);
+                    if(isset($arr_k1[0]) && !empty($arr_k1[0])){
+                        $k = $arr_k1[0];
+                        $arr_short[$k] = $arr_shortC[$k];
+                    }
+                }
+                $ret = Qlib::short_code_global($ret,'sc',$arr_short);
             }
         }
         return $ret;

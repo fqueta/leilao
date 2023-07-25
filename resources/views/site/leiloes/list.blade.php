@@ -1,6 +1,7 @@
 @php
 $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
 $seg1 = request()->segment(1); //link da página em questão
+$seg2 = request()->segment(2); //link da página em questão
 $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
 @endphp
 <style>
@@ -11,9 +12,16 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
 </style>
 <div class="row mt-5">
     <div class="col-md-12" id="lista">
-        @if($seg1==$urlB)
+        @if($seg1==$urlB && !$seg2)
             @php
+            //listar leilões para o plublico
                 $ret = view('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config]);
+                echo $ret;
+            @endphp
+        @elseif($seg1==$urlB && $seg2)
+            @php
+            //Detalhes do leilao
+                $ret = view('site.leiloes.detalhes',['dados'=>@$dados,'config'=>$config]);
                 echo $ret;
             @endphp
         @else

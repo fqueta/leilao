@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Permission;
 use App\Models\Post;
 use App\Models\Qoption;
+use DateTime;
 
 class Qlib
 {
@@ -146,7 +147,7 @@ class Qlib
                 $preco_venda1 = str_replace(",", ".", $preco_venda1);
                 $preco_venda1 = str_replace("R$", "", $preco_venda1);
             }
-            return $preco_venda1;
+            return (float)trim($preco_venda1);
     }
     static function isJson($string) {
 		$ret=false;
@@ -964,5 +965,87 @@ class Qlib
 
         $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
         return $slug;
+    }
+    static function diffDate($d1, $d2, $type='', $sep='-')
+    {
+        $d1 = explode($sep, $d1);
+        $d2 = explode($sep, $d2);
+        switch ($type)
+        {
+            case 'A':
+            $X = 31536000;
+            break;
+            case 'M':
+            $X = 2592000;
+            break;
+            case 'D':
+            $X = 86400;
+            break;
+            case 'H':
+            $X = 3600;
+            break;
+            case 'MI':
+            $X = 60;
+            break;
+            default:
+            $X = 1;
+        }
+
+        return floor( ( ( mktime(0, 0, 0, $d2[1], $d2[2], $d2[0]) - mktime(0, 0, 0, $d1[1], $d1[2], $d1[0] ) ) / $X ) );
+    }
+    /**
+     * Metodo para monstrar a diferença entre datas
+     * @param  $d1 datetime, $d2 datetime
+     * @return string
+     */
+    static function diffDate2($d1, $d2,$label=false,$ab=false) {
+        $d1 = new DateTime($d1);
+        $d2 = new DateTime($d2);
+        $data1  = $d1->format('Y-m-d H:i:s');
+        $data2  = $d2->format('Y-m-d H:i:s');
+        $intervalo = $d1->diff( $d2 );
+        $ret = false;
+        if($ab){
+            $ret .= "$label" . $intervalo->d . " d";
+            if($intervalo->m){
+                $ret .= " e " . $intervalo->m . " meses";
+            }
+            if($intervalo->y){
+                $ret .= " e " . $intervalo->y . " anos.";
+            }
+            if($intervalo->h){
+                $ret .= ", " . $intervalo->h . " h";
+                $ret .= ' '.Qlib::dataExibe($data1);
+            }
+            // if($intervalo->i){
+            //     $ret .= " e " . $intervalo->i . " minutos.";
+            // }
+
+        }else{
+            $ret .= "$label" . $intervalo->d . " dias";
+            if($intervalo->m){
+                $ret .= " e " . $intervalo->m . " meses";
+            }
+            if($intervalo->y){
+                $ret .= " e " . $intervalo->y . " anos.";
+            }
+            if($intervalo->h){
+                $ret .= ", " . $intervalo->h . " horas.";
+            }
+            if($intervalo->i){
+                $ret .= " e " . $intervalo->i . " minutos.";
+            }
+        }
+        // $datatime1 = new DateTime('2015/04/15 00:00:00');
+        // $datatime2 = new DateTime('2015/05/16 00:00:00');
+        return $ret;
+
+        // $diff = $datatime1->diff($datatime2);
+        // $horas = $diff->h + ($diff->days * 24);
+        // return $horas;
+    }
+    static function valor_moeda($val,$sig=false){
+
+        return $sig.number_format($val,2,',','.');
     }
 }

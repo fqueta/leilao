@@ -8,6 +8,7 @@ use App\Http\Controllers\GerenciarGrupo;
 use App\Http\Controllers\GerenciarUsuarios;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\BairroController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\TesteController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\EtapaController;
@@ -192,17 +193,8 @@ Route::resource('/users_site','\App\Http\Controllers\UserController',['parameter
     'users_site' => 'id'
 ]]);
 Route::get('/leiloes/get-data-contrato/{token}', [App\Http\Controllers\LeilaoController::class, 'view_data_contrato'])->name('data.contrato');
-Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
-Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');
 
-Route::get('envio-mails',function(){
-    $user = new stdClass();
-    $user->name = 'Fernando Queta';
-    $user->email = 'ferqueta@yahoo.com.br';
-    //return new \App\Mail\dataBrasil($user);
-    $enviar = Mail::send(new \App\Mail\dataBrasil($user));
-    return $enviar;
-});
+Route::get('/test-email',[EmailController::class,'sendEmailTest']);
 Route::get('/suspenso',[UserController::class,'suspenso'])->name('cobranca.suspenso');
 Route::prefix('cobranca')->group(function(){
     Route::get('/fechar',[UserController::class,'pararAlertaFaturaVencida'])->name('alerta.cobranca.fechar');
@@ -212,3 +204,16 @@ Route::prefix('cobranca')->group(function(){
 //         file_get_contents(base_path() . './laravel8.sql')
 //     );
 // });
+Route::get('envio-mails',function(){
+    $user = new stdClass();
+    $user->name = 'Fernando Queta';
+    $user->email = 'ferqueta@yahoo.com.br';
+    //return new \App\Mail\dataBrasil($user);
+    $enviar = Mail::send(new \App\Mail\dataBrasil($user));
+    return $enviar;
+});
+Route::resource('lances','\App\Http\Controllers\lanceController',['parameters' => [
+    'lances' => 'id'
+]]);
+Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
+Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');

@@ -19,7 +19,17 @@ class QoptionSeeder extends Seeder
                 'nome'=>'Diretorio dos arquivos',
                 'url'=>'storage_path',
                 'valor'=>'/storage',
-            ]
+            ],
+            [
+                'nome'=>'Emails dos gerentes',
+                'url'=>'email_gerente',
+                'valor'=>'ger.maisaqui3@gmail.com',
+            ],
+            [
+                'nome'=>'Nome da Empresa',
+                'url'=>'empresa',
+                'valor'=>'Aeroclube de Juiz de fora',
+            ],
         ]);
     }
 }

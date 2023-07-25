@@ -70,7 +70,8 @@ class PostController extends Controller
                 $urlB = Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
                 if($seg1==$urlB){
                     //Exibir apenas leiloes publicos
-                    $post =  Post::where('post_status','!=','inherit')->where('post_status','=','publish')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
+                    $post =  Post::where('post_status','!=','inherit')->where('post_status','=','publish')->where('post_type','=',trim($post_type))->where('config','LIKE','%"status":"publicado"%')->orderBy('id',$config['order']);
+                    //começar aqui
                 }else{
                     $post =  Post::where('post_author','=',Auth::id())->where('post_status','!=','inherit')->where('post_status','!=','trash')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
                 }
@@ -95,10 +96,9 @@ class PostController extends Controller
                 }else{
                     $get['filter']['post_status'] = 'pending';
                 }
-                //dd($get['filter']);
                 foreach ($get['filter'] as $key => $value) {
                     if(!empty($value)){
-                        if($key=='id'){
+                        if($key=='id' || $key=='ID'){
                             $post->where($key,'LIKE', $value);
                             $titulo_tab .= 'Todos com *'. $campos[$key]['label'] .'% = '.$value.'& ';
                             $arr_titulo[$campos[$key]['label']] = $value;
@@ -115,11 +115,11 @@ class PostController extends Controller
                                 }
                             }else{
                                 $post->where($key,'LIKE','%'. $value. '%');
-                                if($campos[$key]['type']=='select'){
+                                if(isset($campos[$key]['type']) && $campos[$key]['type']=='select'){
                                     $value = $campos[$key]['arr_opc'][$value];
                                 }
-                                $arr_titulo[$campos[$key]['label']] = $value;
-                                $titulo_tab .= 'Todos com *'. $campos[$key]['label'] .'% = '.$value.'& ';
+                                @$arr_titulo[@$campos[$key]['label']] = $value;
+                                $titulo_tab .= 'Todos com *'. @$campos[$key]['label'] .'% = '.$value.'& ';
                             }
                         }
                         $i++;
@@ -252,6 +252,7 @@ class PostController extends Controller
         $ret = [
             'sep1'=>['label'=>'Dados do Leilão','active'=>false,'tam'=>'12','script'=>'<h5 class="pt-1">'.__('Dados do Leilão').'</h5>','type'=>'html_script','class_div'=>'bg-secondary'],
             'ID'=>['label'=>'Id','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'post_title'=>['label'=>'Nome','active'=>true,'placeholder'=>'Ex.: Nome do produto ','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'7','title'=>'Identificador do contrado pode ser nome ou número','value'=>@$data['post_title']],
             'post_type'=>['label'=>'tipo de post','active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>$post_type],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','value'=>@$data['token']],
             'config[origem]'=>['label'=>'origem','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][origem','value'=>$name_route],
@@ -292,30 +293,45 @@ class PostController extends Controller
                 'cp_busca'=>'config][itens',
                 'class'=>'select2',
             ],
-            'post_title'=>['label'=>'Nome','active'=>true,'placeholder'=>'Ex.: Nome do produto ','type'=>'hidden','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'7','title'=>'Identificador do contrado pode ser nome ou número','value'=>@$data['post_title']],
-            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
-            'config[valor_r]'=>['label'=>'Valor','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
-            // 'config[valor_h]'=>['label'=>'Valor Hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_h','title'=>'Valor do hora no contrato'],
+            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
+            'config[valor_r]'=>['label'=>'Valor','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
             // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
-            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
-            'config[valor_venda]'=>['label'=>'Compre já','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            'config[lance_inicial]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][lance_inicial','title'=>'Valor do lance inicial'],
+            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
+            'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
             //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
             'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
             'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
+            'config[pode_lance]'=>[
+                'label'=>'Quem pode dar lances em seu leilão',
+                'active'=>false,
+                'type'=>'select',
+                'arr_opc'=>Qlib::sql_array("SELECT id,nome FROM tags WHERE ativo='s' AND pai='5'",'nome','id'),'exibe_busca'=>'d-block',
+                'exibe_busca'=>'d-block',
+                'event'=>'required',
+                'tam'=>'12',
+                'exibe_busca'=>true,
+                'option_select'=>true,
+                'class'=>'select2',
+                'cp_busca'=>'config][pode_lance',
+            ],
+
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
             // 'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
         ];
         if(Qlib::is_backend()){
-            $ret['post_status'] = ['label'=>'Publicação','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
+            $ret['ID']['active'] = true;
+            $ret['post_status'] = ['label'=>'Liberado','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
         }
         if(Qlib::is_frontend()){
             $value_author = false;
             if(!$data){
                 $value_author = Auth::id();
             }
+            $ret['config[itens][]']['active'] = false;
             $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','value'=>$value_author,'tam'=>'2'];
         }
         return $ret;
@@ -906,47 +922,14 @@ class PostController extends Controller
         }
         $data['post_status'] = isset($data['post_status'])?$data['post_status']:'pending';
         $userLogadon = Auth::id();
-        $data['post_author'] = $userLogadon;
+        $data['post_author'] = isset($data['post_author'])?$data['post_author']: $userLogadon;
         $data['token'] = !empty($data['token'])?$data['token']:uniqid();
         if(isset($dados['config'])){
             $dados['config'] = Qlib::lib_array_json($dados['config']);
         }
         $atualizar=false;
         if(!empty($data)){
-            // if($this->i_wp=='s' && isset($dados['post_type'])){
-            //     $endPoint = 'post/'.$id;
-            //     $arr_parm = [
-            //         'post_name'=>'post_name',
-            //         'post_title'=>'post_title',
-            //         'post_content'=>'post_content',
-            //         'post_excerpt'=>'post_excerpt',
-            //         'post_status'=>'post_status',
-            //         'post_type'=>'post_type',
-            //     ];
-            //     $params = $this->geraParmsWp($dados);
-            //     if($params){
-            //         $atualizar = $this->wp_api->exec2([
-            //             'endPoint'=>$endPoint,
-            //             'method'=>'PUT',
-            //             'params'=>$params
-            //         ]);
-            //         if(isset($atualizar['exec']) && $atualizar['exec']){
-            //             $mens = $this->label.' cadastrado com sucesso!';
-            //             $color = 'success';
-            //             $id = $id;
-            //         }else{
-            //             $mens = 'Erro ao salvar '.$this->label.'';
-            //             $color = 'danger';
-            //             $id = 0;
-            //             if(isset($atualizar['arr']['status'])&&$atualizar['arr']['status']==400 && isset($atualizar['arr']['message']) && !empty($atualizar['arr']['message'])){
-            //                 $mens = $atualizar['arr']['message'];
-            //             }
-            //         }
-            //     }else{
-            //         $color = 'danger';
-            //         $mens = 'Parametros invalidos!';
-            //     }
-            // }else{
+
                 $atualizar=Post::where('id',$id)->update($data);
                 if($atualizar){
                     $mens = $this->label.' cadastrado com sucesso!';

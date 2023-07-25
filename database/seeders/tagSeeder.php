@@ -15,73 +15,72 @@ class tagSeeder extends Seeder
     public function run()
     {
         $arr = [
-            ['nome'=>'Tipo de páginas','obs'=>'Configurar tipos de páginas','ordem'=>1],
-            ['nome'=>'Tipo de conteúdos','obs'=>'Tipos de conteúdos','ordem'=>2],
+            ['nome'=>'Tipo de páginas','value'=>'tipo_paginas','obs'=>'Configurar tipos de páginas','ordem'=>1],
+            ['nome'=>'Tipo de conteúdos','value'=>'tipo_conteudo','obs'=>'Tipos de conteúdos','ordem'=>2],
             [
-                'nome'=>'CADASTROS COM PENDÊNCIAS',
+                'nome'=>'PÁGINA PRINCIAL',
                 'pai'=>1,
+                'value'=>'pode_lance',
                 'ordem'=>2,
-                'obs'=>'São cadastros incompletos devido a três fatores: Recusas (quando o beneficiário não quer, ao menos naquele momento, cadastra-se e fazer parte do Programa); Ocupantes não localizados (quando o ocupante de determinado lote não é encontrado), e Outros (quando faltam documentos como uma Certidão de Casamento, por exemplo).',
+                'obs'=>'Página com banner do tipo da home',
                 'config'=>['color'=>'danger','icon'=>'fa fa-times']
             ],
             [
-                'nome'=>'IMÓVEIS COM REGISTROS',
+                'nome'=>'PÁGINA SECUNDÁRIA',
                 'pai'=>1,
                 'ordem'=>3,
                 'obs'=>'São imóveis que são cadastrados, mas que não comporão o processo jurídico por já apresentarem registro imobiliário. Devem ser considerados como cadastros completos.',
+                'value'=>'pagina_secu',
                 'config'=>['color'=>'info','icon'=>'fas fa-calendar-check']
             ],
             [
-                'nome'=>'Recusas',
-                'pai'=>3,
-                'value'=>'recusas',
-                'ordem'=>1,
-                'obs'=>'Quando o beneficiário não quer, ao menos naquele momento, cadastra-se e fazer parte do Programa.',
+                'nome'=>'Usuários que podem dar lances',
+                'pai'=>0,
+                'value'=>'podem_dar_lances',
+                'ordem'=>3,
+                'obs'=>'Agrupa todas a opções do select de clientes que podem dar lançes',
                 'config'=>['color'=>'warning','icon'=>'fas fa-search-minus']
             ],
             [
-                'nome'=>'Ocupantes não localizados',
-                'pai'=>3,
-                'ordem'=>2,
-                'value'=>'ocupantes_nao_localizados',
-                'obs'=>'Quando o ocupante de determinado lote não é encontrado.',
+                'nome'=>'Qualquer usuário',
+                'pai'=>5,
+                'ordem'=>1,
+                'value'=>'qualquer_usuario',
+                'obs'=>'',
                 'config'=>['color'=>'warning','icon'=>'fa fa-times']
             ],
-            ['nome'=>'Residencial','pai'=>2,'ordem'=>1,'obs'=>''],
-            ['nome'=>'Comercial','pai'=>2,'ordem'=>2,'obs'=>''],
-            ['nome'=>'Lote vago','pai'=>2,'ordem'=>3,'obs'=>''],
             [
-                'nome'=>'CADASTROS COMPLETOS',
-                'pai'=>1,
-                'ordem'=>1,
-                'obs'=>'São cadastros socioeconômicos preenchidos e com toda a documentação necessária para serem encaminhados à Assistência Social para a elaboração do Relatório Social, documento que irá compor o processo jurídico de regularização fundiária. Sem o cadastro completo não há condições de avançar no processo.',
-                'config'=>['color'=>'success','icon'=>'fa fa-check']
+                'nome'=>'Usuários registrados há pelo menos 48 horas',
+                'pai'=>5,
+                'ordem'=>2,
+                'value'=>'48_horas',
+                'obs'=>'',
+                'config'=>['color'=>'warning','icon'=>'fa fa-times']
             ],
             [
-                'nome'=>'Outros',
-                'pai'=>3,
-                'value'=>'outros',
+                'nome'=>'Usuários registrados há pelo menos 7 dias',
+                'pai'=>5,
                 'ordem'=>3,
-                'obs'=>'Quando faltam documentos como uma Certidão de Casamento, por exemplo',
+                'value'=>'7_dias',
+                'obs'=>'',
                 'config'=>['color'=>'warning','icon'=>'fa fa-times']
             ],
             [
-                'nome'=>'Processo entregue',
-                'pai'=>10,
-                'value'=>'processo_entregue',
-                'ordem'=>1,
-                'obs'=>'são aqueles processos que são entregues à Secretaria de Meio Ambiente para serem encaminhados ao Cartório de Registro de Imóveis. É a penúltima etapa do processo de regularização fundiária.',
-                'config'=>['color'=>'warning','icon'=>'fa fa-check']
+                'nome'=>'Usuários registrados há pelo menos 1 mês',
+                'pai'=>5,
+                'ordem'=>4,
+                'value'=>'1_mes',
+                'obs'=>'',
+                'config'=>['color'=>'warning','icon'=>'fa fa-times']
             ],
             [
-                'nome'=>'Certidão',
-                'pai'=>10,
-                'value'=>'certidao',
-                'ordem'=>2,
-                'obs'=>'Trata-se do atendimento final. É quando o beneficiário recebe sua Certidão que todo o processo se consolida e atinge seu objetivo.',
-                'config'=>['color'=>'success','icon'=>'fa fa-check']
+                'nome'=>'Usuários registrados há pelo menos 3 meses',
+                'pai'=>5,
+                'ordem'=>5,
+                'value'=>'3_meses',
+                'obs'=>'',
+                'config'=>['color'=>'warning','icon'=>'fa fa-times']
             ],
-
 
         ];
 

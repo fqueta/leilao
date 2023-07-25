@@ -22,6 +22,7 @@
         $redirect = route($redirect.'.index').$sb;
     }
 
+
 @endphp
 <style media="print">
     #DataTables_Table_0_wrapper .row:first-child{
@@ -68,7 +69,7 @@
                 if($routa=='leiloes'||$routa=='leiloes_adm'||$routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros'){
                     $rlink = 'show';
                 }
-                $linkShow = route($routa.'.'.$rlink,['id'=>$val->id]). '?redirect='.$redirect.'idCad='.$val->id;
+                $linkShow = route($routa.'.'.$rlink,['id'=>$val->id]);
                 $linkDbckp = $linkShow;
             @endphp
             <tr style="cursor: pointer" ondblclick="window.location='{{ $linkDbckp}}'"  id="tr_{{$val->id}}" class="@if (isset($_GET['idCad']) && $_GET['idCad']==$val->id) table-info @endif" title="DÊ DOIS CLIQUES PARA ABRIR">

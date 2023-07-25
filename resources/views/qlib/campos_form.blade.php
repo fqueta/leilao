@@ -276,7 +276,8 @@
                     $value = $config['value'];
                     $pos = strpos( $value, $sigla );
                     if ($pos === false) {
-                        $value = 'R$'.number_format((double)$config['value'],2,',','.');
+                        $config['value'] = App\Qlib\Qlib::precoBanco($config['value']);
+                        $value = 'R$'.number_format($config['value'],2,',','.');
                     }
                 }
                 $title = false;

@@ -65,10 +65,14 @@
                     $val->id = $val->ID;
                 }
                 $rlink = 'edit';
-                if($routa=='leiloes'||$routa=='leiloes_adm'||$routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros'){
+                if($routa=='leiloes_adm'||$routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros'){
                     $rlink = 'show';
                 }
-                $linkShow = route($routa.'.'.$rlink,['id'=>$val->id]). '?redirect='.$redirect.'idCad='.$val->id;
+                if($routa=='leiloes'){
+                    $linkShow = url('/').'/'.App\Qlib\Qlib::get_slug_post_by_id('21').'/'.$val->token;
+                }else{
+                    $linkShow = route($routa.'.'.$rlink,['id'=>$val->id]). '?redirect='.$redirect.'idCad='.$val->id;
+                }
                 $linkDbckp = $linkShow;
             @endphp
             <tr style="cursor: pointer" ondblclick="window.location='{{ $linkDbckp}}'"  id="tr_{{$val->id}}" class="@if (isset($_GET['idCad']) && $_GET['idCad']==$val->id) table-info @endif" title="DÊ DOIS CLIQUES PARA ABRIR">
@@ -77,7 +81,7 @@
                     </td>
                     <td class="text-right d-flex d-print-none">
                         @can('update',$routa)
-                            @if ($routa=='leiloes' || $routa=='leiloes_adm' || $routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros')
+                            @if ($routa=='leiloes_adm' || $routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros')
                                 <a href="{{ $linkShow }}" title="visualizar" class="btn btn-sm btn-outline-secondary mr-2">
                                     <i class="fas fa-eye"></i>
                                 </a>

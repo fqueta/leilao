@@ -26,9 +26,9 @@ class TesteController extends Controller
         // $ret = (new PostController)->addMenu(20);
         // $slug = Qlib::createSlug('leilão 12');
         // $p = (new LeilaoController)->get_data_contrato([24,4],true);
-        $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
-        Qlib::lib_print($p);
-        $p = (new LeilaoController)->array_contratos();
+        // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
+        // Qlib::lib_print($p);
+        $p = (new LanceController)->proximo_lance(36);
         dd($p);
         // dd($ret);
         // return false;

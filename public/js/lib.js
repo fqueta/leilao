@@ -243,10 +243,6 @@ function cancelEdit(id,ac){
     }else{
       var c = temaImput.replace('{value}',v);
     }
-    //c = c.replace('{value}',v);
-    //c = c.replace('{wid}',wid);
-    //c = c.replace('{type}',t);
-    //c = c.replace('{btn}',b);
     td.html(c);
   }
 }
@@ -2290,6 +2286,12 @@ function dataContratos(obj) {
                 data:dpost,
             },function(res){
                 $('#preload').fadeOut("fast");
+                if(!res.exec){
+                    document.querySelector('.select2-selection__choice__remove').click();
+                    $('[name="config[total_horas]"]').val('');
+                    $('[name="config[valor_r]"]').val('');
+                    return;
+                }
                 if(res.total_horas){
                     $('[name="config[total_horas]"]').val(res.total_horas);
                 }else{
@@ -2301,7 +2303,7 @@ function dataContratos(obj) {
                 }else{
                     $('[name="config[valor_r]"]').val(0);
                 }
-                console.log(res);
+                // console.log(res);
                 // if(m=res.value.matricula){
                 //     $('[name="matricula"]').val(m);
                 //     $('#txt-matricula').html(m);
@@ -2312,6 +2314,35 @@ function dataContratos(obj) {
             });
         }
     } catch (error) {
+        alert('erro')
         console.log(error);
     }
+}
+function lib_gerLances(redirect){
+    var idForm = '#frm-lance';
+    $(idForm).submit(function(e){
+        e.preventDefault();
+        var valor_l = $('#frm-lance [name="valor_lance"]').val();
+        valor_l = number_format(valor_l,2,',','.');
+        if(!window.confirm('DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'? \n Ao fazer isso você está concordando também com os nossos termos de usos')){
+            return ;
+        }
+        submitFormulario($(idForm),function(res){
+            try {
+                if(res.mens){
+                    $('.mens').html(res.mens);
+                }
+                if(res.exec){
+                    window.location=redirect;
+                }
+                if(res.code_mens=='enc'){
+                    window.location=redirect;
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },function(error){
+            log(error);
+        });
+    });
 }
