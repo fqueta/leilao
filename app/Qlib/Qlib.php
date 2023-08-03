@@ -1048,4 +1048,23 @@ class Qlib
 
         return $sig.number_format($val,2,',','.');
     }
+    static function criptToken($token){
+        $ret = false;
+        if($token){
+            $pri = substr($token,0,3);
+            $seg = substr($token,-3);
+            $ret = $pri.'**************'.$seg;
+        }
+        return $ret;
+    }
+    static function criptString($token){
+        $ret = false;
+        if($token){
+            $pri = substr($token,0,2);
+            $seg = substr($token,-2);
+            $ret = $pri.'*****'.$seg;
+        }
+        return $ret;
+    }
+
 }

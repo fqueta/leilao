@@ -30,6 +30,17 @@
         $('[selector-event]').on('change',function(){
             initSelector($(this));
         });
+
+        @if (App\Qlib\Qlib::is_frontend())
+            $('.summernote').summernote({
+                height: 250,
+                placeholder: 'Digite o conteudo',
+                toolbar:[['style', ['bold', 'italic']],['para', ['ul', 'ol', 'paragraph']]]
+            });
+            $('[data-dismiss="modal"]').on('click', function(){
+                $('.modal').modal('hide');
+            });
+        @else
         $('[vinculo-event]').on('click',function(){
             var funCall = function(res){};
             initSelector($(this));
@@ -44,26 +55,18 @@
             document.querySelector('.select2-search__field').focus();
         });
 
-        lib_autocompleteGeral('.autocomplete');
-        lib_autocompleteGeral('.autocomplete-pesq',function(ui,el){
-            console.log(ui);
-            try {
-                if(ui.id){
-                    let ur = '/beneficiarios/'+ui.id+'?redirect='+window.location.href;
-                    window.location = ur;
+            lib_autocompleteGeral('.autocomplete');
+            lib_autocompleteGeral('.autocomplete-pesq',function(ui,el){
+                console.log(ui);
+                try {
+                    if(ui.id){
+                        let ur = '/beneficiarios/'+ui.id+'?redirect='+window.location.href;
+                        window.location = ur;
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
-            } catch (error) {
-                console.log(error);
-            }
-        });
-        @if (App\Qlib\Qlib::is_frontend())
-            $('.summernote').summernote({
-                height: 250,
-                placeholder: 'Digite o conteudo',
-                toolbar:[['style', ['bold', 'italic']],['para', ['ul', 'ol', 'paragraph']]]
             });
-
-        @else
             $('.summernote').summernote({
                 height: 250,
                 placeholder: 'Digite o conteudo'

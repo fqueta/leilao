@@ -22,6 +22,7 @@ class CreateLancesTable extends Migration
             $table->json('config')->nullable();
             $table->integer('author')->nullable();
             $table->enum('ativo',['s','n']);
+            $table->enum('superado',['n','s']);
             $table->longText('obs')->nullable();
             $table->string('token')->nullable();
             $table->enum('excluido',['n','s']);

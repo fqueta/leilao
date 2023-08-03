@@ -215,5 +215,8 @@ Route::get('envio-mails',function(){
 Route::resource('lances','\App\Http\Controllers\lanceController',['parameters' => [
     'lances' => 'id'
 ]]);
+Route::prefix('ajax')->group(function(){
+    Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
+});
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');

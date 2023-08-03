@@ -70,6 +70,8 @@
                 }
                 if($routa=='leiloes'){
                     $linkShow = url('/').'/'.App\Qlib\Qlib::get_slug_post_by_id('21').'/'.$val->token;
+                }elseif($routa=='lances'){
+                    $linkShow = false;
                 }else{
                     $linkShow = route($routa.'.'.$rlink,['id'=>$val->id]). '?redirect='.$redirect.'idCad='.$val->id;
                 }

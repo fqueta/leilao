@@ -19,6 +19,7 @@ class TesteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
 
@@ -28,7 +29,7 @@ class TesteController extends Controller
         // $p = (new LeilaoController)->get_data_contrato([24,4],true);
         // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
         // Qlib::lib_print($p);
-        $p = (new LanceController)->lance_automatico(36);
+        $p = (new LanceController)->marca_lance_superado(36);
         dd($p);
         // dd($ret);
         // return false;

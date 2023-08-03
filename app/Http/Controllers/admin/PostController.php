@@ -169,6 +169,8 @@ class PostController extends Controller
         if(Qlib::qoption('editor_padrao')=='laraberg'){
             $hidden_editor = 'hidden';
         }
+        // $event_divide = 'onkeyup=divideHoras(this)';
+        $event_divide = '';
         $ret = [
             'ID'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'post_type'=>['label'=>'tipo de post','active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>$this->post_type],
@@ -178,7 +180,7 @@ class PostController extends Controller
                 'label'=>'Nome do cliente*',
                 'active'=>true,
                 'type'=>'select',
-                'arr_opc'=>Qlib::sql_array("SELECT id,nome FROM users WHERE ativo='s' AND id_permission>'4'",'nome','id'),'exibe_busca'=>'d-block',
+                'arr_opc'=>Qlib::sql_array("SELECT id,name FROM users WHERE ativo='s' AND id_permission>'4'",'name','id'),'exibe_busca'=>'d-block',
                 'event'=>'required',
                 'tam'=>'7',
                 'exibe_busca'=>true,
@@ -186,8 +188,8 @@ class PostController extends Controller
                 'class'=>'select2',
                 'cp_busca'=>'config][cliente',
             ],
-            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required onkeyup=divideHoras(this)','tam'=>'2','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
-            'config[valor_r]'=>['label'=>'Valor','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=divideHoras(this)','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
+            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'2','cp_busca'=>'config][total_horas','title'=>'Número total de horas que serão leiloadas'],
+            'config[valor_r]'=>['label'=>'Valor','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor da rescisão, este também será o valor de lance inicial quando o cliente criar o leilão'],
             // 'config[valor_h]'=>['label'=>'Valor Hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_h','title'=>'Valor do hora no contrato'],
             // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
             // 'config[lance_total]'=>['label'=>'Lance total','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][lance_total','title'=>'Valor unitário do Lançe mutiplicado pela quantidade de horas'],
@@ -260,7 +262,7 @@ class PostController extends Controller
                 'label'=>'Responsável',
                 'active'=>true,
                 'type'=>'select',
-                'arr_opc'=>Qlib::sql_array("SELECT id,nome FROM users WHERE ativo='s' AND id_permission>'1'",'nome','id'),'exibe_busca'=>'d-block',
+                'arr_opc'=>Qlib::sql_array("SELECT id,name FROM users WHERE ativo='s' AND id_permission>'1'",'name','id'),'exibe_busca'=>'d-block',
                 'event'=>'required',
                 'tam'=>'12',
                 'exibe_busca'=>true,
@@ -280,10 +282,23 @@ class PostController extends Controller
                 'cp_busca'=>'config][status',
             ],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            // 'config[itens][]'=>[
+            //     'label'=>'Contratos*',
+            //     'active'=>true,
+            //     'type'=>'select_multiple',
+            //     'arr_opc'=>$arr_itens,'exibe_busca'=>'d-block',
+            //     'event'=>'required onchange=dataContratos(this)',
+            //     'tam'=>'12',
+            //     'class'=>'',
+            //     'exibe_busca'=>true,
+            //     'option_select'=>true,
+            //     'cp_busca'=>'config][itens',
+            //     'class'=>'select2',
+            // ],
             'config[itens][]'=>[
                 'label'=>'Contratos*',
                 'active'=>true,
-                'type'=>'select_multiple',
+                'type'=>'select',
                 'arr_opc'=>$arr_itens,'exibe_busca'=>'d-block',
                 'event'=>'required onchange=dataContratos(this)',
                 'tam'=>'12',
@@ -293,12 +308,12 @@ class PostController extends Controller
                 'cp_busca'=>'config][itens',
                 'class'=>'select2',
             ],
-            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
-            'config[valor_r]'=>['label'=>'Valor','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
+            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
+            'config[valor_r]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
             // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
-            'config[lance_inicial]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][lance_inicial','title'=>'Valor do lance inicial'],
-            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
-            'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            // 'config[lance_inicial]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][lance_inicial','title'=>'Valor do lance inicial'],
+            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
+            'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
@@ -318,7 +333,6 @@ class PostController extends Controller
                 'class'=>'select2',
                 'cp_busca'=>'config][pode_lance',
             ],
-
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
             // 'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
         ];

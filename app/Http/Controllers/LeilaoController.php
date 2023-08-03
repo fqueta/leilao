@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\EventController;
 use App\Http\Controllers\admin\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Requests\StorePostRequest;
+use App\Models\lance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
@@ -349,13 +350,22 @@ class LeilaoController extends Controller
                 $titulo = $title;
                 $d1 = @$dl[0]['config']['termino'].' '.@$dl[0]['config']['hora_termino'];
                 $termino = Qlib::diffDate2($d1,Qlib::dataLocalDb(),false,true);
-                $ultimoLance = (new LanceController)->ultimo_lance($seg2);
+                $lc = new LanceController;
+                $ultimoLance = $lc->ultimo_lance($seg2);
                 $arr_lances = self::arr_lances($seg2,$dl[0],20);
-                $lance_atual = Qlib::valor_moeda($ultimoLance,'R$ ');
+                if($ultimoLance){
+                    $lance_atual = Qlib::valor_moeda($ultimoLance,'R$ ');
+                }else{
+                    $lance_atual = '<h6>SEM LANCES</h6>';
+                }
+                //list lances
+                $ll = $lc->get_lances($dl[0]['ID']);
+
                 $dl[0]['link_thumbnail'] = Qlib::get_thumbnail_link($dl[0]['ID']);
                 $dl[0]['the_permalink'] = Qlib::get_the_permalink($dl[0]['ID']);
                 $dl[0]['termino'] = $termino;
                 $dl[0]['lance_atual'] = $lance_atual;
+                $dl[0]['list_lances'] = $ll;
                 $dl[0]['arr_lances'] = $this->arr_lances($dl[0]['ID'],$dl[0]);
                 $ret = [
                     'dados'=>$dl[0],
@@ -425,9 +435,10 @@ class LeilaoController extends Controller
     public static function arr_lances($leilao_id=false,$data=false,$total=10){
         $ret = [];
         $dl = self::get_leilao($leilao_id,$data);
-        if(isset($dl['config']['incremento']) && isset($dl['config']['lance_inicial'])){
+        $campo_valor = 'valor_r';
+        if(isset($dl['config']['incremento']) && isset($dl['config'][$campo_valor])){
             $inc=Qlib::precoBanco($dl['config']['incremento']);
-            $li=Qlib::precoBanco($dl['config']['lance_inicial']);
+            $li=Qlib::precoBanco($dl['config'][$campo_valor]);
             $l_at=(new LanceController)->ultimo_lance($leilao_id);//lance atual
             if($l_at>0){
                 $li=$l_at+$inc;
@@ -450,4 +461,5 @@ class LeilaoController extends Controller
         $ret = url('/').'/admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
         return $ret;
     }
+
 }

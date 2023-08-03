@@ -22,7 +22,7 @@ class User extends Authenticatable
     // protected $connection = 'tenant';
     protected $fillable = [
         'tipo_pessoa',
-        'nome',
+        'name',
         'razao',
         'email',
         'password',

@@ -470,78 +470,7 @@ function cancelEditAssistencia(frm,qtd){
   //nv = nv.replace('{id}',id);
   s.html(nv);
 }
-function salvarAssitencia(frm,dados){
-  //var var_cartao = atob(arr['var_cartao']);
-        $.ajaxSetup({
-           headers: {
-               'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
-           }
-       });
 
-       //var state = jQuery('#btn-save').val();
-       var f = $('#'+frm);
-       var ac = f.find('[name="ac"]').val();
-       var RAIZ = $('[name="raiz"]').val();
-       if(ac=='cad'){
-         var type = "POST";
-         var ajaxurl = RAIZ+'/assistencias';
-       }else{
-         var id = f.find('[name="id"]').val();
-         var type = "POST";
-         var ajaxurl = RAIZ+"/assistencias/"+id;
-       }
-       $.ajax({
-           type: type,
-           url: ajaxurl,
-           data: f.serialize()+'&dados='+dados,
-           dataType: 'json',
-           success: function (data) {
-             if(data.exec){
-               cancelEditAssistencia(frm,data.data.qtd);
-							 if(data.mens){
-								 lib_formatMensagem('.mens',data.mens,'success');
-							 }
-						 }else{
-							 lib_formatMensagem('.mens',data.mens,'danger');
-						 }
-             if(data.data.dados[0].semanas[6].qtd){
-               var totalR1 = data.data.dados[0].semanas[6].qtd;
-               $('[sele="total_0_6"] span').html(totalR1);
-             }
-             if(data.data.dados[0].semanas[7].qtd){
-               var mediaR1 = data.data.dados[0].semanas[7].qtd;
-               $('[sele="media_0_7"] span').html(mediaR1);
-             }
-             if(data.data.dados[1].semanas[6].qtd){
-               var totalR1 = data.data.dados[1].semanas[6].qtd;
-               $('[sele="total_1_6"] span').html(totalR1);
-             }
-             if(data.data.dados[1].semanas[7].qtd){
-               var mediaR1 = data.data.dados[1].semanas[7].qtd;
-               $('[sele="media_1_7"] span').html(mediaR1);
-             }
-
-             /*
-             if(data.cartao.medias){
-               var array = data.cartao.medias;
-               var id_pub = data.cartao.dados.id;
-               var eq = 1;
-               $.each(array,function(i,k){
-                  $('#pub-'+id_pub+' .tf-2 th:eq('+(eq)+')').html(k);
-                 eq++;
-               });
-             }
-             if(data.salvarRelatorios.obs && data.salvarRelatorios.mes){
-               var selector = '#'+id_pub+'_'+data.salvarRelatorios.mes+' td';
-               $(selector).last().html(data.salvarRelatorios.obs);
-             }
-              */
-           },
-           error: function (data) {
-               console.log(data);
-           }
-       });
-}
 function mask(o, f) {
 	setTimeout(function() {
 		var v = clientes_mascaraTelefone(o.value);
@@ -908,6 +837,16 @@ function getAjax(config,funCall,funError){
             $('#preload').fadeOut("fast");
             lib_funError(res);
         }
+    }
+    if(typeof config.csrf == 'undefined'){
+        config.csrf = '';
+    }
+    if(config.csrf){
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+            }
+        });
     }
     $.ajax({
         type: config.type,
@@ -2344,5 +2283,28 @@ function lib_gerLances(redirect){
         },function(error){
             log(error);
         });
+    });
+}
+function excluirReserva(token){
+    if(!window.confirm('DESEJA MESMO REMOVER A RESERVA?')){
+        return;
+    }
+    getAjax({
+        url:'/ajax/excluir-reserva-lance',
+        type: 'POST',
+        dataType: 'json',
+        csrf: true,
+        data:{
+            token: token,
+        }
+    },function(res){
+        $('#preload').fadeOut("fast");
+        $('.mes').html(res.mens);
+        if(res.exec){
+            $('#info-reserva').remove();
+        }
+    },function(err){
+        $('#preload').fadeOut("fast");
+        console.log(err);
     });
 }

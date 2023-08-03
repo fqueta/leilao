@@ -58,15 +58,16 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255',new FullName],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'cpf'   =>[new RightCpf, 'unique:users']
         ]);
         // $data = $request->all();
         // $validatedData = $request->validate([
-        //     'nome' => ['required','string',new FullName],
+        //     'name' => ['required','string',new FullName],
         //     'email' => ['required','string','unique:users'],
         //     // 'cpf'   =>[new RightCpf]
         // ],[
-        //         'nome.required'=>__('O nome é obrigatório'),
-        //         'nome.string'=>__('É necessário conter letras no nome'),
+        //         'name.required'=>__('O nome é obrigatório'),
+        //         'name.string'=>__('É necessário conter letras no nome'),
         //         'email.unique'=>__('E-mail já cadastrado'),
         // ]);
     }
@@ -81,17 +82,20 @@ class RegisterController extends Controller
     {
          //REGISTRAR EVENTO
          $regev = Qlib::regEvent(['action'=>'create','tab'=>'user','config'=>[
-             'obs'=>'Usuario se cadastro pelo site',
+             'obs'=>'Usuario se cadastrou pelo site',
              'link'=>'',
              ]
         ]);
-        return User::create([
-            'nome' => $data['name'],
+        $ds = [
+            'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'status' => 'pre_registred',
-            'cpf' => @$data['email'],
+            'cpf' => @$data['cpf'],
             'id_permission' => '5',
-        ]);
+            'tipo_pessoa' => 'pf',
+        ];
+        // dd($ds);
+        return User::create($ds);
     }
 }

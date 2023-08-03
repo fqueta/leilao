@@ -62,10 +62,12 @@ class siteController extends Controller
 
                 $ret = $dados['post_content'];
                 $lc = new LeilaoController;
+                $lac = new LanceController;
                 $uc = new UserController;
                 $arr_shortC = [
                     'form_leilao' => $lc->form_leilao($post_id,$dados),
                     'list_leilao' => $lc->list_leilao($post_id,$dados),
+                    'list_lances' => $lac->list_lances($post_id,$dados),
                     'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
                     'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
                     'teste' => 'teste de conteudo do formulario para gadastr',
