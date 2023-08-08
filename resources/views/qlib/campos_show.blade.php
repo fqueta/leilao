@@ -4,11 +4,13 @@
             @if ($config['label'])
                 <label for="{{$config['campo']}}">{{$config['label']}}:</label>
             @endif
-            @if (isset($config['arr_opc']))
-                {{@$config['arr_opc'][$config['value']]}}
+            @if(isset($config['value']) && !empty($config['value']))
+                {{$config['value']}}
+            @else
+                @if (isset($config['arr_opc']))
+                    {{@$config['arr_opc'][$config['value']]}}
+                @endif
             @endif
-            @if($config['campo']=='bairro')
-        @endif
 
         </div>
     @elseif ($config['type']=='hidden' || $config['type']=='password')
@@ -287,35 +289,35 @@
             </div>
         </div>
     @elseif($config['type']=='text')
-    <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
-        <label for="{{$config['campo']}}">{{$config['label']}}:</label>
-        {!! @$config['value'] !!}
-    </div>
+        <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
+            <label for="{{$config['campo']}}">{{$config['label']}}:</label>
+            {!! @$config['value'] !!}
+        </div>
     @elseif($config['type']=='moeda')
-    <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
-        <label for="{{$config['campo']}}">{{$config['label']}}:</label>
-        @php
-            $value=null;
-            if(!empty($config['value'])){
-                    $sigla   = 'R$';
-                    $value = $config['value'];
-                    $pos = strpos( $value, $sigla );
-                    if ($pos === false) {
-                        $value = 'R$'.number_format((double)$config['value'],2,',','.');
-                    }
-            }
-            echo $value;
-        @endphp
-    </div>
+        <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
+            <label for="{{$config['campo']}}">{{$config['label']}}:</label>
+            @php
+                $value=null;
+                if(!empty($config['value'])){
+                        $sigla   = 'R$';
+                        $value = $config['value'];
+                        $pos = strpos( $value, $sigla );
+                        if ($pos === false) {
+                            $value = 'R$'.number_format((double)$config['value'],2,',','.');
+                        }
+                }
+                echo $value;
+            @endphp
+        </div>
     @elseif($config['type']=='date')
-    <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
-        <label for="{{$config['campo']}}">{{$config['label']}}:</label>
-        {{ App\Qlib\Qlib::dataExibe(@$config['value']) }}
-    </div>
+        <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
+            <label for="{{$config['campo']}}">{{$config['label']}}:</label>
+            {{ App\Qlib\Qlib::dataExibe(@$config['value']) }}
+        </div>
     @else
-    <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
-        <label for="{{$config['campo']}}">{{$config['label']}}:</label>
-        {!! @$config['value'] !!}
-    </div>
+        <div class="col-{{$config['tam']}}" div-id="{{$config['campo']}}">
+            <label for="{{$config['campo']}}">{{$config['label']}}:</label>
+            {!! @$config['value'] !!}
+        </div>
     @endif
 @endif

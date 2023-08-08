@@ -70,7 +70,7 @@
                             {{$vll->data}}
                         </td>
                         <td class="text-center">
-                            {{App\Qlib\Qlib::criptString($vll->nome)}}
+                            {{App\Qlib\Qlib::criptString(@$vll->name)}}
                         </td>
                         <td class="td-lance">
                             {{App\Qlib\Qlib::valor_moeda($vll->valor_lance,'R$ ')}} {!!$lance_automatico!!}

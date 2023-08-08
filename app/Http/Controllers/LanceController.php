@@ -313,6 +313,12 @@ class LanceController extends Controller
             $ret['mens'] = Qlib::formatMensagemInfo('Erro o valor do lance é nulo, por favor selecione outro','danger');
             return $ret;
         }
+        //Verifica se usuario tem permissão para dar o lance
+        $al = $this->autoriza_lance($leilao_id);
+        if(!$al['exec']){
+            $ret['mens'] = Qlib::formatMensagemInfo(@$al['mens'],'danger');
+            return $ret;
+        }
         //verificar se o lance é igual a algum lance ja dado
         $verifica = Lance::where('valor_lance','=',$d['valor_lance'])
                     ->where('leilao_id','=',$d['leilao_id'])
@@ -443,7 +449,7 @@ class LanceController extends Controller
      */
     public function ultimo_lance($leilao_id=false,$exibe_data=false){
         $ret = 0;
-        $l = lance::where('leilao_id',$leilao_id)->where('type','lance')->where('excluido','n')->orderBy('id', 'desc')->first()->toArray();
+        $l = lance::where('leilao_id',$leilao_id)->where('type','lance')->where('excluido','n')->orderBy('id', 'desc')->first();
         if($l){
             if($exibe_data){
                 $ret = $l;
@@ -664,5 +670,44 @@ class LanceController extends Controller
             }
         }
         return response()->json($ret);
+    }
+    /**
+     * Metodo para verificar se o usuario está liberado para dar um lance
+     */
+    public function autoriza_lance($leilao_id=false){
+        $ret['exec'] = false;
+        $ret['mens'] = false;
+        if($leilao_id){
+            //Verifica se o usuário tem tempo suficiente cadastro
+            $d = Post::Find($leilao_id);
+            if($d){
+                $arr = Qlib::lib_json_array($d['config']);
+                if(isset($arr['pode_lance']) && $cf=$arr['pode_lance']){
+                    $tgmens = Qlib::buscaValorDb0('tags','id',$cf,'nome');
+                    $ret['mens'] = __('Somente '.$tgmens.' podem dar lances.');
+                    $arr = [
+                        6=>'',
+                        7=>48, //48 horas
+                        8=>168,//7 dias = 168 horas
+                        9=>720,//1 mês = 168 horas
+                        10=>2160,//3 meses = 168 horas
+                    ];
+                    $criterio = $arr[$cf];
+                    if(empty($criterio)){
+                        $ret['exec'] = true;
+                    }else{
+                        $user = Auth::user();
+                        $dt_created = $user->created_at;
+                        $now = Qlib::dataLocalDb();
+                        $difdt = Qlib::diffDate($dt_created,$now);
+                        if((int)$difdt >= (int)$criterio){
+                            $ret['exec'] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $ret;
     }
 }

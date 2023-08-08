@@ -19,7 +19,7 @@
         @if (isset($campos) && is_array($campos))
             @foreach ($campos as $k=>$v)
                 @php
-                    if($v['type'] == 'checkbox'){
+                    if(isset($v['type']) && $v['type'] == 'checkbox'){
                         if(isset($v['cp_busca']) && !empty($v['cp_busca'])){
                             $arrcp = explode('][', $v['cp_busca']);
                             if(isset($arrcp[1]) && !empty($arrcp[1])){
@@ -37,19 +37,34 @@
                         if(isset($v['arr_opc'][$value[$k]])){
                             $v['value'] = $v['arr_opc'][$value[$k]];
                         }
+                    }elseif(isset($v['type'])  && $v['type'] == 'select'){
+                        if(isset($v['cp_busca']) && !empty($v['cp_busca'])){
+                            $arrcp = explode('][', $v['cp_busca']);
+                            if(isset($arrcp[1]) && !empty($arrcp[1])){
+                                $value[$k] = $value[$arrcp[0]][$arrcp[1]];
+                                if(isset($v['arr_opc'][$value[$k]]) && is_array($v['arr_opc'][$value[$k]])){
+                                    $value[$k] = $v['arr_opc'][$value[$k]]['label'];
+                                }else{
+                                    if(isset($v['arr_opc'][$value[$k]])){
+                                        $value[$k] = $v['arr_opc'][$value[$k]];
+                                    }
+                                }
+                            }
+                        }
                     }
+
                 @endphp
-                @if ($v['type']=='select_multiple')
-                @php
+                @if (isset($v['type']) && $v['type']=='select_multiple')
+                    @php
                         $nk = str_replace('[]','',$k);
                         $value[$k] = isset($value[$nk])?$value[$nk]:false;
-                @endphp
+                    @endphp
                 @endif
 
                 {!! App\Qlib\Qlib::qShow([
                         'type'=>@$v['type'],
                         'campo'=>$k,
-                        'label'=>$v['label'],
+                        'label'=>@$v['label'],
                         'placeholder'=>@$v['placeholder'],
                         'ac'=>$config['ac'],
                         'value'=>isset($v['value'])?$v['value']: @$value[$k],

@@ -24,7 +24,8 @@
         </div>
         @if (isset($campos) && is_array($campos))
             @foreach ($campos as $k=>$v)
-                @if (isset($v['cp_busca'])&&!empty($v['cp_busca']))
+
+                    @if (isset($v['cp_busca'])&&!empty($v['cp_busca']))
 
                     @php
                         $cf = explode('][',$v['cp_busca']);
@@ -37,7 +38,7 @@
                         }
                     @endphp
                 @endif
-                @if ($v['type']=='select_multiple' || $v['type']=='html_vinculo')
+                @if (isset($v['type']) && ($v['type']=='select_multiple' || $v['type']=='html_vinculo'))
                     @php
                         $nk = str_replace('[]','',$k);
                         if (isset($v['cp_busca'])&&!empty($v['cp_busca'])){
@@ -60,7 +61,7 @@
             {{App\Qlib\Qlib::qForm([
                     'type'=>@$v['type'],
                     'campo'=>$k,
-                    'label'=>$v['label'],
+                    'label'=>@$v['label'],
                     'placeholder'=>@$v['placeholder'],
                     'ac'=>$config['ac'],
                     'value'=>isset($v['value'])?$v['value']: @$value[$k],

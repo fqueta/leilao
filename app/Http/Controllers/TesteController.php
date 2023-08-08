@@ -28,10 +28,11 @@ class TesteController extends Controller
         // $slug = Qlib::createSlug('leilão 12');
         // $p = (new LeilaoController)->get_data_contrato([24,4],true);
         // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
-        // Qlib::lib_print($p);
-        $p = (new LanceController)->marca_lance_superado(36);
-        dd($p);
-        // dd($ret);
+        $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
+        dd($tempo);
+        // $p = (new LanceController)->marca_lance_superado(36);
+        // dd($p);
+        // // dd($ret);
         // return false;
         // //     echo Qlib::get_subdominio();
         // $dados = (new FamiliaController($user))->rendaFamiliar(3145);

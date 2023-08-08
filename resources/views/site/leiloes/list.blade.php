@@ -3,6 +3,7 @@ $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
 $seg1 = request()->segment(1); //link da página em questão
 $seg2 = request()->segment(2); //link da página em questão
 $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
+// dd($dados1);
 @endphp
 <style>
     .div-salvar {

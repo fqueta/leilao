@@ -966,14 +966,24 @@ class Qlib
         $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
         return $slug;
     }
-    static function diffDate($d1, $d2, $type='', $sep='-')
+    static function diffDate($d1, $d2, $type='H', $sep='-')
     {
-        $d1 = explode($sep, $d1);
-        $d2 = explode($sep, $d2);
+        // $d1 = explode($sep, $d1);
+        // $d2 = explode($sep, $d2);
+        $d1 = new DateTime($d1);
+        $d2 = new DateTime($d2);
+        if($sep=='-'){
+            $data1  = $d1->format('Y-m-d H:i:s');
+            $data2  = $d2->format('Y-m-d H:i:s');
+        }
+        $intervalo = $d1->diff( $d2 );
+        $ret = false;
+        // dd($intervalo);
         switch ($type)
         {
             case 'A':
-            $X = 31536000;
+            // $X = 31536000;
+            $ret = $intervalo->y;
             break;
             case 'M':
             $X = 2592000;
@@ -982,7 +992,8 @@ class Qlib
             $X = 86400;
             break;
             case 'H':
-            $X = 3600;
+            // $X = 3600;
+            $ret = $intervalo->h + ($intervalo->days * 24);
             break;
             case 'MI':
             $X = 60;
@@ -990,8 +1001,8 @@ class Qlib
             default:
             $X = 1;
         }
-
-        return floor( ( ( mktime(0, 0, 0, $d2[1], $d2[2], $d2[0]) - mktime(0, 0, 0, $d1[1], $d1[2], $d1[0] ) ) / $X ) );
+        return $ret;
+        // return floor( ( ( mktime(0, 0, 0, $d2[1], $d2[2], $d2[0]) - mktime(0, 0, 0, $d1[1], $d1[2], $d1[0] ) ) / $X ) );
     }
     /**
      * Metodo para monstrar a diferença entre datas

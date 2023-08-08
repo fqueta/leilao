@@ -15,7 +15,7 @@
                 <div class="row">
                     @if (isset($campos_tabela) && is_array($campos_tabela))
                         @foreach ($campos_tabela as $kbu=>$vbu)
-                            @if ($vbu['active'])
+                            @if (isset($vbu['active']) && $vbu['active'])
                                 @php
                                     if($vbu['type']!='text' && $kbu=='id'){
                                         $vbu['type'] = 'text';

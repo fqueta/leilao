@@ -110,6 +110,7 @@ class LeilaoController extends Controller
         $titulo = $title;
         $view   = '/'.Qlib::get_slug_post_by_id(18);
         //if(isset($queryPost['post']));
+        // dd($queryPost);
         $ret = [
             'dados'=>$queryPost['post'],
             'title'=>$title,
@@ -123,10 +124,8 @@ class LeilaoController extends Controller
             'view'=>$view,
             'i'=>0,
         ];
-
         //REGISTRAR EVENTOS
         // (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-
         return view('site.leiloes.list',$ret);
     }
     /**
@@ -306,9 +305,9 @@ class LeilaoController extends Controller
     public function is_linked_leilao($token=false){
         $ret = false;
         if($token){
-            $d = Post::where('config','LIKE', '%"'.$token.'"%')->where('post_type','=',$this->post_type)->where('post_status','!=','trash')->count();
-            if($d > 0){
-                $ret = true;
+            $d = Post::where('config','LIKE', '%"'.$token.'"%')->where('post_type','=',$this->post_type)->where('post_status','!=','trash')->get()->toArray();
+            if($d){
+                $ret = $d[0]['post_title'];
             }
         }
         return $ret;
@@ -328,10 +327,10 @@ class LeilaoController extends Controller
         }
         if($is_linked && is_array($r)){
             foreach ($r as $k => $v) {
-                if($this->is_linked_leilao($k)){
-                    $ret[$k] = $v.' Indisponível';
+                if($leiao=$this->is_linked_leilao($k)){
+                    $ret[$k] = ['label'=>$v.' Cadastrado no '.$leiao,'attr_option'=>'disabled'] ;
                 }else{
-                    $ret[$k] = $v;
+                    $ret[$k] = ['label'=>$v,'attr_option'=>''] ;
                 }
             }
         }
@@ -394,6 +393,8 @@ class LeilaoController extends Controller
             if(isset($queryPost['post']) && is_object($queryPost['post'])){
                 foreach ($queryPost['post'] as $kp => $vp) {
                     if(isset($vp['config']['itens']) && is_array($vp['config']['itens']) && count($vp['config']['itens'])>0){
+                        $dados[$kp] = $vp;
+                    }elseif(isset($vp['config']['contrato']) && !empty($vp['config']['contrato'])){
                         $dados[$kp] = $vp;
                     }
                 }

@@ -732,7 +732,7 @@ function excluirArquivo(id,ajaxurl){
 function carregaDropZone(seletor){
     $(seletor).dropzone({ url: "/file/post" });
 }
-function submitFormulario(objForm,funCall,funError,compleUrl){
+function submitFormulario_bk(objForm,funCall,funError,compleUrl){
     if(typeof funCall == 'undefined'){
         funCall = function(res){
             console.log(res);
@@ -771,7 +771,7 @@ function submitFormulario(objForm,funCall,funError,compleUrl){
         }
     });
 }
-function submitFormulario_bk(objForm,funCall,funError){
+function submitFormulario(objForm,funCall,funError){
     if(typeof funCall == 'undefined'){
         funCall = function(res){
             console.log(res);
@@ -2226,7 +2226,9 @@ function dataContratos(obj) {
             },function(res){
                 $('#preload').fadeOut("fast");
                 if(!res.exec){
-                    document.querySelector('.select2-selection__choice__remove').click();
+                    documento.querySelector('[name="config[contrato]"]').value='';
+                    documento.querySelector('[name="config[contrato]"]').querySelector('option[value]=\'\'').selected='selected';
+                    // document.querySelector('.select2-selection__choice__remove').click();
                     $('[name="config[total_horas]"]').val('');
                     $('[name="config[valor_r]"]').val('');
                     return;
@@ -2307,4 +2309,8 @@ function excluirReserva(token){
         $('#preload').fadeOut("fast");
         console.log(err);
     });
+}
+function remove_contrato_leilao(){
+    $('[name="config[contrato]"]').val('');
+    $('#tk-contrato,#btn-remove-contrato').remove();
 }

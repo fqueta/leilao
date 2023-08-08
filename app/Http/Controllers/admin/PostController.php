@@ -295,7 +295,8 @@ class PostController extends Controller
             //     'cp_busca'=>'config][itens',
             //     'class'=>'select2',
             // ],
-            'config[itens][]'=>[
+            'callback_contrato'=>[],
+            'config[contrato]'=>[
                 'label'=>'Contratos*',
                 'active'=>true,
                 'type'=>'select',
@@ -305,7 +306,7 @@ class PostController extends Controller
                 'class'=>'',
                 'exibe_busca'=>true,
                 'option_select'=>true,
-                'cp_busca'=>'config][itens',
+                'cp_busca'=>'config][contrato',
                 'class'=>'select2',
             ],
             'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
@@ -330,7 +331,7 @@ class PostController extends Controller
                 'tam'=>'12',
                 'exibe_busca'=>true,
                 'option_select'=>true,
-                'class'=>'select2',
+                'class'=>'select2-',
                 'cp_busca'=>'config][pode_lance',
             ],
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
@@ -345,9 +346,24 @@ class PostController extends Controller
             if(!$data){
                 $value_author = Auth::id();
             }
-            $ret['config[itens][]']['active'] = false;
+            $ret['config[contrato]']['active'] = false;
             $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','value'=>$value_author,'tam'=>'2'];
         }
+        if($ac!='cad'){
+            // if(isset($data['config']['itens'][0]) && !empty($data['config']['itens'][0])){
+            //     $nome_contrato = Qlib::buscaValorDb0('posts','token',$data['config']['itens'][0],'post_title');
+            //     $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> '.$nome_contrato,'type'=>'html_script','class_div'=>'mt-2 mb-2'];
+            // }
+            if(isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
+                $ctt = $data['config']['contrato'];
+                $nome_contrato = Qlib::buscaValorDb0('posts','token',$ctt,'post_title');
+                $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span> <button type="button" id="btn-remove-contrato" class="btn btn-outline-secondary" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button>','type'=>'html_script','class_div'=>'mt-2 mb-2'];
+                $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
+
+            }
+
+        }
+
         return $ret;
     }
     public function campos_pacotes($sec=false){

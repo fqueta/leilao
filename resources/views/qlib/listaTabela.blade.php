@@ -77,6 +77,7 @@
                 }
                 $linkDbckp = $linkShow;
             @endphp
+
             <tr style="cursor: pointer" ondblclick="window.location='{{ $linkDbckp}}'"  id="tr_{{$val->id}}" class="@if (isset($_GET['idCad']) && $_GET['idCad']==$val->id) table-info @endif" title="DÊ DOIS CLIQUES PARA ABRIR">
                     <td>
                         <input type="checkbox" class="checkbox" onclick="color_select1_0(this.checked,this.value);" value="{{$val->id}}" name="check_{{$val->id}}" id="check_{{$val->id}}">
@@ -127,14 +128,25 @@
                     </td>
                 @if (isset($campos_tabela) && is_array($campos_tabela))
                     @foreach ($campos_tabela as $kd=>$vd)
-                        @if (isset($vd['label']) && $vd['active'])
+                        @if (isset($vd['label']) && isset($vd['active']) && $vd['active'])
                             @if (isset($vd['type']) && ($vd['type']=='select' || $vd['type']=='selector'))
                                 @php
                                     if(isset($vd['cp_busca']) && !empty($vd['cp_busca'])){
                                         $cp = explode('][',$vd['cp_busca']);
                                         $kr = @$val[$cp[0]][$cp[1]];
-                                        $td = @$vd['arr_opc'][$kr];
+                                        if(isset($vd['arr_opc'][$kr])){
+                                            if(is_array($vd['arr_opc'][$kr])){
+                                                if(isset($vd['arr_opc'][$kr]['label'])){
+                                                    $td = $vd['arr_opc'][$kr]['label'];
+                                                }else{
+                                                    $td = false;
+                                                }
+                                            }else{
+                                                $td = @$vd['arr_opc'][$kr];
+                                            }
+                                        }
                                     }else{
+
                                         $td = @$vd['arr_opc'][$val->$kd];
                                     }
                                 @endphp

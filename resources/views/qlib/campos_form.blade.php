@@ -10,7 +10,12 @@
                     <option value="" class="option_select"> {{$config['label_option_select']}} </option>
                 @endif
                 @foreach ($config['arr_opc'] as $k=>$v)
-                    <option value="{{$k}}" class="opcs" @if(isset($config['value']) && $config['value'] == $k) selected @endif>{{$v}}</option>
+                {{-- {{App\Qlib\Qlib::lib_print($v)}} --}}
+                    @if(isset($v['attr_option']))
+                        <option value="{{$k}}" {{@$v['attr_option']}}  class="opcs" @if(isset($config['value']) && $config['value'] == $k) selected @endif>{{@$v['label']}}</option>
+                    @else
+                      <option value="{{$k}}" class="opcs" @if(isset($config['value']) && $config['value'] == $k) selected @endif>{{$v}}</option>
+                    @endif
                 @endforeach
             </select>
             @error($config['campo'])
