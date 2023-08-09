@@ -37,7 +37,7 @@
             </div>
 
             <!-- Modal -->
-            <div class="modal fade" id="modalLances" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+            {{-- <div class="modal fade" id="modalLances" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -58,8 +58,14 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
+            </div> --}}
+            @include('site.partes_bs.modal',['config'=>[
+                'id'=>'modalLances',
+                'title'=>'Lances',
+                'tam'=>'modal-lg',
+                'bt_acao'=>false,
+                'include'=>'site.leiloes.lances.list_lances',
+            ]])
             <script>
                 $(function(){
                     $('#btn-ver_lances').on('click', function(){

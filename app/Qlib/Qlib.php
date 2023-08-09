@@ -376,9 +376,16 @@ class Qlib
         }
 	}
     static function formatMensagemInfo($mess='',$cssMes='',$event=false){
-		$mensagem = "<div class=\"alert alert-$cssMes alert-dismissable\" role=\"alert\"><button class=\"close\" type=\"button\" data-dismiss=\"alert\" $event aria-hidden=\"true\">×</button><i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)."</div>";
-		return $mensagem;
+		if(self::is_frontend()){
+            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable fade show\" style=\"float:right\" role=\"alert\"><i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)." <button class=\"btn-close\" type=\"button\" data-bs-dismiss=\"alert\" $event aria-hidden=\"true\"></button></div>";
+		}else{
+            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable\" role=\"alert\"><i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)." <button class=\"close\" type=\"button\" data-dismiss=\"alert\" $event aria-hidden=\"true\">×</button></div>";
+        }
+        return $mensagem;
 	}
+    // static function formatMensagemInfo2($mess='',$cssMes='',$event=false){
+	// 	return $mensagem;
+	// }
     static function gerUploadAquivos($config=false){
         if($config){
             $config['parte'] = isset($config['parte']) ? $config['parte'] : 'painel';

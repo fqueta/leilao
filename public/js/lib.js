@@ -421,11 +421,74 @@ function alerta(msg,id,title,tam,fechar,time,fecha){
                 '</div>'+
             '</div>'+
         '</div>';
-        $('#'+id).remove();
-	  var bodys = $(document.body).append(modalHtml);
 
-	  $("#"+id).modal({backdrop: 'static'});
-	if(fecha == true)
+        $('#'+id).remove();
+        var bodys = $(document.body).append(modalHtml);
+
+        $("#"+id).modal({backdrop: 'static'});
+    if(fecha == true)
+	setTimeout(function(){$("#"+id).modal("hide")}, time);
+}
+function alerta2(msg,id,title,tam,fechar,time,fecha){
+
+	if(typeof(fechar) == 'undefined')
+        fechar = true;
+    if(typeof(title) == 'undefined')
+    title = 'Janela modal';
+    if(typeof(fecha) != 'undefined')
+        fecha = fecha;
+    else
+        fecha = '';
+	if(typeof(id) == 'undefined')
+    id = 'meuModal';
+	if(typeof(tam) == 'undefined')
+    tam = '';
+	if(typeof(time) == 'undefined')
+        time = 2000;
+    if(fechar)
+        fechar = '<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div>';
+    // var modalHtml = '<div class="modal fade" id="'+id+'" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">'+
+    //         '<div class="modal-dialog '+tam+'" role="document">'+
+    //             '<div class="modal-content">'+
+    //                 '<div class="modal-header">'+
+    //                     '<h5 class="modal-title">'+title+'</h5>'+
+    //                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+    //                             '<span aria-hidden="true">&times;</span>'+
+    //                         '</button>'+
+    //                 '</div>'+
+    //                 '<div class="modal-body">'+msg+
+    //                 '</div>'+fechar+
+    //             '</div>'+
+    //         '</div>'+
+    //     '</div>';
+    var modalHtml = '<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">'+
+    '<div class="modal-dialog">'+
+        '<div class="modal-content">'+
+        '<div class="modal-header">'+
+            '<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>'+
+            '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>'+
+        '</div>'+
+        '<div class="modal-body">'+
+        '</div>'+
+        '<div class="modal-footer">'+
+            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>'+
+            '<button type="button" class="btn btn-primary">Save changes</button>'+
+        '</div>'+
+        '</div>'+
+    '</div>'+
+    '</div>';
+
+        $('#'+id).remove();
+        var bodys = $(document.body).append(modalHtml);
+        var myModal = document.getElementById(id)
+        // var myInput = document.getElementById('myInput')
+
+        // myModal.addEventListener('shown.bs.modal', function () {
+        //     console.log('foi');
+        //     // myInput.focus()
+        // })
+        myModal.modal({backdrop: 'static'});
+    if(fecha == true)
 	setTimeout(function(){$("#"+id).modal("hide")}, time);
 }
 function editarAssistencia(obj){
@@ -2265,26 +2328,39 @@ function lib_gerLances(redirect){
         e.preventDefault();
         var valor_l = $('#frm-lance [name="valor_lance"]').val();
         valor_l = number_format(valor_l,2,',','.');
-        if(!window.confirm('DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'? \n Ao fazer isso você está concordando também com os nossos termos de usos')){
-            return ;
-        }
-        submitFormulario($(idForm),function(res){
-            try {
-                if(res.mens){
-                    $('.mens').html(res.mens);
-                }
-                if(res.exec){
-                    window.location=redirect;
-                }
-                if(res.code_mens=='enc'){
-                    window.location=redirect;
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        },function(error){
-            log(error);
+        // if(!window.confirm('DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'? \n Ao fazer isso você está concordando também com os nossos termos de usos')){
+        //     return ;
+        // }
+        var msg = '<div class="row"><div id="exibe_etapas" class="col-md-12 text-center"><h6>DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'?</h6><p>\n Ao fazer isso você estara concordando também com os nossos termos de usos</p></div><div class="col-md-12 mt-3 text-center"></div></div>';
+        // var btns = '<button type="button" class="btn btn-primary" salvar-agora>Salvar agora</button>';
+        // alerta2(msg,'modal-lance','Atenção','',true,9000,true);
+        $('#modal-dar-lance .modal-body').html(msg);
+        $('[suguir-lance]').on('click',function(){
+            seguirLance();
+            document.querySelector('[data-bs-dismiss="modal"]').click();
         });
+        return;
+
+    });
+}
+function seguirLance(){
+    var idForm = '#frm-lance';
+    submitFormulario($(idForm),function(res){
+        try {
+            if(res.mens){
+                $('.mens').html(res.mens);
+            }
+            if(res.exec){
+                window.location=redirect;
+            }
+            if(res.code_mens=='enc'){
+                window.location=redirect;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },function(error){
+        log(error);
     });
 }
 function excluirReserva(token){

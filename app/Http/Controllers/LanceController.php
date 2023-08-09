@@ -279,7 +279,6 @@ class LanceController extends Controller
         $ret['exec'] = false;
         if($d){
             $d['token'] = isset($d['token']) ? $d['token'] :uniqid();
-            // Qlib::lib_print($d);
             $s = lance::create($d);
             if($s->id && isset($d['leilao_id']) && ($leilao_id = $d['leilao_id'])){
                 $ret['exec'] = true;
@@ -555,7 +554,8 @@ class LanceController extends Controller
                         if((double)$proximo_lance1 <= (double)$r){
                             // $v['valor_lance'] = $this->proximo_lance($leilao_id);
                             $v['valor_lance'] = $proximo_lance1;
-                            $v['config'] = Qlib::lib_array_json(['type' => 'auto','token_reserve'=>$v['token']]); //Marca que é um lance automatico
+                            $v['config'] = Qlib::lib_array_json(['type' => 'auto','token_reserva'=>@$reservas[$k]['token']]); //Marca que é um lance automatico
+                            // Qlib::lib_print($reservas);
                             $salv[$k] = $this->gravar_lance($v,$autolance=false);
                             $v['count'] = count($reservas);
                             $v['reserva'] = $r;
