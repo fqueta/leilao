@@ -7,7 +7,7 @@
             <b>{{__('Termina em')}}</b>
         </p>
         <p>
-            {{App\Qlib\Qlib::dataExibe(@$v['config']['termino'])}} {{@$v['config']['hora_termino']}}
+            {{$info_termino}}
         </p>
       </div>
       <div class="card-footer">

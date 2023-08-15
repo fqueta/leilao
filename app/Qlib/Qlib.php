@@ -377,9 +377,15 @@ class Qlib
 	}
     static function formatMensagemInfo($mess='',$cssMes='',$event=false){
 		if(self::is_frontend()){
-            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable fade show\" style=\"float:right\" role=\"alert\"><i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)." <button class=\"btn-close\" type=\"button\" data-bs-dismiss=\"alert\" $event aria-hidden=\"true\"></button></div>";
+            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable fade show\" role=\"alert\">
+                <button class=\"btn-close\" style=\"float:right\" type=\"button\" data-bs-dismiss=\"alert\" $event aria-hidden=\"true\"></button>
+                <i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)."
+            </div>";
 		}else{
-            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable\" role=\"alert\"><i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)." <button class=\"close\" type=\"button\" data-dismiss=\"alert\" $event aria-hidden=\"true\">×</button></div>";
+            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable\" role=\"alert\">
+            <button style=\"float:right\" class=\"close\" type=\"button\" data-dismiss=\"alert\" $event aria-hidden=\"true\">×</button>
+            <i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)."
+            </div>";
         }
         return $mensagem;
 	}
@@ -1017,12 +1023,12 @@ class Qlib
      * @return string
      */
     static function diffDate2($d1, $d2,$label=false,$ab=false) {
+        $ret = false;
         $d1 = new DateTime($d1);
         $d2 = new DateTime($d2);
         $data1  = $d1->format('Y-m-d H:i:s');
         $data2  = $d2->format('Y-m-d H:i:s');
         $intervalo = $d1->diff( $d2 );
-        $ret = false;
         if($ab){
             $ret .= "$label" . $intervalo->d . " d";
             if($intervalo->m){
@@ -1078,11 +1084,26 @@ class Qlib
     static function criptString($token){
         $ret = false;
         if($token){
-            $pri = substr($token,0,2);
-            $seg = substr($token,-2);
+            $pri = mb_substr($token,0,2);
+            $seg = mb_substr($token,-2);
             $ret = $pri.'*****'.$seg;
         }
         return $ret;
     }
-
+    /**
+     * Metodo para publicar de forma rápida o Nick name do usuario.
+     * @param int $user_id
+     * @return string $ret,
+     */
+    static function getNickName($user_id){
+        $d = (new UserController)->get_user_data($user_id);
+        $ret = false;
+        if(isset($d['name'])){
+            $n = explode(' ', $d['name']);
+            if(isset($n[0])){
+                $ret = $n[0];
+            }
+        }
+        return $ret;
+    }
 }

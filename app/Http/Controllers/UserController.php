@@ -688,4 +688,20 @@ class UserController extends Controller
         ];
         return view('site.user.edit',$ret);
     }
+    /**
+     * Metodo para checar se o usuario verificou seu email
+     */
+    public function is_verified(){
+        //uso (new UserController)->is_verified();
+        $user = Auth::user();
+        return $user->email_verified_at;
+    }
+    /**
+     * Metodo para plubicar dados dos usuario
+     * @param int $user_id
+     * @return array $ret
+     */
+    public function get_user_data($user_id){
+        return User::Find($user_id);
+    }
 }

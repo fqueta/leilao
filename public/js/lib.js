@@ -2324,7 +2324,8 @@ function dataContratos(obj) {
 }
 function lib_gerLances(redirect){
     var idForm = '#frm-lance';
-    $(idForm).submit(function(e){
+    var btn_sub = '#frm-lance';
+    $(btn_sub).on('click',function(e){
         e.preventDefault();
         var valor_l = $('#frm-lance [name="valor_lance"]').val();
         valor_l = number_format(valor_l,2,',','.');

@@ -336,10 +336,68 @@ class LeilaoController extends Controller
         }
         return $ret;
     }
+    /**
+     * Metodo de display de terminio de lelao
+     */
+    public function info_termino($leilao_id=false,$dl=false){
+        $ret['exec'] = false;
+        $ret['termino'] = false;
+        $ret['html'] = false;
+        if(!$dl && $leilao_id){
+            $dl = Post::Find($leilao_id);
+        }
+        if($dl){
+            $d1 = @$dl['config']['termino'].' '.@$dl['config']['hora_termino'];
+            $d2 = Qlib::dataLocalDb();
+            $sd1 = strtotime($d1);
+            $sd2 = strtotime($d2);
+            if($sd1<$sd2){
+                $ret['exec'] = true;
+                $ret['termino'] = true;
+                $ret['html'] = 'Finalizado ('.Qlib::dataExibe(@$dl['config']['termino']).' '.@$dl['config']['hora_termino'].')';
+            }else{
+                $termino = Qlib::diffDate2($d1,$d2,false,true);
+                $ret['html'] = $termino;
+                $ret['exec'] = true;
+            }
+
+        }
+        return $ret;
+    }
+    /**
+     * Metodo Mostrar o lance vencedor
+     */
+    public function get_lance_vencedor($leilao_id=false,$dl=false){
+        $ret=false;
+        if(!$dl && $leilao_id){
+            $dl = Post::Find($leilao_id);
+        }
+        if($dl){
+            $termino = $this->info_termino($leilao_id,$dl);
+            if(isset($termino['termino']) && $termino['termino']){
+                $lv = (new LanceController)->ultimo_lance($leilao_id,true);
+                if(isset($lv['valor_lance']) && ($vl=$lv['valor_lance'])){
+                    $ret = Qlib::valor_moeda($vl,'R$ ').' ('.Qlib::getNickName(@$lv['author']).') ';
+                }
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para listar leiloes publicos
+     */
     public function leiloes_publicos($dados=false){
         $pst = new PostController;
         $seg1 = request()->segment(1); //link da página em questão
         $seg2 = request()->segment(2); //link da página em questão
+        $logado = Auth::check();
+        if($logado){
+            //checar se a conta destá verifcadada
+            $iv=(new UserController)->is_verified();
+            if(!$iv){
+                return redirect(route('verification.notice'));
+            }
+        }
         if($seg2){
             $_GET['filter']['ID'] = $seg2;
             $_GET['filter']['post_status'] = 'publish';
@@ -347,8 +405,9 @@ class LeilaoController extends Controller
             if($dl->count() > 0){
                 $title = $dl[0]['post_title'];
                 $titulo = $title;
-                $d1 = @$dl[0]['config']['termino'].' '.@$dl[0]['config']['hora_termino'];
-                $termino = Qlib::diffDate2($d1,Qlib::dataLocalDb(),false,true);
+                // $d1 = @$dl[0]['config']['termino'].' '.@$dl[0]['config']['hora_termino'];
+                $it = $this->info_termino($dl[0]['ID']);
+                $termino = $it['html'];
                 $lc = new LanceController;
                 $ultimoLance = $lc->ultimo_lance($seg2);
                 $arr_lances = self::arr_lances($seg2,$dl[0],20);
@@ -364,7 +423,9 @@ class LeilaoController extends Controller
                 $dl[0]['the_permalink'] = Qlib::get_the_permalink($dl[0]['ID']);
                 $dl[0]['termino'] = $termino;
                 $dl[0]['lance_atual'] = $lance_atual;
+                $dl[0]['info_termino'] = $it;
                 $dl[0]['list_lances'] = $ll;
+                $dl[0]['lance_vencedor'] = $this->get_lance_vencedor($dl[0]['ID'],$dl[0]);
                 $dl[0]['arr_lances'] = $this->arr_lances($dl[0]['ID'],$dl[0]);
                 $ret = [
                     'dados'=>$dl[0],
@@ -382,8 +443,6 @@ class LeilaoController extends Controller
                         'title'=>$title,
                         'titulo'=>$titulo,
                     ],
-
-
                 ];
             }
             return view('site.leiloes.list',$ret);
@@ -460,6 +519,10 @@ class LeilaoController extends Controller
             $post = post::Find($post_id);
         }
         $ret = url('/').'/admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
+        return $ret;
+    }
+    public function get_link($post_id){
+        $ret = asset('/').'leiloes-publicos/'.$post_id;
         return $ret;
     }
 

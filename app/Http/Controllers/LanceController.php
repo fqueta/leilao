@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\admin\PostController;
 use App\Models\lance;
 use App\Models\Post;
+use App\Models\User;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use stdClass;
 
 class LanceController extends Controller
@@ -321,6 +323,7 @@ class LanceController extends Controller
         //verificar se o lance é igual a algum lance ja dado
         $verifica = Lance::where('valor_lance','=',$d['valor_lance'])
                     ->where('leilao_id','=',$d['leilao_id'])
+                    ->where('excluido','=','n')
                     ->where('type','=',$d['type'])
                     ->count();
         if($verifica>0){
@@ -400,7 +403,7 @@ class LanceController extends Controller
         //
     }
     /**
-     * Metodo para marcar uma reseva como superada
+     * Metodo para pegar o penultimo lance
      * @param integer $leilao_id,integer $id_ultimo_lance
      * @return integer $ret
      */
@@ -436,7 +439,52 @@ class LanceController extends Controller
                 $ret['exec'] = true;
                 $ret['dados'] = $this->penultimo_lance($leilao_id);
                 //Enviar notificação
-                //$this->notifica_superado
+                $id_a = Qlib::buscaValorDb0('lances','id',$d['id'],'author');
+                $notific = $this->notifica_superado($leilao_id,$id_a);
+                $ret['notific'] = $notific;
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para avisar um usuario que o lance dele foi superado
+     */
+    public function notifica_superado($leilao_id,$id_user_notific){
+        $ret['exec'] = false;
+        $ret['mens'] = false;
+        if($leilao_id && $id_user_notific){
+            $d_user = User::Find($id_user_notific);
+            // dd($d_user['email']);
+            if(isset($d_user['email']) && !empty($d_user['email'])){
+                $user = new stdClass();
+                $n = explode(' ',$d_user['name']);
+                if(!isset($n[0])){
+                    return $ret;
+                }
+                $title_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+                $user->name = ucwords($n[0]);
+                $user->email = $d_user['email'];
+                $user->subject = 'Lance superado';
+                $user->leilao_id = $leilao_id;
+                $user->nome_leilao = $title_leilao;
+                $user->link_leilao = (new LeilaoController)->get_link($user->leilao_id);
+                // return new \App\Mail\leilao\lancesNotific($user);
+                $enviar = Mail::send(new \App\Mail\leilao\lancesNotific($user));
+                if( count(Mail::failures()) > 0 ) {
+
+                    $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";
+
+                    foreach(Mail::failures() as $email_address) {
+                        $ret['mens'] .= " - $email_address <br />";
+                    }
+
+                } else {
+                    $ret['exec'] = true;
+                    $ret['mens'] = "Sem erros, enviado com sucesso!";
+                }
+            }else{
+                $ret['mens'] = __('Usuário não encontrado');
+                return $ret;
             }
         }
         return $ret;
@@ -710,4 +758,5 @@ class LanceController extends Controller
 
         return $ret;
     }
+
 }

@@ -205,12 +205,12 @@ Route::prefix('cobranca')->group(function(){
 //     );
 // });
 Route::get('envio-mails',function(){
-    $user = new stdClass();
-    $user->name = 'Fernando Queta';
-    $user->email = 'ferqueta@yahoo.com.br';
-    //return new \App\Mail\dataBrasil($user);
-    $enviar = Mail::send(new \App\Mail\dataBrasil($user));
-    return $enviar;
+    // $user = new stdClass();
+    // $user->name = 'Fernando Queta';
+    // $user->email = 'ger.maisaqui3@gmail.com';
+    // //return new \App\Mail\dataBrasil($user);
+    // $enviar = Mail::send(new \App\Mail\dataBrasil($user));
+    // return $enviar;
 });
 Route::resource('lances','\App\Http\Controllers\lanceController',['parameters' => [
     'lances' => 'id'
@@ -218,5 +218,26 @@ Route::resource('lances','\App\Http\Controllers\lanceController',['parameters' =
 Route::prefix('ajax')->group(function(){
     Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
 });
+//Rotas de verificação
+Route::get('/email/verify', function () {
+    // return view('auth.verify');
+    return view('site.index');
+})->middleware('auth')->name('verification.notice');
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect('/');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+use Illuminate\Http\Request;
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
+
+
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');

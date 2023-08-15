@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Qlib\Qlib;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use stdClass;
 
 class TesteController extends Controller
 {
@@ -28,8 +30,13 @@ class TesteController extends Controller
         // $slug = Qlib::createSlug('leilão 12');
         // $p = (new LeilaoController)->get_data_contrato([24,4],true);
         // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
-        $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
-        dd($tempo);
+        // $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
+        // dd($tempo);
+
+        // $ret = (new LanceController)->notifica_superado($leilao_id=45,$id_user_notific=4);
+        // $ret = env('APP_NAME');
+        // return $ret;
+        dd(config('app.debug'));
         // $p = (new LanceController)->marca_lance_superado(36);
         // dd($p);
         // // dd($ret);

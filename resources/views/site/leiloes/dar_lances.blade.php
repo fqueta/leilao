@@ -11,6 +11,7 @@
     @csrf
     <input type="hidden" name="leilao_id" value="{{$dados['ID']}}" />
     <input type="hidden" name="origem" value="front" />
+
     <div class="row mb-3">
         <div class="col-12 mens mb-3"></div>
         <div class="col-6">
@@ -21,7 +22,7 @@
             </select>
         </div>
         <div class="col-6">
-            <button class="btn btn-primary btn-block" data-bs-toggle="modal" data-bs-target="#modal-dar-lance" {{$disbledL}} type="submit"><i class="fas fa-gavel    "></i> {{__('Dar Lance')}}</button>
+            <button id="btn-frm-lance" class="btn btn-primary btn-block" data-bs-toggle="modal" data-bs-target="#modal-dar-lance" {{$disbledL}} type="button"><i class="fas fa-gavel"></i> {{__('Dar Lance')}}</button>
         </div>
     </div>
     <div class="row mb-3">

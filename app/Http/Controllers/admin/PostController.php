@@ -283,21 +283,21 @@ class PostController extends Controller
             ],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             // 'config[itens][]'=>[
-            //     'label'=>'Contratos*',
-            //     'active'=>true,
-            //     'type'=>'select_multiple',
-            //     'arr_opc'=>$arr_itens,'exibe_busca'=>'d-block',
-            //     'event'=>'required onchange=dataContratos(this)',
-            //     'tam'=>'12',
-            //     'class'=>'',
-            //     'exibe_busca'=>true,
-            //     'option_select'=>true,
-            //     'cp_busca'=>'config][itens',
-            //     'class'=>'select2',
-            // ],
-            'callback_contrato'=>[],
-            'config[contrato]'=>[
-                'label'=>'Contratos*',
+                //     'label'=>'Contratos*',
+                //     'active'=>true,
+                //     'type'=>'select_multiple',
+                //     'arr_opc'=>$arr_itens,'exibe_busca'=>'d-block',
+                //     'event'=>'required onchange=dataContratos(this)',
+                //     'tam'=>'12',
+                //     'class'=>'',
+                //     'exibe_busca'=>true,
+                //     'option_select'=>true,
+                //     'cp_busca'=>'config][itens',
+                //     'class'=>'select2',
+                // ],
+                'callback_contrato'=>[],
+                'config[contrato]'=>[
+                    'label'=>'Contratos*',
                 'active'=>true,
                 'type'=>'select',
                 'arr_opc'=>$arr_itens,'exibe_busca'=>'d-block',
@@ -317,9 +317,10 @@ class PostController extends Controller
             'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Boleto').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
             //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
             //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
-            'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
+            'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'required min='.date('Y-m-d').'','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
             'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
             'config[pode_lance]'=>[
                 'label'=>'Quem pode dar lances em seu leilão',
@@ -350,10 +351,12 @@ class PostController extends Controller
             $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','value'=>$value_author,'tam'=>'2'];
         }
         if($ac!='cad'){
-            // if(isset($data['config']['itens'][0]) && !empty($data['config']['itens'][0])){
-            //     $nome_contrato = Qlib::buscaValorDb0('posts','token',$data['config']['itens'][0],'post_title');
-            //     $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> '.$nome_contrato,'type'=>'html_script','class_div'=>'mt-2 mb-2'];
-            // }
+            if(isset($data['config']['itens'][0]) && !empty($data['config']['itens'][0])){
+                $ctt = false;
+                $nome_contrato = Qlib::buscaValorDb0('posts','token',$data['config']['itens'][0],'post_title');
+                $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span> <button type="button" id="btn-remove-contrato" class="btn btn-outline-secondary" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button>','type'=>'html_script','class_div'=>'mt-2 mb-2'];
+                $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
+            }
             if(isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
                 $ctt = $data['config']['contrato'];
                 $nome_contrato = Qlib::buscaValorDb0('posts','token',$ctt,'post_title');
@@ -361,6 +364,13 @@ class PostController extends Controller
                 $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
 
             }
+            // if(isset($data['config']['itens']) && !empty($data['config']['itens'])){
+            //     $ctt = $data['config']['contrato'];
+            //     $nome_contrato = Qlib::buscaValorDb0('posts','token',$ctt,'post_title');
+            //     $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span> <button type="button" id="btn-remove-contrato" class="btn btn-outline-secondary" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button>','type'=>'html_script','class_div'=>'mt-2 mb-2'];
+            //     $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
+
+            // }
 
         }
 

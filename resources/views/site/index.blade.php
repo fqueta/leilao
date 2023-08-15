@@ -1,8 +1,11 @@
 @php
     $_REQUEST['post'] = isset($dados) ? $dados : false;
     $post_id = isset($dados['ID']) ? $dados['ID'] : false;
-    $slug = isset($dados['post_name']) ? $dados['post_name'] : false;
-    $slug2 = isset($dados['slug2']) ? $dados['slug2'] : false;
+    $seg1 = request()->segment(1); //link da página em questão
+    $seg2 = request()->segment(2); //link da página em questão
+
+    $slug = isset($dados['post_name']) ? $dados['post_name'] : $seg1;
+    $slug2 = isset($dados['slug2']) ? $dados['slug2'] : $seg2;
     $title = isset($dados['post_title']) ? $dados['post_namtitle'] : false;
     $main = (new App\Http\Controllers\siteController)->get_main_post($post_id);
 @endphp
@@ -19,8 +22,11 @@
 @stop
 @section('main')
     @if ($slug=='home')
+    @elseif ($slug=='email')
+        @include('site.layout.email')
+    @else
+        @include('site.layout.main')
     @endif
-    @include('site.layout.main')
 @stop
 @section('css')
     <link rel="stylesheet" href="{{url('/')}}/css/select2.css">

@@ -81,6 +81,38 @@ class tagSeeder extends Seeder
                 'obs'=>'',
                 'config'=>['color'=>'warning','icon'=>'fa fa-times']
             ],
+            [
+                'nome'=>'FORMAS DE PAGAMENTO',
+                'pai'=>0,
+                'ordem'=>5,
+                'value'=>'formas_pagamento',
+                'obs'=>'',
+                'config'=>[]
+            ],
+            [
+                'nome'=>'Catão de Crédito',
+                'pai'=>11,
+                'ordem'=>1,
+                'value'=>'credit_card',
+                'obs'=>'',
+                'config'=>[]
+            ],
+            [
+                'nome'=>'PIX',
+                'pai'=>11,
+                'ordem'=>2,
+                'value'=>'PIX',
+                'obs'=>'',
+                'config'=>[]
+            ],
+            [
+                'nome'=>'Boleto',
+                'pai'=>11,
+                'ordem'=>3,
+                'value'=>'BOLETO',
+                'obs'=>'',
+                'config'=>[]
+            ],
 
         ];
 

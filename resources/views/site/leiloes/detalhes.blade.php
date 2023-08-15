@@ -25,12 +25,20 @@
             <div class="col-12 mb-3">
                 <a href="javascript:void(0);" id="btn-ver_lances">{{__('Ver Lances')}} </a>
             </div>
-            <div class="col-12 mb-3">
-                {!!App\Http\Controllers\LanceController::info_reserva($dados['ID'])!!}
-            </div>
-            <div class="col-12">
-                @include('site.leiloes.dar_lances')
-            </div>
+            @if (isset($dados['info_termino']['exec']) && isset($dados['info_termino']['termino']))
+                @if ($dados['info_termino']['termino'])
+                    <div class="col-12">
+                        <label for="termino">{{__('Lance Vencedor')}}: </label><b> {!!@$dados['lance_vencedor']!!} </b>
+                    </div>
+                @else
+                    <div class="col-12 mb-3">
+                        {!!App\Http\Controllers\LanceController::info_reserva($dados['ID'])!!}
+                    </div>
+                    <div class="col-12">
+                        @include('site.leiloes.dar_lances')
+                    </div>
+                @endif
+            @endif
 
             <div class="col-12">
                 <small>* Valores acima do valor mínimo de lance entrarão como valor de reserva para lances automáticos.</small>
