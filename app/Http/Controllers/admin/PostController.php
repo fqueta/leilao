@@ -320,6 +320,18 @@ class PostController extends Controller
             'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Boleto').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
             //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
             //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
+            // 'config[parcelamento]'=>[
+            //     'label'=>'Parcelamento cartão',
+            //     'active'=>true,
+            //     'type'=>'select',
+            //     'arr_opc'=>$arr_status,'exibe_busca'=>'d-block',
+            //     'event'=>'',
+            //     'tam'=>'12',
+            //     'class'=>'',
+            //     'exibe_busca'=>false,
+            //     'option_select'=>false,
+            //     'cp_busca'=>'config][parcelamento',
+            // ],
             'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'required min='.date('Y-m-d').'','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
             'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
             'config[pode_lance]'=>[

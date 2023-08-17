@@ -5,6 +5,7 @@ namespace App\Mail\leilao;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Queue\SerializesModels;
 use stdClass;
 
@@ -33,8 +34,12 @@ class lancesNotific extends Mailable
     {
         $this->subject($this->user->subject);
         $this->to($this->user->email,$this->user->name);
+        $mensagem = isset($this->user->mensagem)?$this->user->mensagem:false;
+        $type = isset($this->user->type)?$this->user->type:false;
         return $this->markdown('mail.leilao.notification',[
             'user'=>$this->user,
+            'mensagem'=>$mensagem,
+            'type'=>$type,
         ]);
     }
 }

@@ -439,8 +439,14 @@ class LanceController extends Controller
                 $ret['exec'] = true;
                 $ret['dados'] = $this->penultimo_lance($leilao_id);
                 //Enviar notificação
-                $id_a = Qlib::buscaValorDb0('lances','id',$d['id'],'author');
-                $notific = $this->notifica_superado($leilao_id,$id_a);
+                // $id_a = Qlib::buscaValorDb0('lances','id',$d['id'],'author');
+                // $notific = $this->notifica_superado($leilao_id,$id_a);
+                $notific = (new LeilaoController)->enviar_email([
+                    'type' => 'notifica_superado',
+                    'lance_id' => $d['id'],
+                    'subject' => 'Seu lance foi superado',
+                    'mensagem' => '<p>Esta é a mesagem</p>',
+                ]);
                 $ret['notific'] = $notific;
             }
         }
@@ -453,8 +459,8 @@ class LanceController extends Controller
         $ret['exec'] = false;
         $ret['mens'] = false;
         if($leilao_id && $id_user_notific){
-            $d_user = User::Find($id_user_notific);
             // dd($d_user['email']);
+            $d_user = User::Find($id_user_notific);
             if(isset($d_user['email']) && !empty($d_user['email'])){
                 $user = new stdClass();
                 $n = explode(' ',$d_user['name']);
@@ -465,6 +471,7 @@ class LanceController extends Controller
                 $user->name = ucwords($n[0]);
                 $user->email = $d_user['email'];
                 $user->subject = 'Lance superado';
+                $user->type = 'notifica_superado';
                 $user->leilao_id = $leilao_id;
                 $user->nome_leilao = $title_leilao;
                 $user->link_leilao = (new LeilaoController)->get_link($user->leilao_id);

@@ -6,13 +6,14 @@ use App\Http\Controllers\admin\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Requests\StorePostRequest;
 use App\Models\lance;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use stdClass;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use App\Models\Permission;
+
 use App\Models\Post;
-use App\Models\Qoption;
+
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 
@@ -366,8 +367,9 @@ class LeilaoController extends Controller
     }
     /**
      * Metodo Mostrar o lance vencedor
+     * @param integer $leilao_id, array $dl=dados dos leilão, string $get_meta_tipo=tipo de dados para trazer junto
      */
-    public function get_lance_vencedor($leilao_id=false,$dl=false){
+    public function get_lance_vencedor($leilao_id=false,$dl=false,$get_meta_tipo=false){
         $ret=false;
         if(!$dl && $leilao_id){
             $dl = Post::Find($leilao_id);
@@ -377,7 +379,16 @@ class LeilaoController extends Controller
             if(isset($termino['termino']) && $termino['termino']){
                 $lv = (new LanceController)->ultimo_lance($leilao_id,true);
                 if(isset($lv['valor_lance']) && ($vl=$lv['valor_lance'])){
-                    $ret = Qlib::valor_moeda($vl,'R$ ').' ('.Qlib::getNickName(@$lv['author']).') ';
+                    if($get_meta_tipo){
+                        if($get_meta_tipo=='ultimo_lance'){
+                            $ret['valor'] = Qlib::valor_moeda($vl,'R$ ').' ('.Qlib::getNickName(@$lv['author']).') ';
+                            $ret[$get_meta_tipo] = $lv;
+                        }else{
+                            $ret = Qlib::valor_moeda($vl,'R$ ').' ('.Qlib::getNickName(@$lv['author']).') ';
+                        }
+                    }else{
+                        $ret = Qlib::valor_moeda($vl,'R$ ').' ('.Qlib::getNickName(@$lv['author']).') ';
+                    }
                 }
             }
         }
@@ -521,8 +532,129 @@ class LeilaoController extends Controller
         $ret = url('/').'/admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
         return $ret;
     }
+    /**
+     * Metodo para pegar o link publico do leilao
+     */
     public function get_link($post_id){
         $ret = asset('/').'leiloes-publicos/'.$post_id;
+        return $ret;
+    }
+    /**
+     * Metodo para pegar o link de pagamento do leilão
+     */
+    public function get_link_pagamento($post_id){
+        $token = Qlib::buscaValorDb0('posts','id',$post_id,'token');
+        $ret = asset('/').'checkout/'.$token;
+        return $ret;
+    }
+    /**
+     * Metodo Notificar o termino do leilao ao ganhador ou ao Dono doleilao
+     * @param int $post_id o id do leilão, string $tipo_responsavel pode ser ganhador ou autor para o dono do leilao
+     */
+    public function notifica_termino($post_id,$tipo_responsavel='ganhador'){
+        $ret['exec'] = false;
+        $dl = Post::Find($post_id) ; //dados do leilao
+        if($dl && $tipo_responsavel=='ganhador'){
+            $meta_notific = 'notifica_email_termino_leilao';
+            //Verifica quem é o ganhador
+            $dg = $this->get_lance_vencedor($post_id,$dl,'ultimo_lance');//dados do ganhador
+            //Verifica se ja foi enviado a notificação antes
+            $verifica_notific = Qlib::get_postmeta($post_id,$meta_notific,true);
+            if($verifica_notific=='s'){
+                $ret['mens'] = 'E-mail ja foi enviado';
+                return $ret;
+            }
+            if(isset($dg['ultimo_lance']['id']) && ($id_lance=$dg['ultimo_lance']['id']) && $verifica_notific!='s'){
+                $ul = $dg['ultimo_lance'];
+                $mensagem = '
+                <h1>Parabéns {nome} </h1>
+                <p>Seu lance de <b>{valor_lance}</b> para o <b>{nome_leilao}</b> foi vencedor</p>
+                <p>para efetuar o pagamento use o botão abaixo!</p>
+                ';
+                $no = explode(' ',Qlib::buscaValorDb0('users','id',$ul['author'],'name'));
+                $nome = @$no[0];
+                $nome_leilao = Qlib::buscaValorDb0('posts','id',$ul['leilao_id'],'post_title');
+                $valor_lance = $ul['valor_lance'];
+                $mensagem = str_replace('{nome}',$nome,$mensagem);
+                $mensagem = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$mensagem);
+                $mensagem = str_replace('{nome_leilao}',$nome_leilao,$mensagem);
+                $link_pagamento = $this->get_link_pagamento($post_id);
+                $ret = (new LeilaoController)->enviar_email([
+                    'type' => 'notifica_finalizado',
+                    'lance_id' => $id_lance,
+                    'subject' => 'Leilão Finalizado',
+                    'mensagem' => $mensagem,
+                    'link_pagamento' => $link_pagamento,
+                ]);
+                if($ret['exec']){
+                    $ret['save'] = Qlib::update_postmeta($post_id,$meta_notific,'s');
+                }
+            }
+            // if(isset($dg['ultimo_lance']['valor_lance']) && isset($dg['ultimo_lance']['author'])){
+            //     $valor_lance = $dg['ultimo_lance']['valor_lance'];
+            //     $autor_lance = $dg['ultimo_lance']['author'];
+            //     $autor_leilao = $dl['post_author'];
+            //     $subject = 'Leilão Finalizado';
+            //     // $arr = implode($valor_lance, $autor_lance, $autor_leilao);
+            //     dd($valor_lance);
+            // }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para preparar o disparar o email
+     * @param array $config
+     * @return array $ret
+     */
+    public function enviar_email($config=[]){
+        $ret['exec'] = false;
+        if(is_array($config)){
+            $lance_id = isset($config['lance_id']) ? $config['lance_id'] : false;
+            if(!$lance_id){
+                return $ret;
+            }
+            $dl = lance::Find($lance_id); //dados do lance.
+            if($dl){
+                $id_user = isset($dl['author']) ? $dl['author'] : false;
+                $leilao_id = isset($dl['leilao_id']) ? $dl['leilao_id'] : false;
+                $subject = isset($config['subject']) ? $config['subject'] : false;
+                $type = isset($config['type']) ? $config['type'] : false;
+                $d_user = isset($config['d_user']) ? $config['d_user'] : User::Find($id_user);
+                $mensagem = isset($config['mensagem']) ? $config['mensagem'] : false;
+                if(isset($d_user['email']) && !empty($d_user['email'])){
+                    $user = new stdClass();
+                    $n = explode(' ',$d_user['name']);
+                    if(!isset($n[0])){
+                        return $ret;
+                    }
+                    $title_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+                    $user->name = ucwords($n[0]);
+                    $user->email = $d_user['email'];
+                    $user->subject = $subject;
+                    $user->type = $type;
+                    $user->leilao_id = $leilao_id;
+                    $user->nome_leilao = $title_leilao;
+                    $user->mensagem = $mensagem;
+                    $user->link_leilao = (new LeilaoController)->get_link($user->leilao_id);
+                    // return new \App\Mail\leilao\lancesNotific($user);
+                    $enviar = Mail::send(new \App\Mail\leilao\lancesNotific($user));
+                    if( count(Mail::failures()) > 0 ) {
+
+                        $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";
+
+                        foreach(Mail::failures() as $email_address) {
+                            $ret['mens'] .= " - $email_address <br />";
+                        }
+
+                    } else {
+                        $ret['exec'] = true;
+                        $ret['mens'] = "Sem erros, enviado com sucesso! ".$user->email;
+                    }
+                }else{
+                    $ret['mens'] = __('Usuário não encontrado');
+                }
+            }
+        }
         return $ret;
     }
 

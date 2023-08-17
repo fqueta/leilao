@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\CobrancaController;
 use App\Http\Controllers\admin\PostController;
+use App\Mail\leilao\lancesNotific;
 use App\Models\Familia;
 use App\Models\Post;
 use App\Models\User;
@@ -32,11 +33,13 @@ class TesteController extends Controller
         // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
         // $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
         // dd($tempo);
-
-        // $ret = (new LanceController)->notifica_superado($leilao_id=45,$id_user_notific=4);
+        $ret = (new LeilaoController)->notifica_termino(45);
         // $ret = env('APP_NAME');
-        // return $ret;
-        dd(config('app.debug'));
+        return $ret;
+        // $up = Qlib::update_postmeta(45,'notifica_termino_leilao','n');
+        // $me = Qlib::get_postmeta(36,'notifica_termino_leilao',true);
+        // dd($me);
+        // dd(config('app.debug'));
         // $p = (new LanceController)->marca_lance_superado(36);
         // dd($p);
         // // dd($ret);
