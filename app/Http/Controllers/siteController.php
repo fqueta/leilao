@@ -68,6 +68,7 @@ class siteController extends Controller
                     'form_leilao' => $lc->form_leilao($post_id,$dados),
                     'list_leilao' => $lc->list_leilao($post_id,$dados),
                     'list_lances' => $lac->list_lances($post_id,$dados),
+                    'list_lance_user' => $lac->list_lance_user(), //Lista os lances do usuario no frontend
                     'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
                     'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
                     'teste' => 'teste de conteudo do formulario para gadastr',

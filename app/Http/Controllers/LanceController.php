@@ -307,6 +307,12 @@ class LanceController extends Controller
         $ret['exec'] = false;
         $ret['code_mens'] = false;
         $ret['mens'] = Qlib::formatMensagemInfo('Erro ao gravar o lance, por favor entre em contato com o nosso suporte','danger');
+        //Verifica se o leilão ja terminou
+        $dg = (new LeilaoController)->get_lance_vencedor($leilao_id,false,'ultimo_lance');
+        if($dg){
+            $ret['mens'] = Qlib::formatMensagemInfo('Não é possível dar lances em leilão finalizado','danger');
+            return $ret;
+        }
         if(!isset($d['valor_lance']) || !isset($d['author']) || !isset($d['leilao_id'])){
             return $ret;
         }
@@ -353,6 +359,7 @@ class LanceController extends Controller
             if($ret['exec']){
                 $ret['idCad'] = @$ret['id'];
                 $ret['mens'] = Qlib::formatMensagemInfo('Lance cadastrado com sucesso','success',70000);
+                $ret['redirect'] = url('/').'/leiloes-publicos/'.$leilao_id;
             }
         }
         return $ret;
@@ -441,11 +448,13 @@ class LanceController extends Controller
                 //Enviar notificação
                 // $id_a = Qlib::buscaValorDb0('lances','id',$d['id'],'author');
                 // $notific = $this->notifica_superado($leilao_id,$id_a);
+                // $nome_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
                 $notific = (new LeilaoController)->enviar_email([
                     'type' => 'notifica_superado',
                     'lance_id' => $d['id'],
                     'subject' => 'Seu lance foi superado',
                     'mensagem' => '<p>Esta é a mesagem</p>',
+                    // 'nome_leilao' => $nome_leilao,
                 ]);
                 $ret['notific'] = $notific;
             }
@@ -649,8 +658,61 @@ class LanceController extends Controller
         return $ret;
     }
     /**
+     * Metodo para listar os lances dos usuarios no site, quando o paramentro $leilao_id for informado busca apenas do lances do usuario em um leilao expessifico
+     * @param integer $leilao_id = o do leilao, strig $type=superdos ou vencendo
+     * @return array $ret= conteudo da consulta
+     */
+    public function list_lance_user($leilao_id=false,$type='superados'){
+        $lances_superados = false;
+        $lances_vencendo = false;
+        //listar lances superados do cliente
+        $ret['exec'] = false;
+        $ret['lances_superados'] = false;
+        $data = Qlib::CalcularDiasAnteriores(date('d/m/Y'),7);
+        $dtBanco = Qlib::dtBanco($data);
+        $arr = array();
+        // dd($dtBanco);
+        //Listar lances distintos superados
+        // $ld_s = lance::select('leilao_id','id')->
+        //         distinct('leilao_id')->
+        //         // getcodes()->
+        //         // groupBy('leilao_id')->
+        //         where('superado','s')->
+        //         where('author',Auth::id())->
+        //         where('excluido','n')->
+        //         whereDate('created_at','>=',$dtBanco)->
+
+        //         orderBy('id','desc')->
+        //         get()->toArray();
+        // dd($ld_s);
+        // if($ld_s){
+            // foreach ($ld_s as $key => $value) {
+                $lances_superados = lance::select('lances.*','posts.*')->distinct('lances.leilao_id')->
+                                    join('posts','lances.leilao_id','=','posts.ID')->
+                                    where('lances.superado','s')->
+                                    where('lances.author',Auth::id())->
+                                    where('lances.excluido','n')->
+                                    orderBy('lances.id','asc')->
+                                    whereDate('lances.created_at','>=',$dtBanco)->
+                                    get()->toArray();
+                if($lances_superados){
+                    foreach ($lances_superados as $k => $v) {
+                    //    $arr[$v['leilao_id']] = $v;
+                       $arr[$k] = $v;
+                    }
+                }
+                // dd($arr);
+            // }
+        // }
+        if($lances_superados){
+            $ret['exec'] = true;
+            $ret['lances_superados'] = $lances_superados;
+        }
+
+    }
+    /**
      * Metodo para listar os lances dos usuarios no site o paramentro post_id se refere ai id da áginas e o paramentro dados os dados da página
-     * @param integer $post_id o
+     * @param integer $post_id = o do leilao, array $dados=dados de configuração da página
      */
     public function list_lances($post_id=false,$dados=false){
         if(Gate::allows('is_admin2')||Gate::allows('is_customer_logado')){
@@ -668,7 +730,7 @@ class LanceController extends Controller
         $view   = url('/').Qlib::get_slug_post_by_id(3);
         $route = $view;
         //if(isset($queryLances['post']));
-        $lancesSuperdos =
+
         $ret = [
             'dados'=>$queryLances['lance'],
             'title'=>$title,
@@ -682,7 +744,6 @@ class LanceController extends Controller
             'view'=>$view,
             'i'=>0,
         ];
-
         //REGISTRAR EVENTOS
         // (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
 

@@ -1,4 +1,4 @@
-<div class="col-md-4">
+<div class="col-md-4 mb-4">
     <div class="card">
       <img class="card-img-top" src="{{$v['src']}}" alt="{{$v['post_title']}}">
       <div class="card-body">

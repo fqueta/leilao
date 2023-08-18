@@ -2336,8 +2336,10 @@ function lib_gerLances(redirect){
         // var btns = '<button type="button" class="btn btn-primary" salvar-agora>Salvar agora</button>';
         // alerta2(msg,'modal-lance','Atenção','',true,9000,true);
         $('#modal-dar-lance .modal-body').html(msg);
-        $('[suguir-lance]').on('click',function(){
-            seguirLance();
+        var btnse = $('[seguir-lance]');
+        btnse.attr('onclick','seguirLance();');
+        btnse.on('click',function(){
+            // seguirLance();
             document.querySelector('[data-bs-dismiss="modal"]').click();
         });
         return;
@@ -2351,8 +2353,8 @@ function seguirLance(){
             if(res.mens){
                 $('.mens').html(res.mens);
             }
-            if(res.exec){
-                window.location=redirect;
+            if(res.exec && res.redirect){
+                window.location=res.redirect;
             }
             if(res.code_mens=='enc'){
                 window.location=redirect;

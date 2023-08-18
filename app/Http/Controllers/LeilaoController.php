@@ -566,6 +566,7 @@ class LeilaoController extends Controller
             }
             if(isset($dg['ultimo_lance']['id']) && ($id_lance=$dg['ultimo_lance']['id']) && $verifica_notific!='s'){
                 $ul = $dg['ultimo_lance'];
+                // dd($ul);
                 $mensagem = '
                 <h1>Parabéns {nome} </h1>
                 <p>Seu lance de <b>{valor_lance}</b> para o <b>{nome_leilao}</b> foi vencedor</p>
@@ -578,14 +579,14 @@ class LeilaoController extends Controller
                 $mensagem = str_replace('{nome}',$nome,$mensagem);
                 $mensagem = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$mensagem);
                 $mensagem = str_replace('{nome_leilao}',$nome_leilao,$mensagem);
-                $link_pagamento = $this->get_link_pagamento($post_id);
+                // dd($mensagem);
                 $ret = (new LeilaoController)->enviar_email([
                     'type' => 'notifica_finalizado',
                     'lance_id' => $id_lance,
                     'subject' => 'Leilão Finalizado',
                     'mensagem' => $mensagem,
-                    'link_pagamento' => $link_pagamento,
                 ]);
+                // return $ret;
                 if($ret['exec']){
                     $ret['save'] = Qlib::update_postmeta($post_id,$meta_notific,'s');
                 }
@@ -613,11 +614,13 @@ class LeilaoController extends Controller
             if(!$lance_id){
                 return $ret;
             }
+            $link_pagamento = isset($config['link_pagamento']) ? $config['link_pagamento'] : $this->get_link_pagamento($lance_id);
             $dl = lance::Find($lance_id); //dados do lance.
             if($dl){
                 $id_user = isset($dl['author']) ? $dl['author'] : false;
                 $leilao_id = isset($dl['leilao_id']) ? $dl['leilao_id'] : false;
                 $subject = isset($config['subject']) ? $config['subject'] : false;
+                $nome_leilao = isset($config['nome_lei$nome_leilao']) ? $config['nome_lei$nome_leilao'] : Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
                 $type = isset($config['type']) ? $config['type'] : false;
                 $d_user = isset($config['d_user']) ? $config['d_user'] : User::Find($id_user);
                 $mensagem = isset($config['mensagem']) ? $config['mensagem'] : false;
@@ -627,17 +630,20 @@ class LeilaoController extends Controller
                     if(!isset($n[0])){
                         return $ret;
                     }
-                    $title_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+                    // $title_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
                     $user->name = ucwords($n[0]);
                     $user->email = $d_user['email'];
                     $user->subject = $subject;
                     $user->type = $type;
                     $user->leilao_id = $leilao_id;
-                    $user->nome_leilao = $title_leilao;
+                    $user->link_pagamento = $link_pagamento;
                     $user->mensagem = $mensagem;
+                    $user->nome_leilao = $nome_leilao;
                     $user->link_leilao = (new LeilaoController)->get_link($user->leilao_id);
-                    // return new \App\Mail\leilao\lancesNotific($user);
-                    $enviar = Mail::send(new \App\Mail\leilao\lancesNotific($user));
+                    $reder_em = new \App\Mail\leilao\lancesNotific($user);
+                    // return $reder_em;
+
+                    $enviar = Mail::send($reder_em);
                     if( count(Mail::failures()) > 0 ) {
 
                         $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";

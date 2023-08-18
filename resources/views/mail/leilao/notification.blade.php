@@ -9,12 +9,12 @@
         @endcomponent
         <small>Lembrando que para dar um lance é necessário estar logado!</small>
     @elseif ($type=='notifica_finalizado')
-        {!!@$mensagem!!}
-        @if(isset($user->link_pagamento))
-            @component('mail::button',['url'=>$user->link_pagamento])
+        @php
+            echo $mensagem;
+        @endphp
+        @component('mail::button',['url'=>$user->link_leilao])
             {{__('Pagamento')}}
-            @endcomponent
-        @endif
+        @endcomponent
     @endif
 @endif
 

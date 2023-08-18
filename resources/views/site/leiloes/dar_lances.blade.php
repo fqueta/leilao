@@ -54,7 +54,7 @@
         'id'=>'modal-dar-lance',
         'title'=>'Atenção',
         'tam'=>'',
-        'bt_acao'=>'<button type="button" suguir-lance class="btn btn-primary">'.__('Prosseguir').'</button>',
+        'bt_acao'=>'<button type="button" seguir-lance class="btn btn-primary">'.__('Prosseguir').'</button>',
         'include'=>false,
     ]])
 @php

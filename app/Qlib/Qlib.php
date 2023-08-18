@@ -1185,4 +1185,112 @@ class Qlib
         }
         return $dados;
     }
+    /**
+     * Metodo para calcular data de vencimento contando x dias a frente sem levar em conta o próxima dia útil
+     * @param string $data=data no formato d/m/Y, integer $dias=numero de dias a frente
+     * @return string $data1
+     */
+    static function CalcularVencimento($data,$dias,$formato = 'd/m/Y')
+    {
+        $novadata = explode("/",$data);
+        $dia = $novadata[0];
+        $mes = $novadata[1];
+        $ano = $novadata[2];
+        if ($dias==0)
+        {
+            $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia,$ano));
+            return self::dtBanco($data1);
+        }
+        else
+        {
+            $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia+$dias,$ano));
+            return self::dtBanco($data1);
+        }
+    }
+    /**
+     * Metodo para calcular data de vencimento contando x dias a frente levando em conta o próxima dia útil
+     * @param string $data=data no formato d/m/Y, integer $dias=numero de dias a frente
+     * @return string $data1
+     */
+    static function CalcularVencimento2($data,$dias,$formato = 'd/m/Y')
+    {
+        $novadata = explode("/",$data);
+        $dia = $novadata[0];
+        $mes = $novadata[1];
+        $ano = $novadata[2];
+        if ($dias==0)
+        {
+            $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia,$ano));
+            return self::proximoDiaUtil(dtBanco($data1), $formato);
+        }
+        else
+        {
+            $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia+$dias,$ano));
+            return self::proximoDiaUtil(dtBanco($data1), $formato);
+        }
+    }
+    /**
+     * Metodo para calcular data de vencimento contando x $meses a frente quando $retDiaUtl=true leva em conta o próxima dia útil
+     * @param string $data=data no formato d/m/Y, integer $meses=numero de meses a frente,string $formato=formato, boolean $retDiaUtil=para levar em conta o próxima dia util ou não
+     * @return string $data1
+     */
+    static function CalcularVencimentoMes($data,$meses,$formato = 'd/m/Y',$retDiaUtl=true)
+        {
+            $novadata = explode("/",$data);
+            $dia = $novadata[0];
+            $mes = $novadata[1];
+            $ano = $novadata[2];
+            if ($meses==0)
+            {
+                $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia,$ano));
+                return self::proximoDiaUtil(dtBanco($data1), $formato);
+            }
+            else
+            {
+                $data1 = date('d/m/Y',mktime(0,0,0,$mes+$meses,$dia,$ano));
+                if($retDiaUtl)
+                    return self::proximoDiaUtil(dtBanco($data1), $formato);
+                else
+                    return $data1;
+            }
+    }
+    /**
+     * Metodo para calcular data anterior contando da $data x dias para trás sem levar em conta o próxima dia útil
+     * @param string $data=data no formato d/m/Y, integer $dias=numero de dias a frente
+     * @return string $data1
+     */
+
+    static function CalcularDiasAnteriores($data,$dias=0,$formato = 'd/m/Y')
+    {
+        $novadata = explode("/",$data);
+        $dia = $novadata[0];
+        $mes = $novadata[1];
+        $ano = $novadata[2];
+        if ($dias==0)
+        {
+            $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia,$ano));
+            return self::dtBanco($data1);
+        }
+        else
+        {
+            $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia-$dias,$ano));
+            return $data1;
+        }
+    }
+    static function proximoDiaUtil($data, $saida = 'd/m/Y') {
+        // Converte $data em um UNIX TIMESTAMP
+        $timestamp = strtotime($data);
+        // Calcula qual o dia da semana de $data
+        // O resultado será um valor numérico:
+        // 1 -> Segunda ... 7 -> Domingo
+        $dia = date('N', $timestamp);
+        // Se for sábado (6) ou domingo (7), calcula a próxima segunda-feira
+        if ($dia >= 6) {
+            $timestamp_final = $timestamp + ((8 - $dia) * 3600 * 24);
+        } else {
+        // Não é sábado nem domingo, mantém a data de entrada
+            $timestamp_final = $timestamp;
+        }
+        return date($saida, $timestamp_final);
+    }
 }

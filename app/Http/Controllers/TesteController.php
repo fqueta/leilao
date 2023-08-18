@@ -33,8 +33,15 @@ class TesteController extends Controller
         // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
         // $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
         // dd($tempo);
-        $ret = (new LeilaoController)->notifica_termino(45);
+        $ret = (new LeilaoController)->notifica_termino(41);
         // $ret = env('APP_NAME');
+        // $ret = (new LeilaoController)->enviar_email([
+        //     'type' => 'notifica_finalizado',
+        //     'lance_id' => 213,
+        //     'subject' => 'Leilão Finalizado',
+        //     'mensagem' => 'Ola mensagem',
+        //     // 'link_pagamento' => $link_pagamento,
+        // ]);
         return $ret;
         // $up = Qlib::update_postmeta(45,'notifica_termino_leilao','n');
         // $me = Qlib::get_postmeta(36,'notifica_termino_leilao',true);
