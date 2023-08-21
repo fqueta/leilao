@@ -22,7 +22,7 @@
             </select>
         </div>
         <div class="col-6">
-            <button id="btn-frm-lance" class="btn btn-primary btn-block" data-bs-toggle="modal" data-bs-target="#modal-dar-lance" {{$disbledL}} type="button"><i class="fas fa-gavel"></i> {{__('Dar Lance')}}</button>
+            <button id="btn-frm-lance" class="btn btn-primary btn-block float-end" data-bs-toggle="modal" data-bs-target="#modal-dar-lance" {{$disbledL}} type="button"><i class="fas fa-gavel"></i> {{__('Dar Lance')}}</button>
         </div>
     </div>
     <div class="row mb-3">
@@ -32,24 +32,6 @@
     </div>
     @endif
 </form>
-
-  {{-- <div class="modal fade" id="modalLance" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalLanceLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalLanceLabel">{{__('Atenção')}}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{__('Fechar')}}</button>
-          <button type="button" suguir-lance class="btn btn-primary">{{__('Prosseguir')}}</button>
-        </div>
-      </div>
-    </div>
-  </div> --}}
     @include('site.partes_bs.modal',['config'=>[
         'id'=>'modal-dar-lance',
         'title'=>'Atenção',
@@ -57,6 +39,7 @@
         'bt_acao'=>'<button type="button" seguir-lance class="btn btn-primary">'.__('Prosseguir').'</button>',
         'include'=>false,
     ]])
+
 @php
     $redirect = App\Qlib\Qlib::UrlAtual();
 @endphp

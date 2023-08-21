@@ -414,8 +414,27 @@ class LeilaoController extends Controller
             $_GET['filter']['post_status'] = 'publish';
             $dl = Post::where('ID','=',$seg2)->where('post_status', '=', 'publish')->get();
             if($dl->count() > 0){
+                //Verificar se estão devidamente publicados
+                if(!isset($dl[0]['config']['status'])){
+                    $title = __('Página não encontrada');
+                    $titulo = $title;
+                    $ret = [
+                        'dados'=>[],
+                        'config'=>[
+                            'title'=>$title,
+                            'titulo'=>$titulo,
+                            'exec'=>false,
+                            'mens'=>Qlib::formatMensagemInfo('Página não encontrada!','danger')
+                        ],
+                    ];
+                    return view('site.leiloes.list',$ret);
+                }
+                if((isset($dl[0]['config']['status']) && isset($dl[0]['post_status'])) && ($dl[0]['config']['status']!='publicado' || $dl[0]['post_status']!='publish')){
+
+                }
                 $title = $dl[0]['post_title'];
                 $titulo = $title;
+                $c_l = isset($dl[0]['config'])?$dl[0]['config']:[]; //config leilao
                 // $d1 = @$dl[0]['config']['termino'].' '.@$dl[0]['config']['hora_termino'];
                 $it = $this->info_termino($dl[0]['ID']);
                 $termino = $it['html'];
@@ -428,21 +447,26 @@ class LeilaoController extends Controller
                     $lance_atual = '<h6>SEM LANCES</h6>';
                 }
                 //list lances
-                $ll = $lc->get_lances($dl[0]['ID']);
+                $ll = $lc->get_lances($dl[0]['ID'],true);
 
                 $dl[0]['link_thumbnail'] = Qlib::get_thumbnail_link($dl[0]['ID']);
                 $dl[0]['the_permalink'] = Qlib::get_the_permalink($dl[0]['ID']);
                 $dl[0]['termino'] = $termino;
                 $dl[0]['lance_atual'] = $lance_atual;
                 $dl[0]['info_termino'] = $it;
-                $dl[0]['list_lances'] = $ll;
+                $dl[0]['list_lances'] = $ll['list'];
+                $dl[0]['total_lances'] = $ll['total'];
                 $dl[0]['lance_vencedor'] = $this->get_lance_vencedor($dl[0]['ID'],$dl[0]);
                 $dl[0]['arr_lances'] = $this->arr_lances($dl[0]['ID'],$dl[0]);
+                $dl[0]['nome_contrato'] = Qlib::buscaValorDb0('posts','token',@$c_l['contrato'],'post_title');
+                $dl[0]['nome_responsavel'] = Qlib::buscaValorDb0('users','id',$dl[0]['post_author'],'name');
                 $ret = [
                     'dados'=>$dl[0],
                     'config'=>[
                         'title'=>$title,
                         'titulo'=>$titulo,
+                        'exec'=>true,
+                        'mens'=>false,
                     ],
                 ];
             }else{
@@ -453,6 +477,8 @@ class LeilaoController extends Controller
                     'config'=>[
                         'title'=>$title,
                         'titulo'=>$titulo,
+                        'exec'=>false,
+                        'mens'=>Qlib::formatMensagemInfo('Página não encontrada!','danger'),
                     ],
                 ];
             }
@@ -574,7 +600,7 @@ class LeilaoController extends Controller
                 ';
                 $no = explode(' ',Qlib::buscaValorDb0('users','id',$ul['author'],'name'));
                 $nome = @$no[0];
-                $nome_leilao = Qlib::buscaValorDb0('posts','id',$ul['leilao_id'],'post_title');
+                $nome_leilao = $dl['post_title'];//Qlib::buscaValorDb0('posts','id',$ul['leilao_id'],'post_title');
                 $valor_lance = $ul['valor_lance'];
                 $mensagem = str_replace('{nome}',$nome,$mensagem);
                 $mensagem = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$mensagem);
@@ -599,6 +625,59 @@ class LeilaoController extends Controller
             //     // $arr = implode($valor_lance, $autor_lance, $autor_leilao);
             //     dd($valor_lance);
             // }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo Notificar o adminstrador moderador toda vez leilão precisar de publicação no site
+     * @param int $post_id o id do leilão, string $tipo_responsavel pode ser ganhador ou autor para o dono do leilao
+     */
+    public function notific_update_admin($post_id,$tipo_responsavel='admin'){
+        //Uso $ret = (new LeilaoController)->notific_update_admin($post_id,'admin');
+        $ret['exec'] = false;
+        $dl = Post::Find($post_id); //dados do leilao
+        if($dl && $tipo_responsavel=='admin'){
+            $meta_notific = 'notifica_email_moderador';
+            // //Verifica se ja foi enviado a notificação antes
+            $verifica_notific = Qlib::get_postmeta($post_id,$meta_notific,true);
+            if($verifica_notific=='s'){
+                $ret['mens'] = 'E-mail ja foi enviado';
+                return $ret;
+            }
+            //Verifica se qual o status
+            $dl = $dl->toArray();
+            if(isset($dl['config']['status']) && $dl['config']['status']=='publicado' && isset($dl['post_status']) && $dl['post_status']!='publish' ){
+                //Enviar notificação
+
+                // $ul = $dg['ultimo_lance'];
+                // dd($ul);
+                $mensagem = '
+                <h1>Atenção Sr. Moderador</h1>
+                <p>O <b>{nome_leilao}</b> foi publicado pelo responsável {nome} dele no site e está aguardando sua conferência e liberação.</p>
+                <p>Use o botão abaixo para acessar o acessar o painel de administração dele!</p>
+                ';
+                $no = explode(' ',Qlib::buscaValorDb0('users','id',$dl['post_author'],'name'));
+                $nome = @$no[0];
+                $nome_leilao = $dl['post_title'];
+                // $valor_lance = $ul['valor_lance'];
+                $mensagem = str_replace('{nome}',$nome,$mensagem);
+                // $mensagem = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$mensagem);
+                $mensagem = str_replace('{nome_leilao}',$nome_leilao,$mensagem);
+                dd($mensagem);
+                $ret = (new LeilaoController)->enviar_email([
+                    'type' => 'notifica_finalizado',
+                    'lance_id' => $id_lance,
+                    'subject' => 'Leilão Finalizado',
+                    'mensagem' => $mensagem,
+                ]);
+                //Salvar meta trava de notificaçao
+
+                // return $ret;
+                if($ret['exec']){
+                    $ret['save'] = Qlib::update_postmeta($post_id,$meta_notific,'s');
+                }
+
+            }
         }
         return $ret;
     }

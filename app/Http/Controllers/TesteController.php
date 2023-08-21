@@ -33,7 +33,8 @@ class TesteController extends Controller
         // $p = (new LeilaoController)->is_linked_leilao('64a5a2b17a602');
         // $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
         // dd($tempo);
-        $ret = (new LeilaoController)->notifica_termino(41);
+        $ret = (new LeilaoController)->notific_update_admin(45,'admin');
+        dd($ret);
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([
         //     'type' => 'notifica_finalizado',

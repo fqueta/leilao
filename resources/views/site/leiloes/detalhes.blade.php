@@ -2,7 +2,8 @@
 {{$config['title']}}
 @endsection
 <div class="row">
-    <div class="col-md-6">
+    @if(isset($config['exec']) && $config['exec'])
+    <div class="col-md-6 mb-3">
         <div class="card">
             <div class="card-body">
                 <img src="{{$dados['link_thumbnail']}}" alt="{{$dados['post_title']}}" class="w-100"/>
@@ -16,19 +17,31 @@
                     {{$config['titulo']}}
                 </h2>
             </div>
+            @php
+                $contrato = isset($dados['nome_contrato']) ? $dados['nome_contrato'] : '';
+            @endphp
+            @if ($contrato)
             <div class="col-12">
-                <label for="termino">{{__('Término')}}: </label><b> {{$dados['termino']}} </b>
+                <label class="fw-bold" for="contrato">{{__('Contrato')}}: </label> {{$contrato}}
+            </div>
+            @endif
+            <div class="col-12">
+                <label class="fw-bold" for="responsavel">{{__('Responsável')}}: </label> {{$dados['nome_responsavel']}}
             </div>
             <div class="col-12">
-                <label for="termino">{{__('Lance Atual')}}: </label><b> {!!$dados['lance_atual']!!} </b>
+                <label class="fw-bold" for="termino">{{__('Término')}}: </label> {{$dados['termino']}}
             </div>
-            <div class="col-12 mb-3">
-                <a href="javascript:void(0);" id="btn-ver_lances">{{__('Ver Lances')}} </a>
+            <div class="col-12">
+                <label class="fw-bold" for="termino">{{__('Lance Atual')}}: </label> {!!$dados['lance_atual']!!}
             </div>
+            <div class="col-12">
+                <a href="javascript:void(0);" id="btn-ver_lances">{{__('Ver Lances')}} ({{$dados['total_lances']}}) </a>
+            </div>
+
             @if (isset($dados['info_termino']['exec']) && isset($dados['info_termino']['termino']))
                 @if ($dados['info_termino']['termino'])
                     <div class="col-12">
-                        <label for="termino">{{__('Lance Vencedor')}}: </label><b> {!!@$dados['lance_vencedor']!!} </b>
+                        <label class="fw-bold" for="termino">{{__('Lance Vencedor')}}: </label><b> {!!@$dados['lance_vencedor']!!} </b>
                     </div>
                 @else
                     <div class="col-12 mb-3">
@@ -40,33 +53,10 @@
                 @endif
             @endif
 
-            <div class="col-12">
+            <div class="col-12 mb-3">
                 <small>* Valores acima do valor mínimo de lance entrarão como valor de reserva para lances automáticos.</small>
             </div>
 
-            <!-- Modal -->
-            {{-- <div class="modal fade" id="modalLances" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                                <h5 class="modal-title">{{__('Lances')}}</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="container-fluid">
-                                <div style="max-height:600px; overflow: auto;">
-                                    @include('site.leiloes.lances.list_lances')
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{__('Fechar')}}</button>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
             @include('site.partes_bs.modal',['config'=>[
                 'id'=>'modalLances',
                 'title'=>'Lances',
@@ -82,6 +72,79 @@
 
                 });
             </script>
+            <!-- Foramas de pagamento -->
+            <div class="col-12 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title">
+                            {{__('Formas de Pagamento')}}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Boleto <i class="fas fa-barcode"></i>
+                            Cartão <i class="fas fa-credit-card"></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @if(isset($dados['config']['valor_venda']))
+            <!-- Comprar agora -->
+            <div class="col-12 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title">
+                            {{config('app.name')}} STORE
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <p class="card-text">
+                                    {{$dados['config']['valor_venda']}}
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <form action="" method="post">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <input type="hidden" name="leilao_id" value="{{$dados['ID']}}">
+                                            <button type="submit" class="card-text btn btn-success float-end">
+                                               <i class="fas fa-cart-plus"></i>  {{__('Comprar')}}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
+    <div class="col-md-12 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    {{__('Descrição do Leilão')}}
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (isset($dados['post_content']))
+
+                {!!$dados['post_content']!!}
+                @endif
+            </div>
+        </div>
+    </div>
+    @else
+    <div class="col-md-12 mb-3">
+        @if(isset($config['mens']))
+        {!!$config['mens']!!}
+        @endif
+    </div>
+
+    @endif
+
 </div>

@@ -176,10 +176,10 @@ class LanceController extends Controller
     }
     /**
      * Metodo para listar lances
-     * @param integer || array $param
+     * @param integer || array $param,boolean $total para retoranr um array contendo o total
      * @return array $ret
      */
-    public function get_lances($param=false){
+    public function get_lances($param=false,$total=false){
         $ret = false;
         if(is_array($param)){
             $author = Auth::id();
@@ -210,6 +210,11 @@ class LanceController extends Controller
                     if(isset($dt[1])){
                         $ret[$kl]->data .= ' às '.$dt[1];
                     }
+                }
+                if($total){
+                    $r['total'] = count($ret);
+                    $r['list'] = $ret;
+                    $ret = $r;
                 }
             }
         }
@@ -307,6 +312,17 @@ class LanceController extends Controller
         $ret['exec'] = false;
         $ret['code_mens'] = false;
         $ret['mens'] = Qlib::formatMensagemInfo('Erro ao gravar o lance, por favor entre em contato com o nosso suporte','danger');
+        //Verifica se que está dando o lance é o dono do leilão
+        $dono_leilao = Qlib::buscaValorDb0('posts','ID',$leilao_id,'post_author');
+        if($dono_leilao){
+            if($d['author']==$dono_leilao){
+                $ret['mens'] = Qlib::formatMensagemInfo('<b>Atenção</b> Não é permitido dar lance eu seu próprio leilão','danger');
+                return $ret;
+            }
+        }else{
+            $ret['mens'] = Qlib::formatMensagemInfo('Leilão sem responsável por favor entre em contato com o nosso suporte','danger');
+            return $ret;
+        }
         //Verifica se o leilão ja terminou
         $dg = (new LeilaoController)->get_lance_vencedor($leilao_id,false,'ultimo_lance');
         if($dg){
