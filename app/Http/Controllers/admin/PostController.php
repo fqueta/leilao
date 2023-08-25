@@ -715,6 +715,16 @@ class PostController extends Controller
                         'link'=>$this->routa,
                         ]
                     ]);
+                    if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
+                        $meta_notific = 'notifica_email_moderador';
+                        //verifica se ja foi enviado um email e não foi aten
+                        // $verific_eviado
+                        $liberar_norificacao = Qlib::update_postmeta($idCad,$meta_notific,'n');
+                        if($liberar_norificacao){
+                            //Enviar notificação para o moderador
+                            $send_notific = (new LeilaoController)->notific_update_admin($idCad);
+                        }
+                    }
                 }
             }else{
                 $mens = 'Erro ao salvar '.$this->label.'';
@@ -989,7 +999,14 @@ class PostController extends Controller
                     $id = $id;
                     //REGISTRAR EVENTOS
                     (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-
+                    if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
+                        //Enviar notificação para o moderador
+                        $meta_notific = 'notifica_email_moderador';
+                        $liberar_norificacao = Qlib::update_postmeta($id,$meta_notific,'n');
+                        if($liberar_norificacao){
+                            $send_notific = (new LeilaoController)->notific_update_admin($id);
+                        }
+                    }
                 }else{
                     $mens = 'Erro ao salvar '.$this->label.'';
                     $color = 'danger';

@@ -1,3 +1,7 @@
+@php
+    $contrato = isset($dados['nome_contrato']) ? $dados['nome_contrato'] : '';
+    $finalizado = isset($dados['finalizado']) ? $dados['finalizado'] : false;
+@endphp
 @section('title')
 {{$config['title']}}
 @endsection
@@ -17,9 +21,6 @@
                     {{$config['titulo']}}
                 </h2>
             </div>
-            @php
-                $contrato = isset($dados['nome_contrato']) ? $dados['nome_contrato'] : '';
-            @endphp
             @if ($contrato)
             <div class="col-12">
                 <label class="fw-bold" for="contrato">{{__('Contrato')}}: </label> {{$contrato}}
@@ -88,7 +89,7 @@
                     </div>
                 </div>
             </div>
-            @if(isset($dados['config']['valor_venda']))
+            @if(isset($dados['config']['valor_venda']) && !$finalizado)
             <!-- Comprar agora -->
             <div class="col-12 mb-3">
                 <div class="card">

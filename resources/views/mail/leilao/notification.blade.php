@@ -15,6 +15,14 @@
         @component('mail::button',['url'=>$user->link_leilao])
             {{__('Pagamento')}}
         @endcomponent
+    @elseif ($type=='notific_update_admin')
+        @php
+            echo $mensagem;
+        @endphp
+        @component('mail::button',['url'=>@$user->link_leilao_admin])
+            {{__('Editar Leilão')}}
+        @endcomponent
+
     @endif
 @endif
 

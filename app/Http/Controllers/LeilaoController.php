@@ -395,7 +395,7 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
-     * Metodo para listar leiloes publicos
+     * Metodo para listar detalhes do leiloes publicado no front
      */
     public function leiloes_publicos($dados=false){
         $pst = new PostController;
@@ -437,6 +437,7 @@ class LeilaoController extends Controller
                 $c_l = isset($dl[0]['config'])?$dl[0]['config']:[]; //config leilao
                 // $d1 = @$dl[0]['config']['termino'].' '.@$dl[0]['config']['hora_termino'];
                 $it = $this->info_termino($dl[0]['ID']);
+                $dl[0]['finalizado'] = @$it['termino']; //inform para a view se o leilão termniou ou não
                 $termino = $it['html'];
                 $lc = new LanceController;
                 $ultimoLance = $lc->ultimo_lance($seg2);
@@ -559,7 +560,18 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
+     * Metodo para pegar o link do leilao no painel de admin
+     * @param int $post_id
+     * @return string $ret
+     */
+    public function get_link_admin($post_id){
+        $ret = asset('/').'admin/leiloes_adm/'.$post_id.'/edit';
+        return $ret;
+    }
+    /**
      * Metodo para pegar o link publico do leilao
+     * @param int $post_id
+     * @return string $ret
      */
     public function get_link($post_id){
         $ret = asset('/').'leiloes-publicos/'.$post_id;
@@ -653,9 +665,8 @@ class LeilaoController extends Controller
                 // dd($ul);
                 $mensagem = '
                 <h1>Atenção Sr. Moderador</h1>
-                <p>O <b>{nome_leilao}</b> foi publicado pelo responsável {nome} dele no site e está aguardando sua conferência e liberação.</p>
-                <p>Use o botão abaixo para acessar o acessar o painel de administração dele!</p>
-                ';
+                <p>O <b>{nome_leilao}</b> foi publicado por <b>{nome}</b>, que é o responsável no site, e aguarda sua conferência e liberação.</p>
+                <p>Use o botão abaixo para acessar o painel de administração dele!</p>';
                 $no = explode(' ',Qlib::buscaValorDb0('users','id',$dl['post_author'],'name'));
                 $nome = @$no[0];
                 $nome_leilao = $dl['post_title'];
@@ -663,11 +674,11 @@ class LeilaoController extends Controller
                 $mensagem = str_replace('{nome}',$nome,$mensagem);
                 // $mensagem = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$mensagem);
                 $mensagem = str_replace('{nome_leilao}',$nome_leilao,$mensagem);
-                dd($mensagem);
                 $ret = (new LeilaoController)->enviar_email([
-                    'type' => 'notifica_finalizado',
-                    'lance_id' => $id_lance,
-                    'subject' => 'Leilão Finalizado',
+                    'type' => 'notific_update_admin',
+                    'leilao_id' => $dl['ID'],
+                    'dados_leilao' => $dl,
+                    'subject' => 'Leilão aguardando publicação',
                     'mensagem' => $mensagem,
                 ]);
                 //Salvar meta trava de notificaçao
@@ -690,53 +701,72 @@ class LeilaoController extends Controller
         $ret['exec'] = false;
         if(is_array($config)){
             $lance_id = isset($config['lance_id']) ? $config['lance_id'] : false;
-            if(!$lance_id){
-                return $ret;
-            }
-            $link_pagamento = isset($config['link_pagamento']) ? $config['link_pagamento'] : $this->get_link_pagamento($lance_id);
-            $dl = lance::Find($lance_id); //dados do lance.
-            if($dl){
-                $id_user = isset($dl['author']) ? $dl['author'] : false;
-                $leilao_id = isset($dl['leilao_id']) ? $dl['leilao_id'] : false;
-                $subject = isset($config['subject']) ? $config['subject'] : false;
-                $nome_leilao = isset($config['nome_lei$nome_leilao']) ? $config['nome_lei$nome_leilao'] : Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
-                $type = isset($config['type']) ? $config['type'] : false;
-                $d_user = isset($config['d_user']) ? $config['d_user'] : User::Find($id_user);
-                $mensagem = isset($config['mensagem']) ? $config['mensagem'] : false;
-                if(isset($d_user['email']) && !empty($d_user['email'])){
-                    $user = new stdClass();
-                    $n = explode(' ',$d_user['name']);
-                    if(!isset($n[0])){
-                        return $ret;
-                    }
-                    // $title_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
-                    $user->name = ucwords($n[0]);
-                    $user->email = $d_user['email'];
-                    $user->subject = $subject;
-                    $user->type = $type;
-                    $user->leilao_id = $leilao_id;
-                    $user->link_pagamento = $link_pagamento;
-                    $user->mensagem = $mensagem;
-                    $user->nome_leilao = $nome_leilao;
-                    $user->link_leilao = (new LeilaoController)->get_link($user->leilao_id);
-                    $reder_em = new \App\Mail\leilao\lancesNotific($user);
-                    // return $reder_em;
-
-                    $enviar = Mail::send($reder_em);
-                    if( count(Mail::failures()) > 0 ) {
-
-                        $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";
-
-                        foreach(Mail::failures() as $email_address) {
-                            $ret['mens'] .= " - $email_address <br />";
+            $type = isset($config['type']) ? $config['type'] : false;
+            $leilao_id = isset($config['leilao_id']) ? $config['leilao_id'] : false;
+            $subject = isset($config['subject']) ? $config['subject'] : false;
+            $mensagem = isset($config['mensagem']) ? $config['mensagem'] : false;
+            if($type=='notific_update_admin'){
+                $dados_leilao = isset($config['dados_leilao']) ? $config['dados_leilao'] : false;
+                if(!$dados_leilao && $leilao_id){
+                    $dados_leilao = Post::Find($leilao_id);
+                }
+                $user = new stdClass();
+                // dd($dados_leilao);
+                $user->name = 'Admin';
+                $user->email = Qlib::qoption('email_gerente');
+                $user->subject = $subject;
+                $user->type = $type;
+                $user->leilao_id = $leilao_id;
+                // $user->link_pagamento = $link_pagamento;
+                $user->mensagem = $mensagem;
+                $user->nome_leilao = $dados_leilao['post_title'];
+                $user->link_leilao_admin = (new LeilaoController)->get_link_admin($user->leilao_id);
+            }else{
+                if(!$lance_id){
+                    return $ret;
+                }
+                $link_pagamento = isset($config['link_pagamento']) ? $config['link_pagamento'] : $this->get_link_pagamento($lance_id);
+                $dl = lance::Find($lance_id); //dados do lance.
+                if($dl){
+                    $leilao_id = isset($dl['leilao_id']) ? $dl['leilao_id'] : false;
+                    $id_user = isset($dl['author']) ? $dl['author'] : false;
+                    $nome_leilao = isset($config['nome_lei$nome_leilao']) ? $config['nome_lei$nome_leilao'] : Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+                    $type = isset($config['type']) ? $config['type'] : false;
+                    $d_user = isset($config['d_user']) ? $config['d_user'] : User::Find($id_user);
+                    if(isset($d_user['email']) && !empty($d_user['email'])){
+                        $user = new stdClass();
+                        $n = explode(' ',$d_user['name']);
+                        if(!isset($n[0])){
+                            return $ret;
                         }
+                        // $title_leilao = Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+                        $user->name = ucwords($n[0]);
+                        $user->email = $d_user['email'];
+                        $user->subject = $subject;
+                        $user->type = $type;
+                        $user->leilao_id = $leilao_id;
+                        $user->link_pagamento = $link_pagamento;
+                        $user->mensagem = $mensagem;
+                        $user->nome_leilao = $nome_leilao;
+                        $user->link_leilao = (new LeilaoController)->get_link($user->leilao_id);
 
-                    } else {
-                        $ret['exec'] = true;
-                        $ret['mens'] = "Sem erros, enviado com sucesso! ".$user->email;
+                    }else{
+                        $ret['mens'] = __('Usuário não encontrado');
                     }
-                }else{
-                    $ret['mens'] = __('Usuário não encontrado');
+                }
+            }
+            if($user){
+                $reder_em = new \App\Mail\leilao\lancesNotific($user);
+                // return $reder_em;
+                $enviar = Mail::send($reder_em);
+                if( count(Mail::failures()) > 0 ) {
+                    $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";
+                    foreach(Mail::failures() as $email_address) {
+                        $ret['mens'] .= " - $email_address <br />";
+                    }
+                } else {
+                    $ret['exec'] = true;
+                    $ret['mens'] = "Sem erros, enviado com sucesso! ".$user->email;
                 }
             }
         }

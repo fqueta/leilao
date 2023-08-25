@@ -3,23 +3,20 @@
 use App\Http\Controllers\admin\EventController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\admin\UserPermissions;
-use App\Http\Controllers\GerenciarGrupo;
-use App\Http\Controllers\GerenciarUsuarios;
-use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\BairroController;
 use App\Http\Controllers\EmailController;
-use App\Http\Controllers\TesteController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\EscolaridadeController;
 use App\Http\Controllers\EstadocivilController;
-use App\Http\Controllers\LotesController;
 use App\Http\Controllers\RelatoriosController;
-use App\Http\Controllers\MapasController;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -218,7 +215,8 @@ Route::resource('lances','\App\Http\Controllers\lanceController',['parameters' =
 Route::prefix('ajax')->group(function(){
     Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
 });
-//Rotas de verificação
+
+//inicio Rotas de verificação
 Route::get('/email/verify', function () {
     // return view('auth.verify');
     return view('site.index');
@@ -230,7 +228,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     return redirect('/');
 })->middleware(['auth', 'signed'])->name('verification.verify');
-use Illuminate\Http\Request;
 
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
@@ -238,6 +235,7 @@ Route::post('/email/verification-notification', function (Request $request) {
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
 
+//Fim rotas de verificação
 
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');

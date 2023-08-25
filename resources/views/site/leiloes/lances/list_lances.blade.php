@@ -1,7 +1,7 @@
 @php
     $seg1 = request()->segment(1); //link da página em questão
     $urllistaTodos = App\Qlib\Qlib::get_slug_post_by_id(3); //link da pagina para listar todos o lances do cliente.
-
+    // dd($lances_vencendo);
 @endphp
 @if ($seg1==$urllistaTodos)
 <div class="col-md-12 mt-5">
@@ -16,7 +16,30 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-
+                @if(isset($lances_vencendo) && is_array($lances_vencendo))
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th width="30%">{{__('Data')}}</th>
+                            <th class="text-center">{{__('Leilão')}}</th>
+                            <th class="text-end">{{__('Valor')}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            @foreach ($lances_vencendo as $k=>$v )
+                                <tr>
+                                    <td>{{App\Qlib\Qlib::dataExibe($v['post_date'])}}</td>
+                                    <td class="text-center">
+                                        <a class="btn btn-link" href="{{url('/')}}/leiloes-publicos/{{$v['leilao_id']}}">
+                                            {{$v['leilao_id']}}
+                                        </a>
+                                    </td>
+                                    <td class="text-end">{{App\Qlib\Qlib::valor_moeda($v['valor_lance'])}}</td>
+                                </tr>
+                            @endforeach
+                    </tbody>
+                </table>
+                @endif
             </div>
         </div>
         <div class="card-footer d-print-none">
@@ -33,7 +56,30 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-
+                @if(isset($lances_superados) && is_array($lances_superados))
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th width="30%">{{__('Data')}}</th>
+                                <th class="text-center">{{__('Leilão')}}</th>
+                                <th class="text-end">{{__('Valor')}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                @foreach ($lances_superados as $k=>$v )
+                                    <tr>
+                                        <td>{{App\Qlib\Qlib::dataExibe($v['post_date'])}}</td>
+                                        <td class="text-center">
+                                            <a class="btn btn-link" href="{{url('/')}}/leiloes-publicos/{{$v['leilao_id']}}">
+                                                {{$v['leilao_id']}}
+                                            </a>
+                                        </td>
+                                        <td class="text-end">{{App\Qlib\Qlib::valor_moeda($v['valor_lance'])}}</td>
+                                    </tr>
+                                @endforeach
+                        </tbody>
+                    </table>
+                @endif
             </div>
         </div>
         <div class="card-footer d-print-none">

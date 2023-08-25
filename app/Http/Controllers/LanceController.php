@@ -703,28 +703,47 @@ class LanceController extends Controller
         // dd($ld_s);
         // if($ld_s){
             // foreach ($ld_s as $key => $value) {
-                $lances_superados = lance::select('lances.*','posts.*')->distinct('lances.leilao_id')->
+                $lances_superados = lance::select('lances.*','posts.*')->
                                     join('posts','lances.leilao_id','=','posts.ID')->
                                     where('lances.superado','s')->
                                     where('lances.author',Auth::id())->
                                     where('lances.excluido','n')->
-                                    orderBy('lances.id','asc')->
+                                    orderBy('lances.id','desc')->
+                                    whereDate('lances.created_at','>=',$dtBanco)->
+                                    get()->toArray();
+                $lances_vencendo = lance::select('lances.*','posts.*')->
+                                    join('posts','lances.leilao_id','=','posts.ID')->
+                                    where('lances.superado','!=','s')->
+                                    where('lances.author',Auth::id())->
+                                    where('lances.excluido','n')->
+                                    orderBy('lances.id','desc')->
                                     whereDate('lances.created_at','>=',$dtBanco)->
                                     get()->toArray();
                 if($lances_superados){
                     foreach ($lances_superados as $k => $v) {
-                    //    $arr[$v['leilao_id']] = $v;
-                       $arr[$k] = $v;
+                        if($k==0){
+                            $arr['lances_superados'][$k] = $v;
+                        }
                     }
                 }
-                // dd($arr);
+                if($lances_vencendo){
+                    foreach ($lances_vencendo as $k => $v) {
+                        if($k==0){
+                            $arr['lances_vencendo'][$k] = $v;
+                        }
+                    }
+                }
             // }
         // }
-        if($lances_superados){
+        if(isset($arr['lances_superados'])){
             $ret['exec'] = true;
-            $ret['lances_superados'] = $lances_superados;
+            $ret['lances_superados'] = $arr['lances_superados'];
         }
-
+        if(isset($arr['lances_vencendo'])){
+            $ret['exec'] = true;
+            $ret['lances_vencendo'] = $arr['lances_vencendo'];
+        }
+        return view('site.leiloes.lances.list_lances',$ret);
     }
     /**
      * Metodo para listar os lances dos usuarios no site o paramentro post_id se refere ai id da áginas e o paramentro dados os dados da página
