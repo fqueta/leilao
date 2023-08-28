@@ -589,17 +589,25 @@ class LeilaoController extends Controller
      * Metodo Notificar o termino do leilao ao ganhador ou ao Dono doleilao
      * @param int $post_id o id do leilão, string $tipo_responsavel pode ser ganhador ou autor para o dono do leilao
      */
-    public function notifica_termino($post_id,$tipo_responsavel='ganhador'){
+    public function notifica_termino($post_id,$tipo_responsavel='ganhador',$dl=false){
         $ret['exec'] = false;
-        $dl = Post::Find($post_id) ; //dados do leilao
+        if($post_id &&!$dl){
+            $dl = Post::Find($post_id) ; //dados do leilao
+        }
         if($dl && $tipo_responsavel=='ganhador'){
             $meta_notific = 'notifica_email_termino_leilao';
+            $meta_pago = 'pago';
             //Verifica quem é o ganhador
             $dg = $this->get_lance_vencedor($post_id,$dl,'ultimo_lance');//dados do ganhador
             //Verifica se ja foi enviado a notificação antes
             $verifica_notific = Qlib::get_postmeta($post_id,$meta_notific,true);
+            $pago = Qlib::get_postmeta($post_id,$meta_pago,true);
             if($verifica_notific=='s'){
                 $ret['mens'] = 'E-mail ja foi enviado';
+                return $ret;
+            }
+            if($pago=='s'){
+                $ret['mens'] = 'Não é ncessário enviar E-mail para leilão pago';
                 return $ret;
             }
             if(isset($dg['ultimo_lance']['id']) && ($id_lance=$dg['ultimo_lance']['id']) && $verifica_notific!='s'){
@@ -769,6 +777,40 @@ class LeilaoController extends Controller
                     $ret['mens'] = "Sem erros, enviado com sucesso! ".$user->email;
                 }
             }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para listar e eviar notificação para os vencedores do leilao que terminou
+     * sem parametros
+     * @return array $ret
+     */
+    public function list_alert_winners(){
+        $ret = 'false';
+        $cal = false;
+        //listar todos os leiloes terminados que não foram emitidos notificações
+        $list = Post::where('post_type',$this->post_type)->
+        where('post_status','publish')->
+        where('config','LIKE','%status":"publicado%')->
+        where('config','LIKE','%contrato":"%')->
+        get();
+        //Enviar a notificação.
+        if($list->count()){
+            $arr_l = $list->toArray();
+            foreach ($arr_l as $key => $value) {
+                $df = $this->info_termino($value['ID'],$value);
+                if(isset($df['termino']) && $df['termino']){
+                    $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
+                    $ret = 'true';
+                }
+            }
+        }
+        if($ret == 'true'){
+            $arquivo = fopen(dirname(__FILE__).'/teste_notific.txt','a');
+            $json = Qlib::lib_array_json($cal);
+			fwrite($arquivo, $json.',');
+        	//Fechamos o arquivo após escrever nele
+    		fclose($arquivo);
         }
         return $ret;
     }

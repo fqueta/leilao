@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Http\Controllers\LeilaoController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -17,6 +18,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
+        $schedule->call((new LeilaoController)->list_alert_winners())->daily()->timezone('America/sao_Paulo');
     }
 
     /**
