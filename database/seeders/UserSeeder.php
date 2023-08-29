@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
     {
         $arr = [
             [
-                'nome' => 'Fernando Queta',
+                'name' => 'Fernando Queta',
                 'email' => 'fernando@maisaqui.com.br',
                 'password' => Hash::make('ferqueta'),
                 'status' => 'actived',
@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
                 'id_permission' => '1',
             ],
             [
-                'nome' => 'Leandro Lopardi',
+                'name' => 'Leandro Lopardi',
                 'email' => 'contato@aeroclubejf.com.br',
                 'password' => Hash::make('a8240e82'),
                 'status' => 'actived',
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                 'id_permission' => '2',
             ],
             [
-                'nome' => 'primeiro cliente de teste',
+                'name' => 'primeiro cliente de teste',
                 'email' => 'teste@aeroclubejf.com.br',
                 'password' => Hash::make('mudar123'),
                 'status' => 'actived',
