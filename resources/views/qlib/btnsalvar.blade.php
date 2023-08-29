@@ -44,11 +44,15 @@
                 <button type="submit" btn="sair"  class="btn btn-outline-primary">Salvar e Sair <i class="fa fa-chevron-right"></i></button>
             @endcan
         @else
-            @can('create',$config['route'])
-                @if (!isset($_GET['popup']))
-                    <button type="submit" btn="permanecer" class="btn btn-primary">Salvar e permanecer</button>
-                @endif
-                <button type="submit" btn="sair"  class="btn btn-outline-primary">Salvar e Sair <i class="fa fa-chevron-right"></i></button>
-            @endcan
+            @if($frontend)
+                <button type="submit" btn="permanecer" class="btn btn-primary">Salvar</button>
+            @else
+                @can('create',$config['route'])
+                    @if (!isset($_GET['popup']))
+                        <button type="submit" btn="permanecer" class="btn btn-primary">Salvar e permanecer</button>
+                    @endif
+                    <button type="submit" btn="sair"  class="btn btn-outline-primary">Salvar e Sair <i class="fa fa-chevron-right"></i></button>
+                @endcan
+            @endif
         @endif
 </div>
