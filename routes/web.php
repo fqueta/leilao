@@ -209,7 +209,7 @@ Route::get('envio-mails',function(){
     // $enviar = Mail::send(new \App\Mail\dataBrasil($user));
     // return $enviar;
 });
-Route::resource('lances','\App\Http\Controllers\lanceController',['parameters' => [
+Route::resource('lances','\App\Http\Controllers\LanceController',['parameters' => [
     'lances' => 'id'
 ]]);
 Route::prefix('ajax')->group(function(){
