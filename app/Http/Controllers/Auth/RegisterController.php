@@ -96,6 +96,17 @@ class RegisterController extends Controller
             'tipo_pessoa' => 'pf',
         ];
         // dd($ds);
-        return User::create($ds);
+        $ret = User::create($ds);
+        if($ret){
+            // request()
+            // Qlib::lib_print(Auth::user());
+
+            // dd('new uwer ok');
+
+                // $request->user()->sendEmailVerificationNotification();
+
+
+        }
+        return $ret;
     }
 }

@@ -231,9 +231,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
-    // dd($mens);
-    // App\Qlib\Qlib::lib_print($ret);
-    // return view('site.index');
     return back()->with('message-very', 'enviado');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
 
