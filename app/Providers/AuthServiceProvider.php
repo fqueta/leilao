@@ -137,6 +137,7 @@ class AuthServiceProvider extends ServiceProvider
         VerifyEmail::toMailUsing(function (object $notifiable, string $url) {
             return (new MailMessage)
                 ->subject('Verifique seu e-mail')
+                ->greeting('Olá!')
                 ->line('Por favor clique no botão abaixo para verificar o seu endereço de E-mail. Através dele você receberá as notificações da plataforma de leilões.')
                 ->action('Verifique seu e-mail', $url);
         });
