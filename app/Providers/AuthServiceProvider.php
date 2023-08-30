@@ -6,6 +6,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Auth\Access\Response;
 use App\Qlib\Qlib;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Auth;
 
 class AuthServiceProvider extends ServiceProvider
@@ -131,6 +133,12 @@ class AuthServiceProvider extends ServiceProvider
                 }
             }
             return $ret;
+        });
+        VerifyEmail::toMailUsing(function (object $notifiable, string $url) {
+            return (new MailMessage)
+                ->subject('Verifique seu e-mail')
+                ->line('Por favor clique no botão abaixo para verificar o seu endereço de E-mail. Através dele você receberá as notificações da plataforma de leilões.')
+                ->action('Verifique seu e-mail', $url);
         });
     }
 }

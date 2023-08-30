@@ -55,7 +55,7 @@
             @endif
 
             <div class="col-12 mb-3">
-                <small>* Valores acima do valor mínimo de lance entrarão como valor de reserva para lances automáticos.</small>
+                <small>* {{__('Valores acima do valor mínimo de lance entrarão como valor de reserva para lances automáticos.')}} </small>
             </div>
 
             @include('site.partes_bs.modal',['config'=>[

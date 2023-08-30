@@ -1,7 +1,7 @@
 @if (isset($dados['ID']) && isset($dados['arr_lances']) && is_array($dados['arr_lances']))
 @php
     $disbledL = 'disabled';
-    $mensLog = '<div class="alert alert-danger">'.__('Para dar lances é necessário estar logado no site.').'</div>';
+    $mensLog = '<div class="alert alert-danger">'.__('Para dar lances é necessário estar logado no site.').' <!--<a href="'.route('login').'" class="text-decoration-underline"> Logar</a>--></div>';
     if(Gate::allows('is_admin2')||Gate::allows('is_customer_logado')){
         $disbledL = '';
         $mensLog = false;
@@ -27,7 +27,9 @@
     </div>
     <div class="row mb-3">
         <div class="col-md-12">
-            {!!$mensLog!!}
+            @php
+               echo $mensLog;
+            @endphp
         </div>
     </div>
     @endif
