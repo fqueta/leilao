@@ -4,9 +4,11 @@
 
 @section('content_header')
 <div class="row mb-2">
-    <div class="col-sm-6">
+    <div class="col-md-12">
         <h1 class="m-0 tit-sep" >Painel</h1>
-    </div><!-- /.col -->
+    </div>
+    @include('admin.leilao.lista_leilao_terminado')
+    <!-- /.col -->
     {{-- <div class="col-sm-6 text-right">
         <div class="btn-group" role="group" aria-label="actions">
             @can('create','familias')

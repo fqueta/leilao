@@ -531,6 +531,9 @@ class LanceController extends Controller
         $l = lance::where('leilao_id',$leilao_id)->where('type','lance')->where('excluido','n')->orderBy('id', 'desc')->first();
         if($l){
             if($exibe_data){
+                if(isset($l['author']) && $l['author']!=''){
+                    $l['nome'] = Qlib::buscaValorDb0('users','id',$l['author'],'name');
+                }
                 $ret = $l;
             }else{
                 $ret = $l['valor_lance'];

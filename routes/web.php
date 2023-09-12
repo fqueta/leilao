@@ -202,10 +202,10 @@ Route::prefix('cobranca')->group(function(){
 //     );
 // });
 Route::get('envio-mails',function(){
-    // $user = new stdClass();
-    // $user->name = 'Fernando Queta';
-    // $user->email = 'ger.maisaqui3@gmail.com';
-    // //return new \App\Mail\dataBrasil($user);
+    $user = new stdClass();
+    $user->name = 'Fernando Queta';
+    $user->email = 'ger.maisaqui3@gmail.com';
+    return new \App\Mail\dataBrasil($user);
     // $enviar = Mail::send(new \App\Mail\dataBrasil($user));
     // return $enviar;
 });

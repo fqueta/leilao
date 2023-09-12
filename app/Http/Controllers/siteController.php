@@ -64,6 +64,7 @@ class siteController extends Controller
                 $lc = new LeilaoController;
                 $lac = new LanceController;
                 $uc = new UserController;
+                $pa = new PaymentController;
                 $arr_shortC = [
                     'form_leilao' => $lc->form_leilao($post_id,$dados),
                     'list_leilao' => $lc->list_leilao($post_id,$dados),
@@ -71,6 +72,7 @@ class siteController extends Controller
                     'list_lance_user' => $lac->list_lance_user(), //Lista os lances do usuario no frontend
                     'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
                     'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
+                    'payment' => $pa->form($post_id,$dados),
                     'teste' => 'teste de conteudo do formulario para gadastr',
                 ];
                 $arr_short = [];

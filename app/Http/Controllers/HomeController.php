@@ -63,7 +63,9 @@ class HomeController extends Controller
         //     'mapa'=>$dadosMp,
         //     'totalDecretos'=>$totalDecretos,
         // ];
-        $config = [];
+        $config = [
+            'lista_leilao_terminado' => (new LeilaoController)->lista_leilao_terminado(),
+        ];
         return view('home',[
             'config'=>$config,
         ]);

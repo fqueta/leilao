@@ -26,47 +26,87 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                 echo $ret;
             @endphp
         @else
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>{{__('Leilões Ganhos')}}</h5>
+                </div>
+                <div class="card-body">
+                    @if(isset($ganhos) && is_array($ganhos))
+
+                        <table class="table table-striped">
+                            <head>
+                                <tr>
+                                    <th>{{__('Leilão')}}</th>
+                                    <th>{{__('Termino')}}</th>
+                                    <th>{{__('Valor')}}</th>
+                                    <th class="text-center">{{__('Status')}}</th>
+                                    <th class="text-end">{{__('Ação')}}</th>
+                                </tr>
+                            </head>
+                            <tbody>
+                                @foreach ( $ganhos as $k=>$v)
+
+                                    <tr>
+                                        <td>{{$v['post_title']}}</td>
+                                        <td>{{@$v['term']['html']}}</td>
+                                        <td>{{App\Qlib\Qlib::valor_moeda(@$v['venc']['valor_lance'])}}</td>
+                                        <td class="text-center">@php echo @$v['situacao_pagamento'] @endphp</td>
+                                        <td class="text-end">@php
+                                                $acao = '<a href="'.@$v['link_pagamento'].'" class="btn btn-success">'.__('Pagar').'</a>';
+                                                echo $acao;
+                                            @endphp
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+                {{-- <div class="card-footer text-muted">
+                    Footer
+                </div> --}}
+            </div>
             <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">
-                    @if (!empty($arr_titulo))
-                        Lista de:
+                <div class="card-header">
+                    <h4 class="card-title">
+                        @if (!empty($arr_titulo))
+                            Lista de:
 
-                        @foreach ($arr_titulo as $k=>$pTitulo)
-                            <label for=""> Todo com {{ $k }}</label> = {{ $pTitulo }}, e
-                        @endforeach
-                    @else
-                        {{ $titulo_tabela }}
-                    @endif
-                    <div class="float-end"><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(2)}}" class="btn btn-primary"> <i class="fas fa-plus"></i> {{__('Novo cadastro')}}</a></div>
-                    </h4>
+                            @foreach ($arr_titulo as $k=>$pTitulo)
+                                <label for=""> Todo com {{ $k }}</label> = {{ $pTitulo }}, e
+                            @endforeach
+                        @else
+                            {{ $titulo_tabela }}
+                        @endif
+                        <div class="float-end"><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(2)}}" class="btn btn-primary"> <i class="fas fa-plus"></i> {{__('Novo cadastro')}}</a></div>
+                        </h4>
 
-                {{-- @can('is_admin_logado')
-                <div class="card-tools d-flex d-print-none">
-                        @include('familias.dropdow_actions')
-                        @include('qlib.dropdow_acaomassa')
+                    {{-- @can('is_admin_logado')
+                    <div class="card-tools d-flex d-print-none">
+                            @include('familias.dropdow_actions')
+                            @include('qlib.dropdow_acaomassa')
+                    </div>
+                    @endcan --}}
                 </div>
-                @endcan --}}
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    {{
-                        App\Qlib\Qlib::listaTabela([
-                        'campos_tabela'=>$campos_tabela,
-                        'config'=>$config,
-                        'dados'=>$dados,
-                        'routa'=>$routa,
-                        //   'fileLista'=>'listaTabelaSite',
-                    ])}}
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {{
+                            App\Qlib\Qlib::listaTabela([
+                            'campos_tabela'=>$campos_tabela,
+                            'config'=>$config,
+                            'dados'=>$dados,
+                            'routa'=>$routa,
+                            //   'fileLista'=>'listaTabelaSite',
+                        ])}}
+                    </div>
                 </div>
-            </div>
-            <div class="card-footer d-print-none">
-                <div class="table-responsive">
-                    @if ($config['limit']!='todos')
-                    {{ $dados->appends($_GET)->links() }}
-                    @endif
+                <div class="card-footer d-print-none">
+                    <div class="table-responsive">
+                        @if ($config['limit']!='todos')
+                        {{ $dados->appends($_GET)->links() }}
+                        @endif
+                    </div>
                 </div>
-            </div>
             </div>
         @endif
 
