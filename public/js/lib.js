@@ -1,6 +1,7 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const pop = urlParams.get('popup');
+const RAIZ = '/';
 function uniqid(prefix, more_entropy) {
   // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
   // +    revised by: Kankrelune (http://www.webfaktory.info/)
@@ -2392,4 +2393,215 @@ function excluirReserva(token){
 function remove_contrato_leilao(){
     $('[name="config[contrato]"]').val('');
     $('#tk-contrato,#btn-remove-contrato').remove();
+}
+function validaNomeCompleto(seletor){
+	var no=document.querySelector(seletor),nome=no.value,arr_no=nome.split(' '),ret=false;
+	// console.log(arr_no[1]);
+	try {
+		var merror='<label id="nome-error" class="error" for="nome">Nome completo invÃ¡lido.</label>';
+		if(typeof arr_no[1]!='undefined'){
+			var sn=arr_no[1];
+			if(sn==''){
+				no.classList.add("error");
+				no.classList.remove("valid");
+				$('#nome-error').remove();
+				$(merror).insertAfter(seletor);
+				no.select();
+			}else{
+				ret=true
+				no.classList.add("valid");
+				no.classList.remove("error");
+				$('#nome-error').remove();
+			}
+		}else{
+			no.classList.add("error");
+			no.classList.remove("valid");
+			$('#nome-error').remove();
+			$(merror).insertAfter(seletor);
+			no.select();
+		}
+		return ret;
+	} catch (error) {
+		no.classList.add("error");
+		no.classList.remove("valid");
+		$('#nome-error').remove();
+		$(merror).insertAfter(seletor);
+		no.select();
+		console.log(error);
+		return ret;
+	}
+}
+function validaCFP(seletor){
+	var cp=document.querySelector(seletor),v=cp.value,ret=true;
+	var Soma;
+    var Resto;
+	v = v.replace('.', '');
+    v = v.replace('.', '');
+    strCPF = v.replace('-', '');
+    Soma = 0;
+
+	if (strCPF == "00000000000") ret= false;
+
+	for (i=1; i<=9; i++) Soma = Soma + parseInt(strCPF.substring(i-1, i)) * (11 - i);
+	Resto = (Soma * 10) % 11;
+
+		if ((Resto == 10) || (Resto == 11))  Resto = 0;
+		if (Resto != parseInt(strCPF.substring(9, 10)) ) ret= false;
+
+	Soma = 0;
+	for (i = 1; i <= 10; i++) Soma = Soma + parseInt(strCPF.substring(i-1, i)) * (12 - i);
+		Resto = (Soma * 10) % 11;
+
+	if ((Resto == 10) || (Resto == 11))  Resto = 0;
+	if (Resto != parseInt(strCPF.substring(10, 11) ) ) ret= false;
+	if(!ret){
+		var merror='<label id="cpf-error" class="error" for="cpf">CPF invÃ¡lido.</label>';
+		$('#cpf-error').remove();
+		$(merror).insertAfter(seletor);
+		cp.classList.add("error");
+		cp.classList.remove("valid");
+		cp.select();
+	}else{
+		cp.classList.add("valid");
+		cp.classList.remove("error");
+		$('#cpf-error').remove();
+	}
+	return ret;
+}
+function ecomerce_initPayment(){
+	var btn_submit = '<button type="button" class="btn btn-success btn-block col-12" f-sub="eco_submitCompra">Pagar</button>';
+	$('.div-bt-submit').html(btn_submit);
+	$('.met-pay input[type="radio"]').on('click', function(){
+		let val = $(this).val();
+		$('.c-pag').hide();
+		var sel = '#c-'+val;
+		$(sel).show();
+		var c_cred_card = document.getElementById('c-cred_card').querySelectorAll('.c-cred_card'),c_cred_card1 = document.getElementById('c-cred_card').querySelectorAll('select');
+		var c_pix = document.getElementById('c-pix').querySelectorAll('input'),c_pix1 = document.getElementById('c-pix').querySelectorAll('select');
+		if(val=='pix'){
+			// console.log(c_cred_card);
+			c_cred_card.forEach(el => {
+				el.setAttribute('disabled','disabled');
+			});
+			$('[f-sub="eco_submitCompra"]').show();
+			document.querySelector('.total-boleto').disabled=true;
+			document.querySelector('.total-pix').disabled=false;
+            $('.met-pay label').removeClass('active');
+            $('#lb-pix').addClass('active');
+		}else if(val == 'boleto'){
+			c_cred_card.forEach(el => {
+				el.setAttribute('disabled','disabled');
+			});
+			$('[f-sub="eco_submitCompra"]').show();
+			document.querySelector('.total-boleto').disabled=false;
+			document.querySelector('.total-pix').disabled=true;
+            $('.met-pay label').removeClass('active');
+            $('#lb-boleto').addClass('active');
+		}else if(val == 'cred_card'){
+			c_cred_card.forEach(el => {
+				el.removeAttribute('disabled');
+			});
+			$('[f-sub="eco_submitCompra"]').show();
+            $('.met-pay label').removeClass('active');
+            $('#lb-card').addClass('active');
+		}else if(val =='conta'){
+			$('[f-sub="eco_submitCompra"]').hide();
+		}
+		// console.log(val+' sel= '+sel);
+	});
+	$('[f-sub="eco_submitCompra"]').on('click', function(){
+		eco_submitCompra();
+	});
+	jQuery('[name="cliente[Cpf]"]').inputmask('999.999.999-99');
+	$('[name="cartao[numero_cartao]"]').inputmask('9999 9999 9999 9999');
+	$('[name="cartao[codigo_seguranca]"]').inputmask('999');
+	$('[name="cliente[Nome]"]').on('change',function(){
+		validaNomeCompleto('[name="cliente[Nome]"]');
+	});
+	$('#cpf').on('change',function(){
+		validaCFP('#cpf');
+	});
+	$('[ck-pix]').on('click',function(e){
+		e.preventDefault();
+		document.getElementById('lb-pix').click();
+        $('.met-pay label').removeClass('active');
+        $('#lb-pix').addClass('active');
+	});
+
+}
+function eco_validateFormV2(seletor){
+	var ret = true;
+	$(seletor).find('input[required]').each(function(k){
+		var v = $(this).val(),attrId=$(this).attr('id');
+		if(attrId=='cliente[Nome]'){
+			if(!validaNomeCompleto('[name="cliente[Nome]"]')){
+				ret = false ;
+			}
+		}
+		if(attrId=='cpf'){
+			if(!validaCFP('#cpf')){
+				ret = false;
+			}
+		}
+	});
+	return ret;
+}
+function eco_submitCompra(){
+	let frm_pagamento='#frm-pag-v2';
+	$(frm_pagamento).validate({
+		submitHandler: function(form) {
+			if(!eco_validateFormV2(frm_pagamento)){
+				return;
+			}
+			getAjax({
+				url:RAIZ+'/app/ecomerce/acao.php?ajax=s&opc=pagamento',
+				type:'POST',
+				data:$(frm_pagamento).serialize(),
+			},function(response){
+				$('#preload').fadeOut("fast");
+				try {
+					if(response.mens){
+						$('.mens2').html(response.mens);
+					}
+					if(response.exec == true){
+						$('#preload').fadeIn();
+						// $('#frm-pag-v2').hide();
+						window.location = '/obrigado-pela-compra';
+					}else{
+						if(response.criarCobrancaCartao.asaas.errors[0]){
+							alert(response.criarCobrancaCartao.asaas.errors[0].description);
+						}else if(response.lancarFaturaPagamentoAsaas.exec){
+							window.location = '/obrigado-pela-compra?matricula='+btoa(response.lancarFaturaPagamentoAsaas.dadosCompraFinalizada.id);
+							//alert('redireciona para pagina de agradecimeno')
+						}else{
+							window.location = '/obrigado-pela-compra';
+						}
+					}
+				} catch (error) {
+					console.log(error);
+				}
+			});
+		},
+		ignore: ".ignore",
+		rules: {
+			nome: {
+				required: true
+			},
+			cpf:{
+				cpf: true
+			}
+		},
+		messages: {
+			nome: {
+				required: " Por favor preencher este campo"
+			},
+			cpf: {
+				required: " Por favor preencher um cpf vÃ¡lido"
+			}
+		}
+	});
+	$(frm_pagamento).submit();
+	// $('#'+id_form).submit(function(){
+
+	// });
 }

@@ -6,12 +6,14 @@
     $thumbnail      = isset($dl['thumbnail'])?$dl['thumbnail']:false;
     $leilao         = isset($dl['post_title'])?$dl['post_title']:false;
     $contrato       = isset($dc['post_title'])?$dc['post_title']:false;
-    $valor_lance    = isset($ul['valor_lance'])?$ul['valor_lance']:false;
+    $valor    = isset($ul['valor_lance'])?$ul['valor_lance']:false;
     $nome_cliente   = isset($ul['nome'])?$ul['nome']:false;
     $data_lance     = isset($ul['created_at'])?$ul['created_at']:false;
     $termino       = isset($dt['html'])?$dt['html']:false;
     // dd($dt);
-    // dd($ul);
+    $valor_pix = '<span>'.App\Qlib\Qlib::valor_moeda($valor,'R$ ').'</span><input type="hidden" class="total-pix" name="compra[valor]" value="'.$valor.'" />';
+	$valor_boleto = '<span>'.App\Qlib\Qlib::valor_moeda($valor,'R$ ').'</span><input type="hidden" class="total-boleto" name="compra[valor]" value="'.$valor.'" />';
+
 @endphp
 
 @if(isset($dl))
@@ -41,6 +43,9 @@
                     font-size: 1.2em;
                     font-weight: bold;
                 }
+                .met-pay [type="radio"]{
+                    display: none;
+                }
             </style>
             <div class="container cont-pag-v2 mb-5 mt-5">
                 {{-- <div class="row mb-3">
@@ -55,7 +60,7 @@
                     <div class="col-9">
                         <h3>{{$leilao}}</h3>
                         <h5>{{$contrato}}</h5>
-                        <h3>{{App\Qlib\Qlib::valor_moeda($valor_lance,'R$ ')}}</h3>
+                        <h3>{{App\Qlib\Qlib::valor_moeda($valor,'R$ ')}}</h3>
                         <ul>
                             <li>
                                 <small><b>Termino:</b> {{$termino}}</small>
@@ -78,7 +83,7 @@
                         <div class="col-12 mb-3 px-0">
                             <!-- {menu_fpagamento} -->
                             <div class="w-100 btn-group btn-group-toggle met-pay" data-toggle="buttons">
-                                <label class="btn btn-outline-primary btn-lg col-4" id="lb-card">
+                                <label class="btn btn-outline-primary btn-lg active col-4" id="lb-card">
                                     <input type="radio" name="compra[forma_pagamento]" value="cred_card" checked> <i class="fa fa-credit-card    "></i> Cartão de crédito
                                 </label>
                                 <label class="btn btn-outline-primary btn-lg col-4" id="lb-pix">
@@ -100,17 +105,17 @@
                         </div>
                         <div id="c-pix" style="display:none" class="row c-pag mr-0 ml-0 mb-3">
                             <div class="col-12">
-                                {tm_pix}
+                                @include('site.leiloes.payment.form_pix',['valor'=>$valor_pix,'nome_contrato'=>$contrato])
                             </div>
                         </div>
                         <div id="c-boleto" style="display:none" class="row c-pag mr-0 ml-0 mb-3">
                             <div class="col-12">
-                                {tm_boleto}
+                                @include('site.leiloes.payment.form_boleto',['valor'=>$valor_boleto,'nome_contrato'=>$contrato])
                             </div>
                         </div>
                         <div class="row mr-0 ml-0">
                             <div class="col-md-12 mens2"></div>
-                            <div class="col-12 px-0 div-bt-submit">
+                            <div class="col-12 div-bt-submit">
 
                             </div>
                         </div>

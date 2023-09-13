@@ -43,13 +43,16 @@
                 <label class="" data-toggle="tooltip" title="" for="cartao[codigo_seguranca]">Código de serguraça (CVV)*</label>
                 <input data-placement="right" id="cartao[codigo_seguranca]" width="100%" name="cartao[codigo_seguranca]" placeholder="" class="form-control c-cred_card" value="" type="tel" style="" required="" />
             </div>
+
             <div class="col-md-12" id="valor_compra">
+                @if(isset($arr_valores) && is_array($arr_valores))
                 <label>Valor: </label><br />
                 <select class="select-valor form-control form-control c-cred_card" name="cartao[valor]" required="">
-                    <option value="01X69,9">01 X R$ 69,90</option>
-                    <option value="02X34,95">02 X R$ 34,95</option>
-                    <option value="03X23.30">03 X R$ 23,30</option>
+                    @foreach ($arr_valores as $kv=>$vv)
+                        <option value="{{$kv}}">{{$vv}}</option>
+                    @endforeach
                 </select>
+                @endif
             </div>
         </div>
         <style>
