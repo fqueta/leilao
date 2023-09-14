@@ -15,7 +15,7 @@
                 <label data-toggle="tooltip" title="Este é o nome do titular, que está impresso no cartão" for="cartao[nome_no_cartao]">Nome no cartão*</label>
                 <input data-placement="right" id="cartao[nome_no_cartao]" width="100%" name="cartao[nome_no_cartao]" placeholder="" class="form-control c-cred_card" value="" type="text" style="" required="" />
             </div>
-            <input id="compra[id_curso]" name="compra[id_curso]" value="2" type="hidden" />
+            <input id="compra[id_leilao]" name="compra[id_leilao]" value="{{$id_leilao}}" type="hidden" />
             <div class="row pl-3 pr-3">
                 <div class="col-md-12" id="campo_validade"><label>Data de validate:</label></div>
                 <div class="col-6">
@@ -97,7 +97,7 @@
                         disabled=""
                     />
                 </div>
-                <input id="compra[id_curso]" name="compra[id_curso]" value="2" type="hidden" />
+                {{-- <input id="compra[id_leilao]" name="compra[id_leilao]" value="2" type="hidden" /> --}}
                 <div class="col-md-6 m-bp" div-id="dados[responsavel][Cpf]">
                     <label class="" data-toggle="tooltip" title="" for="dados[responsavel][Cpf]">Cpf*</label>
                     <input data-placement="right" id="dados[responsavel][Cpf]" width="100%" name="dados[responsavel][Cpf]" placeholder="" class="form-control input-md" value="" type="text" style="" required="" mark_reponse="" disabled="" />

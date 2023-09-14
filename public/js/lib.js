@@ -2548,13 +2548,18 @@ function eco_validateFormV2(seletor){
 }
 function eco_submitCompra(){
 	let frm_pagamento='#frm-pag-v2';
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+        }
+    });
 	$(frm_pagamento).validate({
 		submitHandler: function(form) {
 			if(!eco_validateFormV2(frm_pagamento)){
 				return;
 			}
 			getAjax({
-				url:RAIZ+'/app/ecomerce/acao.php?ajax=s&opc=pagamento',
+				url:'/payment',
 				type:'POST',
 				data:$(frm_pagamento).serialize(),
 			},function(response){

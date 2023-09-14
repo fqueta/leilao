@@ -9,6 +9,7 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\EscolaridadeController;
 use App\Http\Controllers\EstadocivilController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RelatoriosController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -233,6 +234,9 @@ Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message-very', 'enviado');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
+
+//Routa para postar o pagamento.
+Route::post('/payment',[PaymentController::class,'init'])->name('payment');
 
 //Fim rotas de verificação
 

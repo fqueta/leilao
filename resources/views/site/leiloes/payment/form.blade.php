@@ -17,14 +17,16 @@
 @endphp
 
 @if(isset($dl))
-<div class="row">
+<div class="row mt-4">
     <div class="col-md-12 mens">
         {!!@$mens!!}
     </div>
     @if ($status==200)
     <div class="card">
         <div class="card-header">
-            {{__('Pagamentos')}}
+            <h5>
+                {{__('Pagamentos')}}
+            </h5>
         </div>
         <div class="card-body">
             <style>
@@ -81,7 +83,6 @@
                         {{-- <?=$formCampos?> --}}
                     </div>
                         <div class="col-12 mb-3 px-0">
-                            <!-- {menu_fpagamento} -->
                             <div class="w-100 btn-group btn-group-toggle met-pay" data-toggle="buttons">
                                 <label class="btn btn-outline-primary btn-lg active col-4" id="lb-card">
                                     <input type="radio" name="compra[forma_pagamento]" value="cred_card" checked> <i class="fa fa-credit-card    "></i> Cartão de crédito

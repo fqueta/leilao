@@ -9,10 +9,106 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
-    public function __construct()
-    {
+    protected $instance = null;
 
-    }
+	public function __construct()
+
+	{
+
+		// $this->get_instance();
+
+	}
+
+	public function get_instance()
+
+	{
+
+		if (null === self::$instance) {
+
+			self::$instance = new self();
+
+		}
+
+		return self::$instance;
+
+	}
+    /**
+	 * iniciar o pagamento
+	 */
+	public function init(Request $request){
+        $config = $request->all();
+		//cadastrar e verificar cadastro de clientes.
+		// if(!isset($config['_token'])){return false;}
+		// dd($config);
+		// if(isset($config['_token']) && $config['_token']!=session_id()){return false;}
+		// $r = (new integraAsaas)->schemaCustomerAsaas(91);
+		// dd(lib_json_array($r));
+		$ret['exec'] = false;
+        $logado = Auth::check();
+        dd($config);
+        if(isset($config['compra']['token']) && !empty($config['compra']['token'])){
+			//verificar se o cliente está logado
+			if(!$logado){return false;}
+			//fazer o pagamento e integrar ao gateway
+			$ret = (new integraAsaas)->integraCompraAsaas($config);
+		}else{
+			$siga = false;
+			//Verifica se ja está logado
+			if($logado){
+				if(isset($config['Email'])&&isset($config['Cpf']))
+					$atualizaClient = self::cad_cliente($config);
+				$siga = true;
+			}else{
+				//Do contrario cadastra e loga
+				$ret = self::cad_cliente($config);
+				if($logado){
+					$siga = true;
+				}
+				$ret['dbcad'] = $ret;
+			}
+			if($siga){
+				//Segue para o registro da compra
+				$ret['registrarCompra'] = self::regCompra($config);
+				if(isset($ret['registrarCompra']['exec'])){
+					$ret['exec'] = $ret['registrarCompra']['exec'];
+					$ret['token'] = @$ret['registrarCompra']['matricula']['tokenCad'];
+					if(isset($ret['registrarCompra']['matricula']['salvar']['dados_enc'][0]) && ($de=$ret['registrarCompra']['matricula']['salvar']['dados_enc'][0])){
+						if(isset($de['pagamento_asaas']) && empty($de['pagamento_asaas']) && isset($de['token'])){
+							$ret['exec'] = true;
+							$ret['token'] = $de['token'];
+							$ret['registrarCompra']['matricula']['tokenCad'] = $de['token'];
+						}
+					}
+					if(isset($ret['registrarCompra']['matricula']['mensa'])){
+						$ret['mens'] = str_replace('O registro do','A Matrícula do Cliente, ',$ret['registrarCompra']['matricula']['mensa']);
+					}
+				}
+			}
+			if($logado && $ret['exec'] && isset($ret['token']) && $ret['token'] && $config){
+				if(Qlib::isAdmin() || isset($_GET['fq'])){
+					$debug = $ret;
+				}
+				//fazer o pagamento e integrar ao gateway
+				if(isset($ret['registrarCompra']['matricula']['tokenCad']) && !empty($ret['registrarCompra']['matricula']) && ($tokenCompra=$ret['registrarCompra']['matricula']['tokenCad'])){
+					$config['compra']['token'] = $tokenCompra;
+				}
+				$ret = (new integraAsaas)->integraCompraAsaas($config);
+				if(Qlib::isAdmin() || isset($_GET['fq'])){
+					$ret['debug_cad_cliente'] = $debug;
+				}
+			}
+		}
+		if($ret['exec'] && isset($config['compra']['token'])){
+			//Fazer lançamento da fatura referente ao pagamento feito no gateway
+			$ret['lancarFaturaPagamentoAsaas'] = (new ecomerce)->lancarFaturaPagamentoAsaas($config['compra']['token'],$config['compra']['forma_pagamento']);
+		}elseif(isset($ret['mens'])){
+			$ret['mens'] .= formatMensagemInfo('Erro ao efetuar a compra entre em contato com o nosso suporte','danger');
+		}else{
+			$ret['mens'] = @$ret['mensa'];
+			$ret['mens'] .= formatMensagemInfo('Erro ao efetuar a compra entre em contato com o nosso suporte','danger');
+		}
+		return $ret;
+	}
     public function form($post_id,$dados=false){
         $seg1 = request()->segment(1);
         $seg2 = request()->segment(2);
@@ -68,6 +164,7 @@ class PaymentController extends Controller
                         $ret['form_credit_cart'] = $this->frmCredCardV2([
                             'dt'=>$dt,
                             'ul'=>$ul, //dados do ultimo lance.
+                            'dl'=>$dl, //dados do ultimo lance.
                         ]); //dados do terminio
                     }else{
                         $ret['status'] = 500; //bloqueia o formulario mais exibe uma mensagem de erro
@@ -85,12 +182,15 @@ class PaymentController extends Controller
         }
     }
     public function frmCredCardV2($config=false){
-		global $suf_in,$tk_conta;
 		// $dFp = dados_tab('lcf_formas_pagamentos','*',"WHERE id='2' AND parcelamento='s'");//Dados Forma de pagamento cartão
 		$dt = isset($config['dt']) ? $config['dt'] : false; //dados do termino.
 		$ul = isset($config['ul']) ? $config['ul'] : false; //dados do ultimo lance.
         $valor = isset($ul['valor_lance']) ? $ul['valor_lance'] : 0;
+        $id_leilao = isset($config['dl']['ID']) ? $config['dl']['ID'] : false; //dados do ultimo lance.
         $d['valor'] = $valor;
+        $d['id_leilao'] = $id_leilao;
+        $d['dt'] = $dt;
+        $d['dl'] = isset($config['dl']) ? $config['dl'] : false; //dados do ultimo lance.
 		$dFp = Qlib::qoption('forma_pagamento');//Dados Forma de pagamento cartão
 		$d['total_pacelamento'] = 1;
 		$parcelasCurso = isset($config['parcelas'])?$config['parcelas']:1;
@@ -214,7 +314,7 @@ class PaymentController extends Controller
 						// 			</select>';
 						// 			$opt = false;
 						// 			// o total esta declarado no objeto $this->resumoCompra()
-						// 			if(isAdmin(1)){
+						// 			if(Qlib::isAdmin()){
 
 						// 				//lib_print($_SESSION[$tk_conta]['matricula'.$suf_in]);
 						// 				//lib_print($_SESSION[SUF_SYS]['cart'][0]);exit;
@@ -241,6 +341,218 @@ class PaymentController extends Controller
 			// $ret .= '</div>';
 			// $ret .= '</div>';
         $ret = view('site.leiloes.payment.form_credit_card',$d);
+		return $ret;
+	}
+    /**
+	 * Cadastrar e verificar cadastro de cliente
+	 */
+	public function cad_cliente($conf=false){
+		$config = isset($conf['cliente']) ? $conf['cliente'] : false;
+		$config = isset($conf['cliente']) ? $conf['cliente'] : false;
+		global $tk_conta;
+		$ret['exec'] = false;
+		$ret['mes'] = false;
+		$ret['mensa'] = false;
+		if(!$config){
+			$ret['mensa'] = formatMensagem('dados de clientes não recebidos','danger');
+			$ret['mes'] = false;
+			return $ret;
+		}
+		$ac = isset($config['ac']) ? $config['ac'] : 'cad';
+		$Nome = isset($config['Nome']) ? $config['Nome'] : false;
+		$Email = isset($config['Email']) ? $config['Email'] : false;
+		$Cpf = isset($config['Cpf']) ? $config['Cpf'] : false;
+		$Nome = filter_var($Nome, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
+		$Email = filter_var($Email, FILTER_SANITIZE_EMAIL);
+		$no = explode(' ', $Nome);
+		if(count($no) <2){
+			$mes = 'Informe nome completo';
+			$ret['mes'] = $mes;
+			$ret['mensa'] = formatMensagem($mes,'danger');
+			return $ret;
+
+		}
+		if(isset($no[0])){
+			$Nome = $no[0];
+		}
+		if(isset($no[1])){
+			$sobrenome = $no[1];
+		}
+		$Celular = isset($config['Celular']) ? $config['Celular'] : false;
+		if(empty($Nome)){
+			$mes = 'Nome é obrigatório';
+			$ret['mensa'] = formatMensagem($mes,'danger');
+			$ret['mes'] = $mes;
+			return $ret;
+		}
+		if(empty($Email)){
+			$mes = 'Email é obrigatório';
+			$ret['mensa'] = formatMensagem($mes,'danger');
+			$ret['mes'] = $mes;
+			return $ret;
+		}
+		if(empty($Celular)){
+			$mes = 'Celular é obrigatório';
+			$ret['mensa'] = formatMensagem($mes,'danger');
+			$ret['mes'] = $mes;
+			return $ret;
+		}
+		if(empty($Cpf)){
+			$mes = 'CPF é obrigatório';
+			$ret['mensa'] = formatMensagem($mes,'danger');
+			$ret['mes'] = $mes;
+			return $ret;
+		}
+
+		$token = isset($config['token']) ? $config['token'] : uniqid();
+		// $config['campo_bus'] = 'Celular';
+		$config['campo_bus'] = 'Email';
+		$type_alt = 2;
+		$senha = str_replace('(','',$Cpf);
+		$senha = str_replace(')','',$senha);
+		$senha = str_replace('.','',$senha);
+		$senha = str_replace('-','',$senha);
+		// $nome = sanitize($nome);
+		// return $nome;
+		$dadosForm = [
+			'Nome' => $Nome,
+			'sobrenome' => $sobrenome,
+			'Celular' => trim($Celular),
+			'Email' => $Email,
+			'token' => $token,
+			'Cpf' => $Cpf,
+			'senha' => $senha,
+			'conf' => 's',
+			'pg' => 'comprar', //para cadastrar no asaas e logar
+			'sec' =>'cad_clientes_site',
+		];
+		if($id_cliente=is_clientLogado(true)){
+			// $cond_valid = "WHERE id = '".$id_cliente."' AND ".compleDelete();
+			$ac='cad';
+			$cond_valid = "WHERE ".$config['campo_bus']." = '".$dadosForm['Email']."' AND ".compleDelete();
+			// $dadosForm['campo_id']='id';
+			$type_alt = 1;
+		}else{
+			$cond_valid = "WHERE ".$config['campo_bus']." = '".$dadosForm['Email']."' AND ".compleDelete();
+		}
+		$tabUser = $GLOBALS['tab15'];
+		if($ac=='cad'){
+			$dadosForm['enviaEmail'] = 's';
+		}
+		$config2 = array(
+					'tab'=>$tabUser,
+					'valida'=>true,
+					'condicao_validar'=>$cond_valid,
+					'sqlAux'=>false,
+					'ac'=>$ac,
+					'type_alt'=>$type_alt,
+					'dadosForm' => $dadosForm
+		);
+		$ret = lib_json_array(lib_salvarFormulario($config2));
+		if(isset($ret['salvar']['mess']) && $ret['salvar']['mess']=='enc' && ($d_enc=$ret['salvar']['dados_enc'][0])){
+			$mes = 'Cliente com o e-mail '.$d_enc['Email'].' já cadastrado, efetue login para prosseguir';
+			$ret['mes'] = $mes;
+			$ret['mensa'] = formatMensagem($mes,'danger');
+			return $ret;
+		}elseif($ret['exec']==true && isset($ret['idCad']) && ($id_cliente = $ret['idCad'])){
+			$id_cliente = $ret['idCad'];
+		}
+		// $id_cliente = is_clientLogado(true);
+		//Verifica se o cliente ja está logado
+		// $compra = isset($conf['compra']) ? $conf['compra'] : false;
+		// if($id_cliente && $compra){
+		// 	if(isset($compra['id_curso']) && $compra['id_curso']){
+		// 		$dias_seguir 			= 1000;
+		// 		$dataSeg	  			= CalcularVencimento2(date('d/m/Y'),$dias_seguir);
+		// 		$_GET['data_seguir'] 	= dtBanco($dataSeg).' '.date('H:m:i');
+
+		// 		$registrarCompra = self::regCompra($config);
+		// 		$ret['registrarCompra'] = $registrarCompra;
+		// 		if(isAdmin(1))
+		// 			$ret['compra'] = $compra;
+		// 		if(isset($registrarCompra['matricula']['tokenCad'])){
+		// 			$ret['token'] = $registrarCompra['matricula']['tokenCad'];
+		// 		}
+		// 	}
+		// }
+		return $ret;
+	}
+	/**Metodo para registrar uma compra */
+	public function regCompra($config=false){
+		global $tk_conta;
+		$ret['exec'] = false;
+		$id_cliente = isset($config['id_cliente']) ? $config['id_cliente'] : is_clientLogado(true);
+		$compra = isset($config['compra']) ? $config['compra'] : false;
+		if(!$compra){
+			$ret['mensa'] = 'Compra não informada';
+			return $ret;
+		}
+		$configM['id_cliente']	= $id_cliente;
+		$configM['id_curso'] 	= isset($compra['id_curso'])?$compra['id_curso']:0;
+		$configM['id_turma'] 	= isset($compra['id_turma'])?$compra['id_turma']:0;
+		$configM['status'] 		= isset($compra['status'])?$compra['status']:1;
+		$configM['id_responsavel']=0;
+		$configM['token'] 		= uniqid();
+		$configM['Obs']=isset($compra['obs'])?$compra['obs']:false;
+		$configM['ac']='cad';
+		$configM['tab']=base64_encode($GLOBALS['tab12']);
+		$configM['evento']='Compra do site';
+		$configM['conf']='s';
+		$configM['tag']=json_encode(array('via_site'));
+		$configM['memo']=  'Via site';
+		if(isset($_SESSION[$tk_conta]['af']['autor']) && !empty($_SESSION[$tk_conta]['af']['autor'])){
+			$configM['seguido_por']=@$_SESSION[$tk_conta]['af']['autor'];
+			$configM['autor']=@$_SESSION[$tk_conta]['af']['autor'];
+			$configM['data_seguir']=$_GET['data_seguir'];
+		}
+		//Registrar a matricula do clientes
+		$retu = (new ecomerce)->registrarCompra($configM);
+		if(isset($retu['matricula']['exec'])){
+			$ret['exec'] = $retu['matricula']['exec'];
+			$ret['matricula'] = $retu['matricula'];
+
+		}
+		return $ret;
+	}
+	/**
+	 * envia dados do cliente ao asaas gateway
+	 */
+	public function cad_cliente_asaas($id_cliente = null)
+	{
+		$ret = false;
+		$asaas = new integraAsaas;
+		$config['id_cliente'] = $id_cliente;
+		$ret = $asaas->cadastrarCliente($config);
+
+		return $ret;
+	}
+	/**
+	 * Metodo para remover teste
+	 */
+	public function removeTest($tk_pedido = null,$ac='rc')
+	{
+		$ret['exec']=false;
+		$dp = Escola::dadosMatricula($tk_pedido);
+		if($dp){
+			if(!empty($dp[0]['id_asaas'])){
+				$ret = (new integraAsaas)->deletarCliente($dp[0]['id_cliente']);
+				if($ret['exec']){
+					if(!empty($dp[0]['Email'])){
+						$sqlDelCli = "DELETE FROM ".$GLOBALS['tab15']." WHERE Email='".$dp[0]['Email']."'";
+					}else{
+						$sqlDelCli = "DELETE FROM ".$GLOBALS['tab15']." WHERE id='".$dp[0]['id']."'";
+					}
+					$ret['delCli'] = salvarAlterar($sqlDelCli);
+					if($ret['delCli']){
+						$sqlDelMatr = "DELETE FROM ".$GLOBALS['tab12']." WHERE token='".$tk_pedido."'";
+						$ret['delMatr'] = salvarAlterar($sqlDelMatr);
+					}
+				}
+			}else{
+
+			}
+		}
+		dd($ret);
 		return $ret;
 	}
 }
