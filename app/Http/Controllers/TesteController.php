@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\admin\AsaasController;
 use App\Http\Controllers\admin\CobrancaController;
 use App\Http\Controllers\admin\PostController;
 use App\Mail\leilao\lancesNotific;
@@ -34,8 +35,9 @@ class TesteController extends Controller
         // $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
         // dd($tempo);
         // $ret = (new LeilaoController)->notific_update_admin(48,'admin');
-        $ret = (new LeilaoController)->list_alert_winners();
-        // dd($ret);
+        // $ret = (new AsaasController)->schemaCustomerAsaas(6);
+        $ret = Qlib::update_usermeta(3,'id_asaas','453124');
+        dd($ret);
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([
         //     'type' => 'notifica_finalizado',

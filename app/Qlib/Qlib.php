@@ -1162,6 +1162,53 @@ class Qlib
         return $ret;
     }
     /**
+     * Metodo para salvar ou atualizar os meta users
+     */
+    static function update_usermeta($user_id,$meta_key=null,$meta_value=null)
+    {
+        $ret = false;
+        $tab = 'usermeta';
+        if($user_id&&$meta_key&&$meta_value){
+            $verf = Qlib::totalReg($tab,"WHERE user_id='$user_id' AND meta_key='$meta_key'");
+            if($verf){
+                $ret=DB::table($tab)->where('user_id',$user_id)->where('meta_key',$meta_key)->update([
+                    'meta_value'=>$meta_value,
+                    'updated_at'=>self::dataBanco(),
+                ]);
+            }else{
+                $ret=DB::table($tab)->insert([
+                    'user_id'=>$user_id,
+                    'meta_value'=>$meta_value,
+                    'meta_key'=>$meta_key,
+                    'created_at'=>self::dataBanco(),
+                ]);
+            }
+            //$ret = DB::table($tab)->storeOrUpdate();
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para pegar os meta users
+     */
+    static function get_usermeta($user_id,$meta_key=null,$string=null)
+    {
+        $ret = false;
+        $tab = 'usermeta';
+        if($user_id){
+            if($meta_key){
+                $d = DB::table($tab)->where('user_id',$user_id)->where('meta_key',$meta_key)->get();
+                if($d->count()){
+                    if($string){
+                        $ret = $d[0]->meta_value;
+                    }else{
+                        $ret = [$d[0]->meta_value];
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
+    /**
      * Metodo para formatar os dados das bando de dados Post
      */
     static function dataPost($dados=false){
@@ -1292,5 +1339,9 @@ class Qlib
             $timestamp_final = $timestamp;
         }
         return date($saida, $timestamp_final);
+    }
+    static function get_company_data(){
+        $ret = self::lib_json_array(self::qoption('dados_empresa'));
+        return $ret;
     }
 }
