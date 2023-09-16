@@ -11,12 +11,14 @@ class AsaasController extends Controller
 {
 	public $Api_key;
 	public $url;
+    public $campo_cad_asaas;
 	public function __construct(){
 		$this->credenciais();
 	}
 	public function credenciais(){
 		$this->Api_key = Qlib::qoption('token-asaas');
 		$this->url = Qlib::qoption('url-asaas');//Produção : https://www.asaas.com
+		$this->campo_cad_asaas = 'id_asaas';//campo para salvar id do cliente no asaas
 	}
 	public function webhook($config=false){
 		$ret['exec'] = false;
@@ -243,7 +245,7 @@ class AsaasController extends Controller
 	public function integraCompraAsaas($confi=false){
 		$ret['exec'] = false;
 		$dadosCompra = false;
-		$ret['mens'] = formatMensagem('Erro ao efetuar pagamento!','danger',40000);
+		$ret['mens'] = Qlib::formatMensagemInfo('Erro ao efetuar pagamento!','danger',40000);
 		$dadosCli = false;
 		$confiv = array();
 		$dadosCliCad=false;
@@ -432,28 +434,28 @@ class AsaasController extends Controller
 		return json_decode($response,true);
 	}
 	public function criarCobrancaCartao($confi=false){
-			$confic['customer'] 													= isset($confi['customer']) ? $confi['customer'] 													: 'cus_000000331531'; //formato: uniqid
-			$confic['billingType']				 									= 'CREDIT_CARD';
-			$confic['dueDate']			 											= isset($confi['dueDate']) ? $confi['dueDate'] 														: uniqid();
-			$confic['value']				 											= isset($confi['value']) ? $confi['value'] 																: 0;
-			$confic['installmentCount']											= isset($confi['installmentCount']) ? $confi['installmentCount'] 							: false;
-			$confic['installmentValue']											= isset($confi['installmentValue']) ? $confi['installmentValue'] 								: false;
-			$confic['description']													= isset($confi['description']) ? $confi['description']											 	: false;
-			$confic['externalReference']										= isset($confi['externalReference']) ? $confi['externalReference'] 						: false;
-			$confic['creditCard']['holderName']								= isset($confi['creditCard']['holderName']) ? $confi['creditCard']['holderName'] 	: false;
-			$confic['creditCard']['number']										= isset($confi['creditCard']['number']) ? $confi['creditCard']['number'] 					: false;
-			$confic['creditCard']['expiryMonth']								= isset($confi['creditCard']['expiryMonth']) ? $confi['creditCard']['expiryMonth']	: false;
-			$confic['creditCard']['expiryYear']									= isset($confi['creditCard']['expiryYear']) ? $confi['creditCard']['expiryYear']	: false;
-			$confic['creditCard']['ccv']											= isset($confi['creditCard']['ccv']) ? $confi['creditCard']['ccv']	: false;
-			$confic['creditCardHolderInfo']['name']							= isset($confi['creditCardHolderInfo']['name']) ? $confi['creditCardHolderInfo']['name']	: false;
-			$confic['creditCardHolderInfo']['email']							= isset($confi['creditCardHolderInfo']['email']) ? $confi['creditCardHolderInfo']['email']	: false;
-			$confic['creditCardHolderInfo']['postalCode'] 				= isset($confi['creditCardHolderInfo']['postalCode']) ? $confi['creditCardHolderInfo']['postalCode']	: null;
+			$confic['customer'] = isset($confi['customer']) ? $confi['customer'] 													: 'cus_000000331531'; //formato: uniqid
+			$confic['billingType'] = 'CREDIT_CARD';
+			$confic['dueDate'] = isset($confi['dueDate']) ? $confi['dueDate'] 														: uniqid();
+			$confic['value'] = isset($confi['value']) ? $confi['value'] 																: 0;
+			$confic['installmentCount'] = isset($confi['installmentCount']) ? $confi['installmentCount'] 							: false;
+			$confic['installmentValue'] = isset($confi['installmentValue']) ? $confi['installmentValue'] 								: false;
+			$confic['description'] = isset($confi['description']) ? $confi['description']											 	: false;
+			$confic['externalReference'] = isset($confi['externalReference']) ? $confi['externalReference'] 						: false;
+			$confic['creditCard']['holderName'] = isset($confi['creditCard']['holderName']) ? $confi['creditCard']['holderName'] 	: false;
+			$confic['creditCard']['number'] = isset($confi['creditCard']['number']) ? $confi['creditCard']['number'] 					: false;
+			$confic['creditCard']['expiryMonth'] = isset($confi['creditCard']['expiryMonth']) ? $confi['creditCard']['expiryMonth']	: false;
+			$confic['creditCard']['expiryYear'] = isset($confi['creditCard']['expiryYear']) ? $confi['creditCard']['expiryYear']	: false;
+			$confic['creditCard']['ccv'] = isset($confi['creditCard']['ccv']) ? $confi['creditCard']['ccv']	: false;
+			$confic['creditCardHolderInfo']['name'] = isset($confi['creditCardHolderInfo']['name']) ? $confi['creditCardHolderInfo']['name']	: false;
+			$confic['creditCardHolderInfo']['email'] = isset($confi['creditCardHolderInfo']['email']) ? $confi['creditCardHolderInfo']['email']	: false;
+			$confic['creditCardHolderInfo']['postalCode'] = isset($confi['creditCardHolderInfo']['postalCode']) ? $confi['creditCardHolderInfo']['postalCode']	: null;
 			//$confic['creditCardHolderInfo']['postalCode'] 				= '89223-005';
-			$confic['creditCardHolderInfo']['cpfCnpj']						= isset($confi['creditCardHolderInfo']['cpfCnpj']) ? $confi['creditCardHolderInfo']['cpfCnpj']	: false;
-			$confic['creditCardHolderInfo']['addressNumber']			= isset($confi['creditCardHolderInfo']['addressNumber']) ? $confi['creditCardHolderInfo']['addressNumber']	: null;
-			$confic['creditCardHolderInfo']['addressComplement'] 	= isset($confi['creditCardHolderInfo']['addressComplement']) ? $confi['creditCardHolderInfo']['addressComplement']	: null;
-			$confic['creditCardHolderInfo']['phone'] 						= isset($confi['creditCardHolderInfo']['phone']) ? $confi['creditCardHolderInfo']['phone']	: $confi['creditCardHolderInfo']['mobilePhone'];
-			$confic['creditCardHolderInfo']['mobilePhone'] 				= isset($confi['creditCardHolderInfo']['mobilePhone']) ? $confi['creditCardHolderInfo']['mobilePhone']	: null;
+			$confic['creditCardHolderInfo']['cpfCnpj'] = isset($confi['creditCardHolderInfo']['cpfCnpj']) ? $confi['creditCardHolderInfo']['cpfCnpj']	: false;
+			$confic['creditCardHolderInfo']['addressNumber'] = isset($confi['creditCardHolderInfo']['addressNumber']) ? $confi['creditCardHolderInfo']['addressNumber']	: null;
+			$confic['creditCardHolderInfo']['addressComplement'] = isset($confi['creditCardHolderInfo']['addressComplement']) ? $confi['creditCardHolderInfo']['addressComplement']	: null;
+			$confic['creditCardHolderInfo']['phone'] = isset($confi['creditCardHolderInfo']['phone']) ? $confi['creditCardHolderInfo']['phone']	: $confi['creditCardHolderInfo']['mobilePhone'];
+			$confic['creditCardHolderInfo']['mobilePhone'] = isset($confi['creditCardHolderInfo']['mobilePhone']) ? $confi['creditCardHolderInfo']['mobilePhone']	: null;
 
 			$json_confic = json_encode($confic,JSON_UNESCAPED_UNICODE);//exit;
 			$ret['confic'] = $confic;
@@ -783,19 +785,24 @@ class AsaasController extends Controller
 		}
 		return $ret;
 	}
+    /**
+     * Mentodo para envidar o cadastro para o asaas
+     * @param array $confi, float $confere=true para atualizar o cadastro no asaas
+     */
 	public function cadastrarCliente($confi=false,$confere=false){
 			$ret = false;
 			$ret['exec'] = false;
 			//print_r($confi);
 			if(isset($confi['id_cliente']) && !empty($confi['id_cliente'])){
-					$sql = "SELECT * FROM ".$GLOBALS['tab15']. " WHERE `id`= '".$confi['id_cliente']."' ";
 					$dadosCli = User::Find($confi['id_cliente']);
 					if($dadosCli){
                         $dadosCli = $dadosCli->toArray();
                         $id_cliente = $dadosCli['id'];
-						$id_asaas = Qlib::get_usermeta($id_cliente,'id_asaas',true);
+						$id_asaas = Qlib::get_usermeta($id_cliente,$this->campo_cad_asaas,true);
                         $ret['dadosCli'] = $dadosCli;
 						$schemaAsaas = $this->schemaCustomerAsaas(false,$dadosCli);
+                        $ret['schemaAsaas'] = $schemaAsaas;
+                        $ret['id_asaas'] = $id_asaas;
 						if((!$id_asaas) || ($id_asaas && empty($id_asaas))){
 							$url = $this->url."/api/v3/customers";
 							$ch = curl_init();
@@ -815,76 +822,31 @@ class AsaasController extends Controller
 							$response = curl_exec($ch);
 							curl_close($ch);
 							$ret['cad_asaas'] = json_decode($response,true);
-
 							if(isset($ret['cad_asaas']['id']) && !empty($ret['cad_asaas']['id'])){
-								$ret['exec'] = true;
-
-								// $ret['upt']['sql'] = "UPDATE IGNORE ".$GLOBALS['tab15']." SET `id_asaas`='".$ret['cad_asaas']['id']."' WHERE `id`='".$dadosCli[0]['id']."'";
-								$ret['upt']['exec'] = Qlib::update_usermeta($ret['upt']['sql']);
-								/*if(isset($confi['criarCobrancaBoleto']) && $confi['criarCobrancaBoleto'] == 's'){
-									$confi['dadosCob']['id_cliente_asaas'] = $ret['cad_asaas']['id'];
-									$confi['dadosCob']['token_pedido'] 		= $confi['token_pedido'];
-									$ret['criarCobrancaBoleto'] = $this->criarCobrancaBoleto($confi['dadosCob']);
-								}*/
+                                $id_asaas = $ret['cad_asaas']['id'];
+								$ret['exec'] = Qlib::update_usermeta($id_cliente,$this->campo_cad_asaas,$id_asaas);
 							}
 						}else{
-									// $celular = str_replace('(','',$dadosCli[0]['Celular']);
-									// $celular = str_replace(')','',$celular);
-									// $celular = str_replace('-','',$celular);
-
-									// $telefone = str_replace('(','',$dadosCli[0]['Tel']);
-									// $telefone = str_replace(')','',$telefone);
-									// $telefone = str_replace('-','',$telefone);
-
-									// $cep = str_replace('(','',$dadosCli[0]['Cep']);
-									// $cep = str_replace(')','',$cep);
-
-									// $pos = strpos($dadosCli['email'],',');
-									// if($pos===false){
-									// 	$em = explode(',',$dadosCli['email']);
-									// 	$email = $em[0];
-									// 	$emailAdicional = str_replace($em[0].',','',$dadosCli['email']);
-									// }else{
-									// 	$email = $dadosCli['email'];
-									// 	$emailAdicional = '';
-									// }
-									// $schemaAsaas = "{
-									//   \"name\": \"".$dadosCli[0]['Nome']." ".$dadosCli[0]['sobrenome']."\",
-									//   \"email\": \"".$email."\",
-									//   \"phone\": \"".$telefone."\",
-									//   \"mobilePhone\": \"".$celular."\",
-									//   \"cpfCnpj\": \"".$dadosCli[0]['Cpf']."\",
-									//   \"postalCode\": \"".$cep."\",
-									//   \"address\": \"".$dadosCli['endereco']."\",
-									//   \"addressNumber\": \"".$dadosCli[0]['Numero']."\",
-									//   \"complement\": \"".$dadosCli[0]['Compl']."\",
-									//   \"province\": \"".$dadosCli[0]['Bairro']."\",
-									//   \"externalReference\": \"".$dadosCli[0]['id']."\",
-									//   \"notificationDisabled\": false,
-									//   \"additionalEmails\": \"".$emailAdicional."\",
-									//   \"municipalInscription\": \"\",
-									//   \"stateInscription\": \"\"
-									// }";
-									if($confere && $schemaAsaas){
-											$ch = curl_init();
-											curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers/".$dadosCli[0]['id_asaas']);
-											curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-											curl_setopt($ch, CURLOPT_HEADER, FALSE);
-											curl_setopt($ch, CURLOPT_POST, TRUE);
-											curl_setopt($ch, CURLOPT_POSTFIELDS, $schemaAsaas);
-											curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-											  "Content-Type: application/json",
-											  "access_token: ".$this->Api_key.""
-											));
-											$response = curl_exec($ch);
-											curl_close($ch);
-											$ret['exec'] = true;
-											$ret['cad_asaas'] = json_decode($response,true);
-									}else{
-											$ret['exec'] = true;
-											$ret['cad_asaas'] = json_decode($schemaAsaas,true);
-											$ret['cad_asaas']['id'] = $dadosCli[0]['id_asaas'];
-									}
+							if($confere && $schemaAsaas){
+								$ch = curl_init();
+								curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers/".$id_asaas);
+								curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+								curl_setopt($ch, CURLOPT_HEADER, FALSE);
+								curl_setopt($ch, CURLOPT_POST, TRUE);
+								curl_setopt($ch, CURLOPT_POSTFIELDS, $schemaAsaas);
+								curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+								  "Content-Type: application/json",
+								  "access_token: ".$this->Api_key.""
+								));
+								$response = curl_exec($ch);
+								curl_close($ch);
+								$ret['exec'] = true;
+								$ret['cad_asaas'] = json_decode($response,true);
+							}else{
+								$ret['exec'] = true;
+								$ret['cad_asaas'] = json_decode($schemaAsaas,true);
+								$ret['cad_asaas']['id'] = $id_asaas;
+							}
 						}
 					}
 			}
@@ -892,11 +854,12 @@ class AsaasController extends Controller
 	}
 	public function deletarCliente($id_cliente=false){
 		$ret['exec'] = false;
-		$sql = "SELECT * FROM ".$GLOBALS['tab15']. " WHERE `id`= '".$id_cliente."' ";
-		$dadosCli = buscaValoresDb($sql);
+		// $sql = "SELECT * FROM ".$GLOBALS['tab15']. " WHERE `id`= '".$id_cliente."' ";
+		$dadosCli = User::Find($id_cliente);
 		if($dadosCli){
 			$schemaAsaas = $this->schemaCustomerAsaas(false,$dadosCli);
-			if(!empty($dadosCli[0]['id_asaas'])){
+            $id_asaas = Qlib::get_usermeta($id_cliente,$this->campo_cad_asaas);
+			if(!empty($id_asaas)){
 				$ch = curl_init();
 				curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers/".$dadosCli[0]['id_asaas']);
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);

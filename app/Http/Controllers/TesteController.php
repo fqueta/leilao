@@ -35,8 +35,9 @@ class TesteController extends Controller
         // $tempo  = Qlib::diffDate('2014-12-01 15:00:00',Qlib::dataLocalDb(),'H');
         // dd($tempo);
         // $ret = (new LeilaoController)->notific_update_admin(48,'admin');
-        // $ret = (new AsaasController)->schemaCustomerAsaas(6);
-        $ret = Qlib::update_usermeta(3,'id_asaas','453124');
+        // $ret = (new AsaasController)->cadastrarCliente(['id_cliente'=>6],true);
+        // $ret = (new AsaasController)->deletarCliente('cus_000005435290');
+        $ret = (new AsaasController)->deletarCliente(6);
         dd($ret);
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([
