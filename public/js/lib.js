@@ -847,7 +847,6 @@ function submitFormulario(objForm,funCall,funError){
         }
     }
     var route = objForm.attr('action');
-    //console.log(route);
     objForm.validate({
         submitHandler: function(form) {
             $.ajax({

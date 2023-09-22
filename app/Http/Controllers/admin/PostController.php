@@ -970,6 +970,8 @@ class PostController extends Controller
             }
             unset($dados['d_meta']);
         }
+        //carrega config
+        $dados['config'] = isset($dados['config'])?$dados['config']:[];
         foreach ($dados as $key => $value) {
             if($key!='_method'&&$key!='_token'&&$key!='ac'&&$key!='ajax'){
                 /*if($key=='data_batismo' || $key=='data_nasci'){

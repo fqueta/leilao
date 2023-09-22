@@ -38,6 +38,7 @@ Route::fallback(function () {
 
 
 Auth::routes();
+Auth::routes(['register' => false]);
 Route::prefix('admin')->group(function(){
     // Auth::routes();
     // Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');

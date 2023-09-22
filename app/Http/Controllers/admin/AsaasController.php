@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AsaasController extends Controller
 {
@@ -242,146 +243,187 @@ class AsaasController extends Controller
 
 			return json_decode($response,true);
 	}
+    /**
+     * Metodo para integrar os pagamentos faz as requisições com a api para forma de pagamento cartão pix boleto
+     * @param array
+     * @return array
+     */
 	public function integraCompraAsaas($confi=false){
+        //uso
+        // $conf=[
+        //     'compra' => [
+        //         'token' =>'',
+        //         'id_cliente' =>6,
+        //         'valor' =>'',
+        //         'forma_pagamento' =>'cred_card || boleto || pix',
+        //         'descricao' =>'Pagamento de leilao 14',
+        //     ],
+        //     'cartao' => [
+        //         'valor' =>'02X25,50',
+        //         'nome_no_cartao' =>'Jose Onifarsio',
+        //         'numero_cartao' =>'000000000000000000001',
+        //         'validade_mes' =>'05',
+        //         'validade_ano' =>'2025',
+        //         'codigo_seguranca' =>'123',
+        //     ],
+        //     'responsavel' => [],
+        // ];
+        //$ret = (new AsaasController)->integraCompraAsaas($conf);
 		$ret['exec'] = false;
 		$dadosCompra = false;
 		$ret['mens'] = Qlib::formatMensagemInfo('Erro ao efetuar pagamento!','danger',40000);
-		$dadosCli = false;
 		$confiv = array();
 		$dadosCliCad=false;
-		if(isset($confi['compra']['token'])){
-			$confi['token_compra'] = trim($confi['compra']['token']);
-			$sqlCompra = "SELECT * FROM ".$GLOBALS['tab12']. " WHERE `token`='".$confi['token_compra']."' AND ".compleDelete();
-			$dadosCompra = buscaValoresDb($sqlCompra);
-			if($dadosCompra){
-				$dadosCurso = dados_tab($GLOBALS['tab10'],'*',"WHERE id='".$dadosCompra[0]['id_curso']."'");
-				if(isset($dadosCompra[0]['id_cliente']) && $dadosCurso){
-					$dadosCliCad = $this->cadastrarCliente($dadosCompra[0]);
-					$ret['dadosCliCad'] = $dadosCliCad;
-					if(isset($confi['compra']['forma_pagamento'])){
-						if($confi['compra']['forma_pagamento']=='cred_card'){
-							if(isset($dadosCliCad['exec'])){
-								$confiv['customer'] = isset($confi['customer']) ? $confi['customer'] : $dadosCliCad['cad_asaas']['id']; //formato: uniqid
-								$confiv['dueDate']	= isset($confi['dueDate']) ? $confi['dueDate'] 	: date('Y-m-d');
-								$confiv['value']	= isset($confi['value']) ? $confi['value'] 	: $confi['compra']['valor'];
-								$pagamento = explode("X",$confi['cartao']['valor']);
-								$confiv['installmentCount']	= isset($confi['installmentCount']) ? $confi['installmentCount'] : (int)$pagamento[0];
-								$installment = number_format((double)$pagamento[1],2,'.','');
-								$confiv['installmentValue']	= isset($confi['installmentValue']) ? $confi['installmentValue'] : precoDbdase($installment);
-								//$description = 'Compra do curso '.buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
-								$description = buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
-								$confiv['description']= isset($confi['description']) ? $confi['description']											 	: $description;
-								$confiv['externalReference']= isset($confi['externalReference']) ? $confi['externalReference'] 						: uniqid();
-								$confiv['creditCard']['holderName']	= isset($confi['creditCard']['holderName']) ? $confi['creditCard']['holderName'] 	: $confi['cartao']['nome_no_cartao'];
-								$confiv['creditCard']['number']	= isset($confi['creditCard']['number']) ? $confi['creditCard']['number'] 					: str_replace(' ','',$confi['cartao']['numero_cartao']);
-								$confiv['creditCard']['expiryMonth']= isset($confi['creditCard']['expiryMonth']) ? $confi['creditCard']['expiryMonth']	: $confi['cartao']['validade_mes'];
-								$confiv['creditCard']['expiryYear']	= isset($confi['creditCard']['expiryYear']) ? $confi['creditCard']['expiryYear']			: $confi['cartao']['validade_ano'];
-								$confiv['creditCard']['ccv']= isset($confi['creditCard']['ccv']) ? $confi['creditCard']['ccv']								: $confi['cartao']['codigo_seguranca'];
-								$confiv['creditCardHolderInfo']['name']	= isset($confi['creditCardHolderInfo']['name']) ? $confi['creditCardHolderInfo']['name']: $confi['cartao']['nome_no_cartao'];
-								if(isset($confi['cartao']['dono']) && $confi['cartao']['dono'] =='outro' && isset($confi['responsavel'])){
-									$confiv['creditCardHolderInfo']['email']= isset($confi['creditCardHolderInfo']['email']) ? $confi['creditCardHolderInfo']['email']	: $confi['responsavel']['Email'];
-									$confiv['creditCardHolderInfo']['cpfCnpj']	= isset($confi['creditCardHolderInfo']['cpfCnpj']) ? $confi['creditCardHolderInfo']['cpfCnpj']	: str_replace('.','',$confi['responsavel']['Cpf']);
-									$confiv['creditCardHolderInfo']['addressNumber']= isset($confi['creditCardHolderInfo']['addressNumber']) ? $confi['creditCardHolderInfo']['addressNumber']	: $confi['responsavel']['Numero'];
-									$confiv['creditCardHolderInfo']['addressComplement'] = isset($confi['creditCardHolderInfo']['addressComplement']) ? $confi['creditCardHolderInfo']['addressComplement']	: $confi['responsavel']['Compl'];
-									$confiv['creditCardHolderInfo']['phone'] = isset($confi['creditCardHolderInfo']['phone']) ? $confi['creditCardHolderInfo']['phone']	: $dadosCliCad['cad_asaas']['phone'];
-									$confiv['creditCardHolderInfo']['postalCode'] = isset($confi['creditCardHolderInfo']['postalCode']) ? $confi['creditCardHolderInfo']['postalCode']	: $confi['responsavel']['Cep'];
-									$celular = str_replace('(','',$confi['responsavel']['Celular']);
-									$celular = str_replace(')','',$celular);
-									$celular = str_replace('-','',$celular);
-									$confiv['creditCardHolderInfo']['mobilePhone'] = isset($confi['creditCardHolderInfo']['mobilePhone']) ? $confi['creditCardHolderInfo']['mobilePhone']	: $celular;
-								}else{
-									$confiv['creditCardHolderInfo']['email']= isset($confi['creditCardHolderInfo']['email']) ? $confi['creditCardHolderInfo']['email']	: $dadosCliCad['cad_asaas']['email'];
-									$confiv['creditCardHolderInfo']['cpfCnpj']= isset($confi['creditCardHolderInfo']['cpfCnpj']) ? $confi['creditCardHolderInfo']['cpfCnpj']	: $dadosCliCad['cad_asaas']['cpfCnpj'];
-									$confiv['creditCardHolderInfo']['addressNumber']= isset($confi['creditCardHolderInfo']['addressNumber']) ? $confi['creditCardHolderInfo']['addressNumber']	: $dadosCliCad['cad_asaas']['addressNumber'];
-									$confiv['creditCardHolderInfo']['addressComplement'] = isset($confi['creditCardHolderInfo']['addressComplement']) ? $confi['creditCardHolderInfo']['addressComplement']	: $dadosCliCad['cad_asaas']['complement'];
-									$confiv['creditCardHolderInfo']['phone'] = isset($confi['creditCardHolderInfo']['phone']) ? $confi['creditCardHolderInfo']['phone']	: $dadosCliCad['cad_asaas']['phone'];
-									$confiv['creditCardHolderInfo']['postalCode'] = isset($confi['creditCardHolderInfo']['postalCode']) ? $confi['creditCardHolderInfo']['postalCode']	: $dadosCliCad['cad_asaas']['postalCode'];
-									$confiv['creditCardHolderInfo']['mobilePhone'] = isset($confi['creditCardHolderInfo']['mobilePhone']) ? $confi['creditCardHolderInfo']['mobilePhone']	: $dadosCliCad['cad_asaas']['mobilePhone'];
-								}
-								$confiv['creditCardHolderInfo']['cpfCnpj'] = str_replace('.','',$confiv['creditCardHolderInfo']['cpfCnpj']);
-								$confiv['creditCardHolderInfo']['cpfCnpj'] = str_replace('-','',$confiv['creditCardHolderInfo']['cpfCnpj']);
-								$confiv['creditCardHolderInfo']['postalCode'] = str_replace('-','',$confiv['creditCardHolderInfo']['postalCode']);
-								$ret['criarCobrancaCartao'] = $this->criarCobrancaCartao($confiv);
-								$ret['confiv'] = $confiv;
-								if(isset($ret['criarCobrancaCartao']['asaas']['id'])){
-									$ret['exec'] = true;
-									$ret['mens'] = formatMensagem('Pagamento Efetuado com sucesso!','success',40000);
+        $token = isset($confi['compra']['token']) ? $confi['compra']['token'] : false;
+        $forma_pagamento = isset($confi['compra']['forma_pagamento']) ? $confi['compra']['forma_pagamento'] : false;
+        $valor = isset($confi['compra']['valor'])?$confi['compra']['valor']:0; //valor total da compra
+        $id_asaas = false;
+		$description = isset($confi['compra']['descricao'])?$confi['compra']['descricao']: Qlib::buscaValorDb0('posts','token',$token,'post_title');
+		//$confi['cartao']['valor'] = 10X52,30 total da compra e a parcela tbm
+        $user_id = isset($confi['compra']['id_cliente']) ? $confi['compra']['id_cliente'] : Auth::id();
+		if($token){
+            if(isset($forma_pagamento)){
+                if($user_id){
+                    $dadosCliCad = $this->cadastrarCliente(['id_cliente'=>$user_id],true);
+                    if(isset($dadosCliCad['cad_asaas']['id'])){
+                        $id_asaas = $dadosCliCad['cad_asaas']['id'];
+                    }
+                }
+                // dd($dadosCliCad);
+                if($forma_pagamento=='cred_card' && $id_asaas){
+                    if(isset($dadosCliCad['exec'])){
+                        $confiv['customer'] = isset($confi['customer']) ? $confi['customer'] : $id_asaas; //formato: uniqid
+                        $confiv['dueDate']	= isset($confi['dueDate']) ? $confi['dueDate'] 	: date('Y-m-d');
+                        $confiv['value']	= isset($confi['value']) ? $confi['value'] 	: $valor;
+                        $pagamento = explode("X",$confi['cartao']['valor']);
+                        $confiv['installmentCount']	= isset($confi['installmentCount']) ? $confi['installmentCount'] : (int)$pagamento[0];
+                        $installment = number_format((double)$pagamento[1],2,'.','');
+                        $confiv['installmentValue']	= isset($confi['installmentValue']) ? $confi['installmentValue'] : Qlib::precoDbdase($installment);
+                        //$description = 'Compra do curso '.buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
+                        $confiv['description']= isset($confi['description']) ? $confi['description']											 	: $description;
+                        $confiv['externalReference']= isset($confi['externalReference']) ? $confi['externalReference'] : $token;
+                        $confiv['creditCard']['holderName']	= isset($confi['creditCard']['holderName']) ? $confi['creditCard']['holderName'] 	: $confi['cartao']['nome_no_cartao'];
+                        $confiv['creditCard']['number']	= isset($confi['creditCard']['number']) ? $confi['creditCard']['number'] 					: str_replace(' ','',$confi['cartao']['numero_cartao']);
+                        $confiv['creditCard']['expiryMonth']= isset($confi['creditCard']['expiryMonth']) ? $confi['creditCard']['expiryMonth']	: $confi['cartao']['validade_mes'];
+                        $confiv['creditCard']['expiryYear']	= isset($confi['creditCard']['expiryYear']) ? $confi['creditCard']['expiryYear']			: $confi['cartao']['validade_ano'];
+                        $confiv['creditCard']['ccv']= isset($confi['creditCard']['ccv']) ? $confi['creditCard']['ccv']								: $confi['cartao']['codigo_seguranca'];
+                        $confiv['creditCardHolderInfo']['name']	= isset($confi['creditCardHolderInfo']['name']) ? $confi['creditCardHolderInfo']['name']: $confi['cartao']['nome_no_cartao'];
+                        if(isset($confi['cartao']['dono']) && $confi['cartao']['dono'] =='outro' && isset($confi['responsavel'])){
+                            $confiv['creditCardHolderInfo']['email']= isset($confi['creditCardHolderInfo']['email']) ? $confi['creditCardHolderInfo']['email']	: $confi['responsavel']['Email'];
+                            $confiv['creditCardHolderInfo']['cpfCnpj']	= isset($confi['creditCardHolderInfo']['cpfCnpj']) ? $confi['creditCardHolderInfo']['cpfCnpj']	: str_replace('.','',$confi['responsavel']['Cpf']);
+                            $confiv['creditCardHolderInfo']['addressNumber']= isset($confi['creditCardHolderInfo']['addressNumber']) ? $confi['creditCardHolderInfo']['addressNumber']	: $confi['responsavel']['Numero'];
+                            $confiv['creditCardHolderInfo']['addressComplement'] = isset($confi['creditCardHolderInfo']['addressComplement']) ? $confi['creditCardHolderInfo']['addressComplement']	: $confi['responsavel']['Compl'];
+                            $confiv['creditCardHolderInfo']['phone'] = isset($confi['creditCardHolderInfo']['phone']) ? $confi['creditCardHolderInfo']['phone']	: $dadosCliCad['cad_asaas']['phone'];
+                            $confiv['creditCardHolderInfo']['postalCode'] = isset($confi['creditCardHolderInfo']['postalCode']) ? $confi['creditCardHolderInfo']['postalCode']	: $confi['responsavel']['Cep'];
+                            $celular = str_replace('(','',$confi['responsavel']['Celular']);
+                            $celular = str_replace(')','',$celular);
+                            $celular = str_replace('-','',$celular);
+                            $confiv['creditCardHolderInfo']['mobilePhone'] = isset($confi['creditCardHolderInfo']['mobilePhone']) ? $confi['creditCardHolderInfo']['mobilePhone']	: $celular;
+                        }else{
+                            $confiv['creditCardHolderInfo']['email']= isset($confi['creditCardHolderInfo']['email']) ? $confi['creditCardHolderInfo']['email']	: $dadosCliCad['cad_asaas']['email'];
+                            $confiv['creditCardHolderInfo']['cpfCnpj']= isset($confi['creditCardHolderInfo']['cpfCnpj']) ? $confi['creditCardHolderInfo']['cpfCnpj']	: $dadosCliCad['cad_asaas']['cpfCnpj'];
+                            $confiv['creditCardHolderInfo']['addressNumber']= isset($confi['creditCardHolderInfo']['addressNumber']) ? $confi['creditCardHolderInfo']['addressNumber']	: $dadosCliCad['cad_asaas']['addressNumber'];
+                            $confiv['creditCardHolderInfo']['addressComplement'] = isset($confi['creditCardHolderInfo']['addressComplement']) ? $confi['creditCardHolderInfo']['addressComplement']	: $dadosCliCad['cad_asaas']['complement'];
+                            $confiv['creditCardHolderInfo']['phone'] = isset($confi['creditCardHolderInfo']['phone']) ? $confi['creditCardHolderInfo']['phone']	: $dadosCliCad['cad_asaas']['phone'];
+                            $confiv['creditCardHolderInfo']['postalCode'] = isset($confi['creditCardHolderInfo']['postalCode']) ? $confi['creditCardHolderInfo']['postalCode']	: $dadosCliCad['cad_asaas']['postalCode'];
+                            $confiv['creditCardHolderInfo']['mobilePhone'] = isset($confi['creditCardHolderInfo']['mobilePhone']) ? $confi['creditCardHolderInfo']['mobilePhone']	: $dadosCliCad['cad_asaas']['mobilePhone'];
+                        }
+                        $confiv['creditCardHolderInfo']['cpfCnpj'] = str_replace('.','',$confiv['creditCardHolderInfo']['cpfCnpj']);
+                        $confiv['creditCardHolderInfo']['cpfCnpj'] = str_replace('-','',$confiv['creditCardHolderInfo']['cpfCnpj']);
+                        $confiv['creditCardHolderInfo']['postalCode'] = str_replace('-','',$confiv['creditCardHolderInfo']['postalCode']);
+                        $criarCobrancaCartao = $this->criarCobrancaCartao($confiv);
+                        $ret['criarCobrancaCartao'] = $criarCobrancaCartao;
+                        $ret['confiv'] = $confiv;
 
-									$resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
-									$urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
-									if(isAdmin(1) || isset($_GET['fq'])){
-										$ret['urlUpd'] = $urlUpd;
-									}
-									$ret['salvarResumo'] = salvarAlterar($urlUpd);
-								}
-							}else{
-								$ret['mens'] = formatMensagem('Forma de pagamento não selecionada!','danger',40000);
-							}
-						}
-						if($confi['compra']['forma_pagamento']=='boleto' || $confi['compra']['forma_pagamento']== 'pix'){
-							$fp = 'BOLETO';
-							if($confi['compra']['forma_pagamento']=='pix'){
-								$filderPayCallback = 'criarCobrancaPix';
-								$fp = 'PIX';
-								$vencimento = date('d/m/Y');
-							}else{
-								$prazo_boleto = Qlib::qoption('prazo_boleto') ? Qlib::qoption('prazo_boleto') : 1;
-								$vencimento = isset($confi['compra']['Vencimento']) ? $confi['compra']['Vencimento'] : CalcularVencimento2(date('d/m/Y'),$prazo_boleto);
-								$filderPayCallback = 'criarCobrancaBoleto';
-							}
-							if(isset($dadosCliCad['exec'])){
-								$confic['customer'] 		= isset($confi['customer']) ? $confi['customer'] 	: $dadosCliCad['dadosCli']['id_asaas']; //formato: uniqid
-								$confic['billingType']	= isset($confi['billingType']) ? $confi['billingType'] 	: $fp;
-								$confic['dueDate']	 = isset($confi['dueDate']) ? $confi['dueDate']	: dtBanco($vencimento);
-								$confic['value']	= isset($confi['compra']['valor']) ? $confi['compra']['valor']	: $dadosCompra[0]['total'];
-								if(!$confic['value']){
-									$vl = (double)$dadosCurso[0]['valor'];$ins=(double)$dadosCurso[0]['inscricao'];
-									$confic['value'] =  precoDbdase($vl+ $ins);
-									// Qlib::lib_print($dadosCurso[0]);
-									// dd($confic);
-								}
-								//$confic['installmentCount']= isset($confi['installmentCount']) ? $confi['installmentCount'] 							: false;
-								//$confic['installmentValue']= isset($confi['installmentValue']) ? $confi['installmentValue'] 								: false;
-								$description = false;
-								$categoriaCurso = buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'categoria');
-								if($categoriaCurso != 'cursos_online'){
-									$description = 'Matrícula ';
-								}
-								$description .= buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
-								$confic['description'] = isset($confi['description']) ? $confi['description']: $description;
-								//$confic['externalReference']										= isset($confi['externalReference']) ? $confi['externalReference'] 						: $confi['compra']['token'];
-								$confic['externalReference']= isset($dadosCompra[0]['token']) ? $dadosCompra[0]['token'] 	: uniqid();
-								$confic['fine'] = isset($confi['multa']) ? $confi['multa'] : array('value'=>0); //Informações de multa para pagamento após o vencimento
-								$confic['interest'] = isset($confi['juros']) ? $confi['juros'] : array('value'=>0,'dueDateLimitDays'=>0); //Informações de multa para pagamento após o vencimento
-								$confic['value'] = number_format((double)$confic['value'],2,'.','');
-								if($confi['compra']['forma_pagamento']=='pix'){
-									$ret[$filderPayCallback] = $this->cobrancaPix($confic);
-								}else{
-									$ret[$filderPayCallback] = json_decode($this->criarCobrancaBoleto($confic),true);
-								}
-								if(isset($ret[$filderPayCallback]['object']) || (@$ret[$filderPayCallback]['exec'])){
-									$ret['exec'] = true;
-									$ret['mens'] = formatMensagem('Pagamento Efetuado com sucesso!','success',40000);
-									$resPagamento = json_encode($ret[$filderPayCallback]);
-									$urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
-									if(isAdmin(1) || isset($_GET['fq'])){
-										$ret['urlUpd'] = $urlUpd;
-									}
-									$ret['salvarResumo'] = salvarAlterar($urlUpd);
-									// $ret['urlUpd'] = salvarAlterar($urlUpd);
-								}elseif(isset($ret[$filderPayCallback]['errors'][0]['description'])){
-									$ret['mens'] = formatMensagemInfo($ret[$filderPayCallback]['errors'][0]['description'],'danger',40000);
-								}
-								$ret['confic'] = $confic;
-							}
-						}
-					}
-				}
-			}
+                        if(isset($ret['criarCobrancaCartao']['asaas']['id'])){
+                            $ret['exec'] = true;
+                            $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
+                            // $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
+                            // $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
+                            // if(isAdmin(1) || isset($_GET['fq'])){
+                            //     $ret['urlUpd'] = $urlUpd;
+                            // }
+                            // $ret['salvarResumo'] = salvarAlterar($urlUpd);
+                        }elseif(isset($ret['criarCobrancaCartao']['asaas']['errors'][0]['description']) && ($mes=$ret['criarCobrancaCartao']['asaas']['errors'][0]['description'])){
+                            $ret['mens'] = Qlib::formatMensagemInfo($mes,'danger');
+                        }
+                    }else{
+                        $ret['mens'] = Qlib::formatMensagemInfo('Forma de pagamento não selecionada!','danger');
+                    }
+                }
+                if($forma_pagamento=='boleto' || $forma_pagamento== 'pix'){
+                    $fp = 'BOLETO';
+                    if($forma_pagamento=='pix'){
+                        $filderPayCallback = 'criarCobrancaPix';
+                        $fp = 'PIX';
+                        $vencimento = date('d/m/Y');
+                    }else{
+                        $prazo_boleto = Qlib::qoption('prazo_boleto') ? Qlib::qoption('prazo_boleto') : 1;
+                        $vencimento = isset($confi['compra']['Vencimento']) ? $confi['compra']['Vencimento'] : CalcularVencimento2(date('d/m/Y'),$prazo_boleto);
+                        $filderPayCallback = 'criarCobrancaBoleto';
+                    }
+                    if(isset($dadosCliCad['exec'])){
+                        $confic['customer'] 		= isset($confi['customer']) ? $confi['customer'] 	: $dadosCliCad['dadosCli']['id_asaas']; //formato: uniqid
+                        $confic['billingType']	= isset($confi['billingType']) ? $confi['billingType'] 	: $fp;
+                        $confic['dueDate']	 = isset($confi['dueDate']) ? $confi['dueDate']	: dtBanco($vencimento);
+                        $confic['value']	= isset($confi['compra']['valor']) ? $confi['compra']['valor']	: $dadosCompra[0]['total'];
+                        if(!$confic['value']){
+                            $vl = (double)$dadosCurso[0]['valor'];$ins=(double)$dadosCurso[0]['inscricao'];
+                            $confic['value'] =  precoDbdase($vl+ $ins);
+                            // Qlib::lib_print($dadosCurso[0]);
+                            // dd($confic);
+                        }
+                        //$confic['installmentCount']= isset($confi['installmentCount']) ? $confi['installmentCount'] 							: false;
+                        //$confic['installmentValue']= isset($confi['installmentValue']) ? $confi['installmentValue'] 								: false;
+                        $description = false;
+                        $categoriaCurso = buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'categoria');
+                        if($categoriaCurso != 'cursos_online'){
+                            $description = 'Matrícula ';
+                        }
+                        $description .= buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
+                        $confic['description'] = isset($confi['description']) ? $confi['description']: $description;
+                        //$confic['externalReference']										= isset($confi['externalReference']) ? $confi['externalReference'] 						: $confi['compra']['token'];
+                        $confic['externalReference']= isset($dadosCompra[0]['token']) ? $dadosCompra[0]['token'] 	: uniqid();
+                        $confic['fine'] = isset($confi['multa']) ? $confi['multa'] : array('value'=>0); //Informações de multa para pagamento após o vencimento
+                        $confic['interest'] = isset($confi['juros']) ? $confi['juros'] : array('value'=>0,'dueDateLimitDays'=>0); //Informações de multa para pagamento após o vencimento
+                        $confic['value'] = number_format((double)$confic['value'],2,'.','');
+                        if($confi['compra']['forma_pagamento']=='pix'){
+                            $ret[$filderPayCallback] = $this->cobrancaPix($confic);
+                        }else{
+                            $ret[$filderPayCallback] = json_decode($this->criarCobrancaBoleto($confic),true);
+                        }
+                        if(isset($ret[$filderPayCallback]['object']) || (@$ret[$filderPayCallback]['exec'])){
+                            $ret['exec'] = true;
+                            $ret['mens'] = formatMensagem('Pagamento Efetuado com sucesso!','success',40000);
+                            $resPagamento = json_encode($ret[$filderPayCallback]);
+                            $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
+                            if(isAdmin(1) || isset($_GET['fq'])){
+                                $ret['urlUpd'] = $urlUpd;
+                            }
+                            $ret['salvarResumo'] = salvarAlterar($urlUpd);
+                            // $ret['urlUpd'] = salvarAlterar($urlUpd);
+                        }elseif(isset($ret[$filderPayCallback]['errors'][0]['description'])){
+                            $ret['mens'] = formatMensagemInfo($ret[$filderPayCallback]['errors'][0]['description'],'danger',40000);
+                        }
+                        $ret['confic'] = $confic;
+                    }
+                }
+            }
+			// $confi['token_compra'] = trim($token);
+			// $sqlCompra = "SELECT * FROM ".$GLOBALS['tab12']. " WHERE `token`='".$confi['token_compra']."' AND ".compleDelete();
+			// $dadosCompra = buscaValoresDb($sqlCompra);
+			// if($dadosCompra){
+			// 	$dadosCurso = dados_tab($GLOBALS['tab10'],'*',"WHERE id='".$dadosCompra[0]['id_curso']."'");
+			// 	if(isset($dadosCompra[0]['id_cliente']) && $dadosCurso){
+			// 		$dadosCliCad = $this->cadastrarCliente($dadosCompra[0]);
+			// 		$ret['dadosCliCad'] = $dadosCliCad;
+
+			// 	}
+			// }
 		}
 		if(Qlib::qoption('debug_front')=='s'){
 			$ret['confi'] = $confi;
-			$ret['sqlCompra'] = $sqlCompra;
+			// $ret['sqlCompra'] = $sqlCompra;
 			$ret['dadosCompra'] = $dadosCompra;
 			$ret['dadosCliCad'] = $dadosCliCad;
 			//$ret['confiv'] = $confiv;

@@ -6,9 +6,11 @@
     if($frontend){
         $config['route'] = str_replace('_adm','',@$config['route']);
     }
+    $route_store = isset($config['route_store']) ? $config['route_store'] : $config['route'].'.store';
+    $route_update = isset($config['route_update']) ? $config['route_update'] : $config['route'].'.update';
 @endphp
 
-<form id="{{$config['frm_id']}}" class="" action="@if($config['ac']=='cad'){{ route($config['route'].'.store') }}@elseif($config['ac']=='alt'){{ route($config['route'].'.update',['id'=>$config['id']]) }}@endif" method="post">
+<form id="{{$config['frm_id']}}" class="" action="@if($config['ac']=='cad'){{ route($route_store) }}@elseif($config['ac']=='alt'){{ route($route_update,['id'=>$config['id']]) }}@endif" method="post">
     @if($config['ac']=='alt')
     @method('PUT')
     @endif
@@ -25,17 +27,18 @@
         @if (isset($campos) && is_array($campos))
             @foreach ($campos as $k=>$v)
 
-                    @if (isset($v['cp_busca'])&&!empty($v['cp_busca']))
-
+                @if (isset($v['cp_busca'])&&!empty($v['cp_busca']))
                     @php
                         $cf = explode('][',$v['cp_busca']);
                         if(isset($cf[1])){
-                            if(empty($value[$k]))
-                                $value[$k] = @$value[$cf[0]][$cf[1]];
+                            $value[$k] = @$value[$cf[0]][$cf[1]];
                         }
-                        if($v['type']=='checkbox'){
-                            // dd($value);
-                        }
+                    @endphp
+                @endif
+                @if (isset($v['type']) && $v['type']=='select_multiple')
+                    @php
+                        $nk = str_replace('[]','',$k);
+                        $value[$k] = isset($value[$nk])?$value[$nk]:false;
                     @endphp
                 @endif
                 @if (isset($v['type']) && ($v['type']=='select_multiple' || $v['type']=='html_vinculo'))

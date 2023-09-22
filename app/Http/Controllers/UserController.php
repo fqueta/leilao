@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\EventController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Models\_upload;
 use App\Models\Post;
 use App\Models\User;
@@ -34,7 +35,7 @@ class UserController extends Controller
     public function __construct()
     {
         $user = Auth::user();
-        $this->middleware('auth');
+        // $this->middleware('auth');
         $this->user = $user;
         if(Qlib::is_backend()){
             $this->routa = 'users';
@@ -114,7 +115,7 @@ class UserController extends Controller
         $users->esteMes = $fm->whereYear('created_at', '=', $ano)->whereMonth('created_at','=',$mes)->get()->count();
         $users->ativos = $fm->where('ativo','=','s')->get()->count();
         $users->inativos = $fm->where('ativo','=','n')->get()->count();
-        //dd($user);
+        // dd($user);
         $ret['user'] = $user;
         $ret['user_totais'] = $users;
         $ret['arr_titulo'] = $arr_titulo;
@@ -130,8 +131,22 @@ class UserController extends Controller
         return $ret;
     }
     public function campos($dados=false,$local='index'){
-        $user = Auth::user();
-        $permission = new admin\UserPermissions($user);
+        $logado = Auth::check();
+        if($logado){
+            $user = Auth::user();
+            $permission = new admin\UserPermissions($user);
+            $campos_permissions = $permission->campos();
+            $arr_opc = Qlib::sql_array("SELECT id,name FROM permissions WHERE active='s' AND id >='".$user->id_permission."'",'name','id');
+        }else{
+            $campos_permissions = false;
+            $user = false;
+            $arr_opc = [];
+        }
+        if(Qlib::is_backend()){
+            $origem = 'admin';
+        }else{
+            $origem = 'site';
+        }
         if(isset($dados['tipo_pessoa']) && $dados['tipo_pessoa']){
             $_GET['tipo'] = $dados['tipo_pessoa'];
         }
@@ -160,31 +175,194 @@ class UserController extends Controller
             'config[celular]'=>['label'=>'Telefone celular','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
             'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'6'],
             'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
-            'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Documentos').'</h4><hr>','script_show'=>''],
-            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf','tam'=>'3'],
+            'sep0'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Documentos').'</h4><hr>','script_show'=>''],
+            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3'],
+            'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Configurações').'</h4><hr>','script_show'=>''],
+            'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3','cp_busca'=>'config][cep'],
+            'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'7','cp_busca'=>'config][endereco'],
+            'config[numero]'=>['label'=>'Numero','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'numero=cep','tam'=>'2','cp_busca'=>'config][numero'],
+            'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'4','cp_busca'=>'config][complemento'],
+            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'6','cp_busca'=>'config][cidade'],
+            'config[uf]'=>['label'=>'UF','active'=>false,'js'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','cp_busca'=>'config][uf'],
             'sep2'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Configurações').'</h4><hr>','script_show'=>''],
             'id_permission'=>[
                 'label'=>'Permissão*',
                 'active'=>true,
                 'type'=>'select',
                 'data_selector'=>[
-                    'campos'=>$permission->campos(),
+                    'campos'=>$campos_permissions,
                     'route_index'=>route('permissions.index'),
                     'id_form'=>'frm-permission',
                     'action'=>route('permissions.store'),
                     'campo_id'=>'id',
                     'campo_bus'=>'nome',
                     'label'=>'Permissão',
-                ],'arr_opc'=>Qlib::sql_array("SELECT id,name FROM permissions WHERE active='s' AND id >='".$user->id_permission."'",'name','id'),'exibe_busca'=>'d-block',
+                ],'arr_opc'=>$arr_opc,'exibe_busca'=>'d-block',
                 'event'=>'',
                 'tam'=>'12',
             ],'ativo'=>['label'=>'Liberar acesso','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
+            'config[origem]'=>['label'=>'origem','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][origem','value'=>$origem],
             //'email'=>['label'=>'Observação','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
         ];
+        if(!$logado){
+            unset($ret['id_permission']);
+        }
         if(Qlib::is_frontend()){
             unset($ret['sep2'],$ret['ativo'],$ret['id_permission']);
             //Desablitar a edição de email no frontend
-            $ret['email']['event'] = 'disabled';
+            if($logado){
+                $ret['email']['event'] = 'disabled';
+            }
+        }
+        return $ret;
+    }
+    public function campos_bk2($dados=false,$local='index'){
+        $logado = Auth::check();
+        if($logado){
+            $user = Auth::user();
+            $permission = new admin\UserPermissions($user);
+            $campos_permissions = $permission->campos();
+            $arr_opc = Qlib::sql_array("SELECT id,name FROM permissions WHERE active='s' AND id >='".$user->id_permission."'",'name','id');
+        }else{
+            $campos_permissions = false;
+            $user = false;
+            $arr_opc = [];
+        }
+        if(Qlib::is_backend()){
+            $origem = 'admin';
+        }else{
+            $origem = 'site';
+        }
+        if(isset($dados['tipo_pessoa']) && $dados['tipo_pessoa']){
+            $_GET['tipo'] = $dados['tipo_pessoa'];
+        }
+        $sec = isset($_GET['tipo'])?$_GET['tipo']:'pf';
+        if($sec=='pf'){
+            $lab_nome = 'Nome completo *';
+            $lab_cpf = 'CPF *';
+            $displayPf = '';
+            $displayPj = 'd-none';
+        }elseif($sec=='pj'){
+            $lab_nome = 'Nome do responsável *';
+            $lab_cpf = 'CPF do responsável*';
+            $displayPf = 'd-none';
+            $displayPj = '';
+        }else{
+            $lab_nome = 'Nome completo *';
+            $lab_cpf = 'CPF *';
+            $displayPf = '';
+            $displayPj = 'd-none';
+        }
+        $ret = [
+            'id'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            // 'tipo_pessoa'=>[
+            //     'label'=>'Tipo de Pessoa',
+            //     'active'=>true,
+            //     'type'=>'radio_btn',
+            //     'arr_opc'=>['pf'=>'Pessoa Física','pj'=>'Pessoa Jurídica'],
+            //     'exibe_busca'=>'d-block',
+            //     'event'=>'onclick=selectTipoUser(this.value)',
+            //     'tam'=>'12',
+            //     'value'=>$sec,
+            //     'class'=>'btn btn-outline-secondary',
+            // ],
+            'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Informe os dados').'</h4><hr>','script_show'=>''],
+            'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'id_permission'=>[
+                'label'=>'Permissão*',
+                'active'=>true,
+                'type'=>'select',
+                'data_selector'=>[
+                    'campos'=>$campos_permissions,
+                    'route_index'=>route('permissions.index'),
+                    'id_form'=>'frm-permission',
+                    'action'=>route('permissions.store'),
+                    'campo_id'=>'id',
+                    'campo_bus'=>'nome',
+                    'label'=>'Permissão',
+                   ],
+                'arr_opc'=>$arr_opc,'exibe_busca'=>'d-block',
+                'event'=>'required',
+                'tam'=>'12',
+                'value'=>@$_GET['id_permission'],
+            ],
+            'email'=>['label'=>'E-mail *','active'=>true,'type'=>'email','exibe_busca'=>'d-none','event'=>'required','tam'=>'9','placeholder'=>''],
+            'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3','placeholder'=>'','value'=>''],
+            //'password_confirmation'=>['label'=>'Confirmar Senha *','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'required','tam'=>'3','placeholder'=>''],
+            'name'=>['label'=>$lab_nome,'active'=>true,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'9','placeholder'=>''],
+            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf','tam'=>'3'],
+            'cnpj'=>['label'=>'CNPJ *','active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cnpj required','tam'=>'4','class_div'=>'div-pj '.$displayPj],
+            'razao'=>['label'=>'Razão social *','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'4','placeholder'=>'','class_div'=>'div-pj '.$displayPj],
+            'config[nome_fantasia]'=>['label'=>'Nome fantasia','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'4','placeholder'=>'','class_div'=>'div-pj '.$displayPj],
+            'config[celular]'=>['label'=>'Telefone celular','active'=>true,'type'=>'tel','tam'=>'4','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
+            'config[telefone_residencial]'=>['label'=>'Telefone residencial','active'=>false,'type'=>'tel','tam'=>'4','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','class_div'=>'div-pf '.$displayPf,'cp_busca'=>'config][telefone_residencial'],
+            'config[telefone_comercial]'=>['label'=>'Telefone comercial','active'=>false,'type'=>'tel','tam'=>'4','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][telefone_comercial'],
+            'config[rg]'=>['label'=>'RG','active'=>false,'type'=>'tel','tam'=>'4','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][rg','class_div'=>'div-pf '.$displayPf],
+            'config[nascimento]'=>['label'=>'Data de nascimento','active'=>false,'type'=>'date','tam'=>'4','exibe_busca'=>'d-block','event'=>'','cp_busca'=>'config][nascimento','class_div'=>'div-pf '.$displayPf],
+            'genero'=>[
+                'label'=>'Sexo',
+                'active'=>false,
+                'type'=>'select',
+                'arr_opc'=>Qlib::lib_sexo(),
+                'event'=>'',
+                'tam'=>'4',
+                'exibe_busca'=>true,
+                'option_select'=>false,
+                'class'=>'select2',
+                'class_div'=>'div-pf '.$displayPf,
+            ],
+            'config[escolaridade]'=>[
+                'label'=>'Escolaridade',
+                'active'=>false,
+                'type'=>'select',
+                'arr_opc'=>Qlib::lib_escolaridades(),'exibe_busca'=>'d-block',
+                'event'=>'',
+                'tam'=>'6',
+                'class'=>'select2',
+                'cp_busca'=>'config][escolaridade','class_div'=>'div-pf '.$displayPf,
+            ],
+            'config[profissao]'=>[
+                'label'=>'Profissão',
+                'active'=>false,
+                'type'=>'select',
+                'arr_opc'=>Qlib::lib_profissao(),'exibe_busca'=>'d-block',
+                'event'=>'',
+                'tam'=>'6',
+                'class'=>'select2',
+                'cp_busca'=>'config][profissao','class_div'=>'div-pf '.$displayPf,
+            ],
+            'config[tipo_pj]'=>[
+                'label'=>'Tipo de Pessoa Jurídica',
+                'active'=>false,
+                'type'=>'select',
+                'arr_opc'=>Qlib::sql_array("SELECT id,nome FROM tags WHERE ativo='s' AND pai='tipo_pj'",'nome','id'),'exibe_busca'=>'d-block',
+                'event'=>'',
+                'tam'=>'4',
+                'class'=>'select2',
+                'cp_busca'=>'config][tipo_pj','class_div'=>'div-pj '.$displayPj,
+            ],
+            'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-center">'.__('Endereço').'</h4><hr>','script_show'=>'<h4 class="text-center">'.__('Endereço').'</h4><hr>'],
+            'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3'],
+            'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'7','cp_busca'=>'config][endereco'],
+            'config[numero]'=>['label'=>'Numero','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'numero=cep','tam'=>'2','cp_busca'=>'config][numero'],
+            'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'4','cp_busca'=>'config][complemento'],
+            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'6','cp_busca'=>'config][cidade'],
+            'config[uf]'=>['label'=>'UF','active'=>false,'js'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','cp_busca'=>'config][uf'],
+            //'foto_perfil'=>['label'=>'Foto','active'=>false,'js'=>false,'placeholder'=>'','type'=>'file','exibe_busca'=>'d-none','event'=>'','tam'=>'12'],
+            'sep2'=>['label'=>'Preferencias','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Preferências').'</h4><hr>','script_show'=>'<h4 class="text-left">'.__('Preferências').'</h4><hr>'],
+            'ativo'=>['label'=>'Liberado para uso','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
+            'preferencias[newslatter]'=>['label'=>'Deseja receber e-mails com as novidades','active'=>false,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-none','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não'],'cp_busca'=>'preferencias][newslatter'],
+
+        ];
+        if(!$logado){
+            unset($ret['id_permission']);
+        }
+        if(Qlib::is_frontend()){
+            unset($ret['sep2'],$ret['ativo'],$ret['id_permission']);
+            //Desablitar a edição de email no frontend
+            if($logado){
+                $ret['email']['event'] = 'disabled';
+            }
         }
         return $ret;
     }
@@ -246,16 +424,22 @@ class UserController extends Controller
     }
     public function store(Request $request)
     {
+        $dados = $request->all();
+        $origem = isset($dados['config']['origem']) ? $dados['config']['origem'] : false;
+
         $validatedData = $request->validate([
-            'nome' => ['required','string',new FullName],
+            'name' => ['required','string',new FullName],
             'email' => ['required','string','unique:users'],
-            'cpf'   =>[new RightCpf]
+            'cpf'   =>[new RightCpf,'required']
         ],[
                 'nome.required'=>__('O nome é obrigatório'),
                 'nome.string'=>__('É necessário conter letras no nome'),
                 'email.unique'=>__('E-mail já cadastrado'),
         ]);
-        $dados = $request->all();
+        if($origem!='admin'){
+            $ret = (new RegisterController)->init($dados);
+            return $ret;
+        }
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
         $dados['ativo'] = isset($dados['ativo'])?$dados['ativo']:'n';
         if(isset($dados['password']) && !empty($dados['password'])){
@@ -277,9 +461,20 @@ class UserController extends Controller
         ];
         if($ajax=='s'){
             //REGISTRAR EVENTOS
-           (new EventController)->listarEvent(['tab'=>$this->tab,'id'=>$salvar->id,'this'=>$this]);
-            $ret['return'] = route($route).'?idCad='.$salvar->id;
-            $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+           if($origem=='admin'){
+                //requisição realizada no painel de administrador
+                (new EventController)->listarEvent(['tab'=>$this->tab,'id'=>$salvar->id,'this'=>$this]);
+                $ret['return'] = route($route).'?idCad='.$salvar->id;
+                $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+            }else{
+                //requisição realizada pelo usuario do site
+                if($salvar->id){
+                    $ret['return'] = route($route).'?idCad='.$salvar->id;
+                    $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+                }else{
+                    $ret['log'] = $this->after_cad_user_site($salvar->id);
+                }
+            }
             return response()->json($ret);
         }else{
             return redirect()->route($route,$ret);
@@ -632,6 +827,7 @@ class UserController extends Controller
     }
     /**Metodo para gerar o formulario no front pode ser iniciado com o short_code [sc ac="form_meu_cadastro"] */
     public function form_meu_cadastro($post_id=false,$dados=false,$meu_cadastro_id=false){
+        $route = $this->routa;
         if(Gate::allows('is_customer_logado')||Gate::allows('is_admin2')){
             if(Auth::check()){
                 $ac = 'alt';
@@ -642,7 +838,8 @@ class UserController extends Controller
                 $ac = 'cad';
             }
         }else{
-            return false;
+            $ac = 'cad';
+            $dadosmeu_cadastro = false;
         }
         // $seg2 = request()->segment(2);
         // $meu_cadastro_id = $meu_cadastro_id ? $meu_cadastro_id : $seg2;
@@ -651,7 +848,6 @@ class UserController extends Controller
 
             $dados = Post::Find($post_id);
         }
-        $route = $this->routa;
         $title = __('Meu Cadastro');
         $titulo = $title;
         $config = [
@@ -703,5 +899,44 @@ class UserController extends Controller
      */
     public function get_user_data($user_id){
         return User::Find($user_id);
+    }
+    /**
+     * Metodo para Gerenciar o cadastro de usuarios peelo site
+     * @param int $id_pagina,$dp= dados de postagem da página
+     * @return string $ret
+     */
+    public function ger_user($id_pagina=false,$dp=false){
+        $seg1 = request()->segment(1);
+        $seg2 = request()->segment(2);
+        if(!$seg2){
+            if(Qlib::isAdmin(3)){
+                return $this->get_users_site();
+            }else{
+                return redirect('/meu-cadastro');
+            }
+        }elseif($seg2=='create'){
+            //Criar usuario
+            return $this->form_meu_cadastro($id_pagina,$dp);
+        }elseif($seg2=='edit'){
+            //editar usuario
+        }elseif($seg2=='show'){
+            //visualizar usuario
+
+        }elseif($seg2=='remove'){
+            //excluir usuario
+        }
+        $ret = $seg2;
+
+        return $ret;
+    }
+    /**
+     * Metodo para logar cliente apos cadastro de usuario no site tbme envia um email de verificação
+     */
+    public function after_cad_user_site($user_id){
+
+
+    }
+    public function get_users_site(){
+
     }
 }

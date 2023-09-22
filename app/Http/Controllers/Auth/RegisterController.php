@@ -10,7 +10,7 @@ use App\Rules\FullName;
 use App\Rules\RightCpf;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -45,6 +45,9 @@ class RegisterController extends Controller
     {
         $this->middleware('guest');
     }
+    public function init(Array $data){
+        return $this->create($data);
+    }
 
     /**
      * Get a validator for an incoming registration request.
@@ -60,16 +63,6 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'cpf'   =>[new RightCpf, 'unique:users']
         ]);
-        // $data = $request->all();
-        // $validatedData = $request->validate([
-        //     'name' => ['required','string',new FullName],
-        //     'email' => ['required','string','unique:users'],
-        //     // 'cpf'   =>[new RightCpf]
-        // ],[
-        //         'name.required'=>__('O nome é obrigatório'),
-        //         'name.string'=>__('É necessário conter letras no nome'),
-        //         'email.unique'=>__('E-mail já cadastrado'),
-        // ]);
     }
 
     /**
@@ -78,35 +71,63 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\Models\User
      */
-    protected function create(array $data)
+    protected function create(array $dados)
     {
          //REGISTRAR EVENTO
-         $regev = Qlib::regEvent(['action'=>'create','tab'=>'user','config'=>[
-             'obs'=>'Usuario se cadastrou pelo site',
-             'link'=>'',
-             ]
-        ]);
-        $ds = [
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'status' => 'pre_registred',
-            'cpf' => @$data['cpf'],
-            'id_permission' => '5',
-            'tipo_pessoa' => 'pf',
-        ];
+        //  $regev = Qlib::regEvent(['action'=>'create','tab'=>'user','config'=>[
+        //      'obs'=>'Usuario se cadastrou pelo site',
+        //      'link'=>'',
+        //      ]
+        // ]);
+        // $ds = [
+        //     'name' => $data['name'],
+        //     'email' => $data['email'],
+        //     'password' => Hash::make($data['password']),
+        //     'status' => 'pre_registred',
+        //     'cpf' => @$data['cpf'],
+        //     'id_permission' => '5',
+        //     'tipo_pessoa' => 'pf',
+        // ];
         // dd($ds);
-        $ret = User::create($ds);
-        if($ret){
-            // request()
-            // Qlib::lib_print(Auth::user());
-
-            // dd('new uwer ok');
-
-                // $request->user()->sendEmailVerificationNotification();
-
-
+        $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
+        $dados['ativo'] = isset($dados['ativo'])?$dados['ativo']:'s';
+        $dados['id_permission'] = 5;
+        if(isset($dados['cpf']) && !empty($dados['cpf'])){
+            $cpf = str_replace('.','',$dados['cpf']);
+            $cpf = str_replace('-','',$cpf);
+            $dados['password'] = $cpf;
         }
-        return $ret;
+        if(isset($dados['password']) && !empty($dados['password'])){
+            $dados['password'] = Hash::make($dados['password']);
+        }else{
+            if(empty($dados['password'])){
+                unset($dados['password']);
+            }
+        }
+        if(isset($dados['config'])){
+            $dados['config'] = Qlib::lib_array_json($dados['config']);
+        }
+        // dd($dados);
+        $salvar = User::create($dados);
+        $dados['id'] = $salvar->id;
+        // $route = $this->routa.'.index';
+        // $ret = User::create($ds);
+        $ret = [
+            'mens'=>'Usuário cadastrada com sucesso!',
+            'color'=>'success',
+            'idCad'=>$salvar->id,
+            'exec'=>true,
+            'dados'=>$dados,
+        ];
+        if($ret){
+           // $request->user()->sendEmailVerificationNotification();
+        }
+        if($ajax=='s'){
+            // $ret['reg'] = $this->register(Request $request);
+            return true;
+            return response()->json($ret);
+        }else{
+            return $ret;
+        }
     }
 }

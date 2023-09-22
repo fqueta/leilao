@@ -46,7 +46,7 @@ class Qlib
     {
         $user = Auth::user();
 
-        if($user->id_permission<=$perm_admin){
+        if(isset($user->id_permission) && $user->id_permission<=$perm_admin){
             return true;
         }else{
             return false;
@@ -1343,5 +1343,70 @@ class Qlib
     static function get_company_data(){
         $ret = self::lib_json_array(self::qoption('dados_empresa'));
         return $ret;
+    }
+    /**
+     * Metodo para formatar um valor moeda para ser salvo no banco de dados
+     * @param string || double $preco
+     * @return string $data1
+     */
+    static function precoDbdase($preco){
+        $preco = str_replace('R$', '', $preco);
+        $preco = trim($preco);
+        $sp = substr($preco,-3,-2);
+        $sp2 = substr($preco,-2,-1);
+        if($sp=='.'){
+            $preco_venda1 = $preco;
+        }elseif($sp2 && $sp2=='.'){
+            $preco_venda1 = $preco;
+        }else{
+            $preco_venda1 = str_replace(".", "", $preco);
+            $preco_venda1 = str_replace(",", ".", $preco_venda1);
+        }
+        return $preco_venda1;
+    }
+    /**
+     * MONTA UM ARRAY COM OPÇÕES DE SEXO
+     * @retun array ou string se $var não for nulo
+     */
+    static function lib_sexo($var = null)
+    {
+        $arr_tipo_genero = [
+            'm'=>__('Masculino'),'f'=>__('Feminino'),'ni'=>__('Não informar')
+        ];
+        if(!$var){
+            return $arr_tipo_genero;
+        }else{
+            return $arr_tipo_genero[$var];
+        }
+    }
+    /**
+     * MONTA UM ARRAY COM OPÇÕES DE ESCOLARIDADE ORIGEM TABELA ESCOLARIDADES
+     * @retun array ou string se $var não for nulo
+     */
+    static function lib_escolaridades($var = null)
+    {
+        $arr_tipo_escolaridade = Qlib::sql_array("SELECT id,nome FROM escolaridades WHERE ativo='s' ORDER BY nome ASC",'nome','id');
+        if(!$var){
+            return $arr_tipo_escolaridade;
+        }else{
+            return $arr_tipo_escolaridade[$var];
+        }
+    }
+    /**
+     * MONTA UM ARRAY COM OPÇÕES DE PROFISSÃO ORIGEM TABELA profissaos
+     * @retun array ou string se $var não for nulo
+     */
+    static function lib_profissao($var = null)
+    {
+        $arr_tipo_profissao = Qlib::sql_array("SELECT id,nome FROM profissaos WHERE ativo='s' ORDER BY nome ASC",'nome','id');
+        if(!$var){
+            return $arr_tipo_profissao;
+        }else{
+            return $arr_tipo_profissao[$var];
+        }
+    }
+    static function dominio(){
+        $url_atual = "http" . (isset($_SERVER['HTTPS']) ? (($_SERVER['HTTPS']=="on") ? "s" : "") : "") . "://" . "$_SERVER[HTTP_HOST]";
+        return $url_atual;
     }
 }

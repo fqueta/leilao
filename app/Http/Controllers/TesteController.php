@@ -37,7 +37,26 @@ class TesteController extends Controller
         // $ret = (new LeilaoController)->notific_update_admin(48,'admin');
         // $ret = (new AsaasController)->cadastrarCliente(['id_cliente'=>6],true);
         // $ret = (new AsaasController)->deletarCliente('cus_000005435290');
-        $ret = (new AsaasController)->deletarCliente(6);
+        // $ret = (new AsaasController)->deletarCliente(6);
+          $conf=[
+            'compra' => [
+                'token' =>'64b0769e47002',
+                'id_cliente' =>6,
+                'valor' =>'',
+                'forma_pagamento' =>'cred_card',
+                'descricao' =>'Pagamento de leilao 14',
+            ],
+            'cartao' => [
+                'valor' =>'02X25,50',
+                'nome_no_cartao' =>'Jose Onifarsio',
+                'numero_cartao' =>'000000000000000000001',
+                'validade_mes' =>'05',
+                'validade_ano' =>'2025',
+                'codigo_seguranca' =>'123',
+            ],
+            // 'responsavel' => [],
+        ];
+        $ret = (new AsaasController)->integraCompraAsaas($conf);
         dd($ret);
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([

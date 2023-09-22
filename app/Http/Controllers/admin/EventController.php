@@ -121,7 +121,7 @@ class EventController extends Controller
             $cfe = [
                 'action'=>$action,
                 'tab'=>$config['tab'],
-                'user_id'=>$user['id'],
+                'user_id'=>@$user['id'],
                 'post_id'=>$id,
                 'config'=>[
                     'obs'=>$acaoObs,
