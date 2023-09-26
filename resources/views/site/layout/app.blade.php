@@ -104,7 +104,7 @@
 
           @else
             <li><a class="btn btn-default btn-flat float-right" href="{{route('login')}}"><i class="fas fa-user"></i>&nbsp;Login</a></li>
-            <li><a class="btn btn-default btn-flat float-right" href="{{route('register')}}"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li>
+            <li><a class="btn btn-default btn-flat float-right" href="{{url('/')}}/user/create"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li>
           @endcan
           <li><a class="btn btn-default btn-flat float-right" href="#"><i class="fas fa-search"></i></a></li>
         </ul>

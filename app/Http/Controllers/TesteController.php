@@ -47,7 +47,7 @@ class TesteController extends Controller
                 'descricao' =>'Pagamento de leilao 14',
             ],
             'cartao' => [
-                'valor' =>'02X25,50',
+                'valor' =>'02X25.36',
                 'nome_no_cartao' =>'Jose Onifarsio',
                 'numero_cartao' =>'000000000000000000001',
                 'validade_mes' =>'05',
@@ -56,8 +56,11 @@ class TesteController extends Controller
             ],
             // 'responsavel' => [],
         ];
-        $ret = (new AsaasController)->integraCompraAsaas($conf);
-        dd($ret);
+        // $ret = (new AsaasController)->integraCompraAsaas($conf);
+        // dd($ret);
+        $post_id = Qlib::get_id_by_token('64b6e7630678d');
+        dd($post_id);
+        // dd(Auth::user());
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([
         //     'type' => 'notifica_finalizado',

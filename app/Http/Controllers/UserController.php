@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\EventController;
 use App\Http\Controllers\Auth\RegisterController;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use App\Models\_upload;
 use App\Models\Post;
 use App\Models\User;
@@ -15,7 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
@@ -436,12 +437,14 @@ class UserController extends Controller
                 'nome.string'=>__('É necessário conter letras no nome'),
                 'email.unique'=>__('E-mail já cadastrado'),
         ]);
-        if($origem!='admin'){
-            $ret = (new RegisterController)->init($dados);
-            return $ret;
-        }
+        // if($origem!='admin'){
+        //     $ret = (new RegisterController)->init($dados);
+        //     $ret['login'] = new llController($request);
+        //     return $ret;
+        // }
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
-        $dados['ativo'] = isset($dados['ativo'])?$dados['ativo']:'n';
+        $dados['ativo'] = isset($dados['ativo'])?$dados['ativo']:'s';
+        $dados['id_permission'] = isset($dados['id_permission'])?$dados['id_permission']:5;
         if(isset($dados['password']) && !empty($dados['password'])){
             $dados['password'] = Hash::make($dados['password']);
         }else{
@@ -469,10 +472,17 @@ class UserController extends Controller
             }else{
                 //requisição realizada pelo usuario do site
                 if($salvar->id){
-                    $ret['return'] = route($route).'?idCad='.$salvar->id;
-                    $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+                    $authenticate = $this->authenticate($request);
+                    if($authenticate){
+                        $ret['redirect'] = url('/').'/'.Qlib::get_slug_post_by_id(37);
+                        $ret['return'] = $ret['redirect'];
+                    }else{
+                        $ret['mens'] = @$authenticate['mens'];
+                    }
+                    // $ret['return'] = route($route).'?idCad='.$salvar->id;
+                    // $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
                 }else{
-                    $ret['log'] = $this->after_cad_user_site($salvar->id);
+
                 }
             }
             return response()->json($ret);
@@ -932,11 +942,42 @@ class UserController extends Controller
     /**
      * Metodo para logar cliente apos cadastro de usuario no site tbme envia um email de verificação
      */
-    public function after_cad_user_site($user_id){
-
+    public function after_cad_user_site(Request $request){
+        $ret = false;
+        if($request){
+            $ret = $this->authenticate($request);
+            // $email = isset($config['email'])?$config['email']:false;
+            // $pass = isset($config['password'])?$config['password']:false;
+            // if($email && $pass){
+            // }
+        }
+        return $ret;
+    }
+    /**
+     * Handle an authentication attempt.
+     */
+    public function authenticate(Request $request)    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+        $ret['exec'] = false;
+        $ret['mens'] = false;
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $ret['exec'] = true;
+            // return redirect()->intended('dashboard');
+        }else{
+            $ret['mens'] = 'Invalid';
+            // return back()->withErrors([
+            //     'email' => 'The provided credentials do not match our records.',
+            // ])->onlyInput('email');
+        }
+        return $ret;
 
     }
     public function get_users_site(){
 
     }
 }
+

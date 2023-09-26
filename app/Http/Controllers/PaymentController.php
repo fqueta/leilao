@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\admin\AsaasController;
 use App\Models\Post;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
@@ -45,12 +46,12 @@ class PaymentController extends Controller
 		// dd(lib_json_array($r));
 		$ret['exec'] = false;
         $logado = Auth::check();
-        dd($config);
         if(isset($config['compra']['token']) && !empty($config['compra']['token'])){
 			//verificar se o cliente está logado
 			if(!$logado){return false;}
+            //o token da compra é importante para associar o resultado do pagamento ao token do leilao
 			//fazer o pagamento e integrar ao gateway
-			$ret = (new integraAsaas)->integraCompraAsaas($config);
+			$ret = (new AsaasController)->integraCompraAsaas($config);
 		}else{
 			$siga = false;
 			//Verifica se ja está logado
@@ -191,6 +192,8 @@ class PaymentController extends Controller
         $d['id_leilao'] = $id_leilao;
         $d['dt'] = $dt;
         $d['dl'] = isset($config['dl']) ? $config['dl'] : false; //dados do ultimo lance.
+        $d['token'] = isset($config['dl']['token']) ? $config['dl']['token'] : false; //token do leilao.
+
 		$dFp = Qlib::qoption('forma_pagamento');//Dados Forma de pagamento cartão
 		$d['total_pacelamento'] = 1;
 		$parcelasCurso = isset($config['parcelas'])?$config['parcelas']:1;

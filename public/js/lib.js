@@ -2575,7 +2575,7 @@ function eco_submitCompra(){
 						if(response.criarCobrancaCartao.asaas.errors[0]){
 							alert(response.criarCobrancaCartao.asaas.errors[0].description);
 						}else if(response.lancarFaturaPagamentoAsaas.exec){
-							window.location = '/obrigado-pela-compra?matricula='+btoa(response.lancarFaturaPagamentoAsaas.dadosCompraFinalizada.id);
+							window.location = '/obrigado-pela-compra?token='+btoa(response.lancarFaturaPagamentoAsaas.dadosCompraFinalizada.id);
 							//alert('redireciona para pagina de agradecimeno')
 						}else{
 							window.location = '/obrigado-pela-compra';

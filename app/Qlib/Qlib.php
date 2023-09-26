@@ -1156,10 +1156,26 @@ class Qlib
                     }else{
                         $ret = [$d[0]->meta_value];
                     }
+                }else{
+                    $post_id = self::get_id_by_token($post_id);
+                    if($post_id){
+                        $ret = self::get_postmeta($post_id,$meta_key,$string);
+                    }
                 }
             }
         }
         return $ret;
+    }
+    /**
+     * Metodo buscar o post_id com o token
+     * @param string $token
+     * @return string $ret;
+     */
+    static function get_id_by_token($token)
+    {
+        if($token){
+            return Qlib::buscaValorDb0('posts','token',$token,'ID');
+        }
     }
     /**
      * Metodo para salvar ou atualizar os meta users

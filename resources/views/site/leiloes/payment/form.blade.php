@@ -79,6 +79,7 @@
                 {{-- <?=$dadosCliente?> --}}
                 <form id="frm-pag-v2" class="frm-pag-v2" action="" method="post">
                     @csrf
+                    <input type="hidden" name="compra[token]" value="{{$dl['token']}}"/>
                     <div class="row ml-0 mr-0 mb-3">
                         {{-- <?=$formCampos?> --}}
                     </div>

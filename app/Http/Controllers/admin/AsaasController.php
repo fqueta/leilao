@@ -252,24 +252,25 @@ class AsaasController extends Controller
         //uso
         // $conf=[
         //     'compra' => [
-        //         'token' =>'',
+        //         'token' =>'64b0769e47002',
         //         'id_cliente' =>6,
         //         'valor' =>'',
-        //         'forma_pagamento' =>'cred_card || boleto || pix',
+        //         'forma_pagamento' =>'cred_card',
         //         'descricao' =>'Pagamento de leilao 14',
         //     ],
         //     'cartao' => [
-        //         'valor' =>'02X25,50',
+        //         'valor' =>'02X25.36',
         //         'nome_no_cartao' =>'Jose Onifarsio',
         //         'numero_cartao' =>'000000000000000000001',
         //         'validade_mes' =>'05',
         //         'validade_ano' =>'2025',
         //         'codigo_seguranca' =>'123',
         //     ],
-        //     'responsavel' => [],
+        //     // 'responsavel' => [],
         // ];
         //$ret = (new AsaasController)->integraCompraAsaas($conf);
-		$ret['exec'] = false;
+		// dd($confi);
+        $ret['exec'] = false;
 		$dadosCompra = false;
 		$ret['mens'] = Qlib::formatMensagemInfo('Erro ao efetuar pagamento!','danger',40000);
 		$confiv = array();
@@ -335,15 +336,19 @@ class AsaasController extends Controller
                         $ret['criarCobrancaCartao'] = $criarCobrancaCartao;
                         $ret['confiv'] = $confiv;
 
+                        dd($ret);
                         if(isset($ret['criarCobrancaCartao']['asaas']['id'])){
                             $ret['exec'] = true;
                             $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
-                            // $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
+                            $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
                             // $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
                             // if(isAdmin(1) || isset($_GET['fq'])){
                             //     $ret['urlUpd'] = $urlUpd;
                             // }
-                            // $ret['salvarResumo'] = salvarAlterar($urlUpd);
+                            $post_id = Qlib::get_id_by_token($token);
+
+                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,'resumo',$resPagamento);
+                            $ret['salvarStatus'] = Qlib::update_postmeta($post_id,'pago','s');
                         }elseif(isset($ret['criarCobrancaCartao']['asaas']['errors'][0]['description']) && ($mes=$ret['criarCobrancaCartao']['asaas']['errors'][0]['description'])){
                             $ret['mens'] = Qlib::formatMensagemInfo($mes,'danger');
                         }
@@ -394,7 +399,7 @@ class AsaasController extends Controller
                         }
                         if(isset($ret[$filderPayCallback]['object']) || (@$ret[$filderPayCallback]['exec'])){
                             $ret['exec'] = true;
-                            $ret['mens'] = formatMensagem('Pagamento Efetuado com sucesso!','success',40000);
+                            $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
                             $resPagamento = json_encode($ret[$filderPayCallback]);
                             $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
                             if(isAdmin(1) || isset($_GET['fq'])){
@@ -403,7 +408,7 @@ class AsaasController extends Controller
                             $ret['salvarResumo'] = salvarAlterar($urlUpd);
                             // $ret['urlUpd'] = salvarAlterar($urlUpd);
                         }elseif(isset($ret[$filderPayCallback]['errors'][0]['description'])){
-                            $ret['mens'] = formatMensagemInfo($ret[$filderPayCallback]['errors'][0]['description'],'danger',40000);
+                            $ret['mens'] = Qlib::formatMensagemInfo($ret[$filderPayCallback]['errors'][0]['description'],'danger');
                         }
                         $ret['confic'] = $confic;
                     }
