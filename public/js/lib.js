@@ -2574,6 +2574,7 @@ function eco_submitCompra(){
 					}else{
 						if(response.criarCobrancaCartao.asaas.errors[0]){
 							alert(response.criarCobrancaCartao.asaas.errors[0].description);
+                            return;
 						}else if(response.lancarFaturaPagamentoAsaas.exec){
 							window.location = '/obrigado-pela-compra?token='+btoa(response.lancarFaturaPagamentoAsaas.dadosCompraFinalizada.id);
 							//alert('redireciona para pagina de agradecimeno')

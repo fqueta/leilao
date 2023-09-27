@@ -58,8 +58,12 @@ class TesteController extends Controller
         ];
         // $ret = (new AsaasController)->integraCompraAsaas($conf);
         // dd($ret);
-        $post_id = Qlib::get_id_by_token('64b6e7630678d');
-        dd($post_id);
+        // $post_id = Qlib::get_id_by_token('64b6e7630678d');
+        // dd($post_id);
+        $post_id = 36;
+        // $ret = Qlib::get_postmeta($post_id,'pago');
+        $ret = (new PaymentController) -> get_info_pagamento($post_id);
+        return $ret;
         // dd(Auth::user());
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([

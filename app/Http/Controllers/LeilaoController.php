@@ -884,7 +884,7 @@ class LeilaoController extends Controller
     public function lista_leilao_terminado($user_id=false){
         $ret = false;
         $cal = false;
-        $meta_status_pagamento = Qlib::qoption('meta_status_pagamento')?Qlib::qoption('meta_status_pagamento'):'status_pagamento';
+        $meta_status_pagamento = Qlib::qoption('meta_status_pagamento')?Qlib::qoption('meta_status_pagamento'):'pago';
         //listar todos os leiloes terminados que não foram emitidos notificações
         $list = Post::where('post_type',$this->post_type)->
         where('post_status','publish')->
@@ -909,9 +909,12 @@ class LeilaoController extends Controller
                             $link_leilao_front = $this->get_link_front($leilao_id);
                             if($sp=='s'){
                                 $situacao_pagamento = '<span class="text-success">Pago</span>';
+                            }elseif($sp=='a'){
+                                $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
                             }else{
                                 $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
                             }
+                            $ret[$key]['status_pago'] = $sp;
                             $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
                             $ret[$key]['link_leilao_front'] = $link_leilao_front;
                             $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);

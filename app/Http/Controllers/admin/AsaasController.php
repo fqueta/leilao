@@ -278,6 +278,10 @@ class AsaasController extends Controller
         $token = isset($confi['compra']['token']) ? $confi['compra']['token'] : false;
         $forma_pagamento = isset($confi['compra']['forma_pagamento']) ? $confi['compra']['forma_pagamento'] : false;
         $valor = isset($confi['compra']['valor'])?$confi['compra']['valor']:0; //valor total da compra
+        // if($valor>5000){
+        //     //condição para teste enquando não liberar valores maiores no assas
+        //     $valor = 1000.52;
+        // }
         $id_asaas = false;
 		$description = isset($confi['compra']['descricao'])?$confi['compra']['descricao']: Qlib::buscaValorDb0('posts','token',$token,'post_title');
 		//$confi['cartao']['valor'] = 10X52,30 total da compra e a parcela tbm
@@ -336,18 +340,14 @@ class AsaasController extends Controller
                         $ret['criarCobrancaCartao'] = $criarCobrancaCartao;
                         $ret['confiv'] = $confiv;
 
-                        dd($ret);
+                        // dd($ret);
                         if(isset($ret['criarCobrancaCartao']['asaas']['id'])){
                             $ret['exec'] = true;
                             $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
                             $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
-                            // $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
-                            // if(isAdmin(1) || isset($_GET['fq'])){
-                            //     $ret['urlUpd'] = $urlUpd;
-                            // }
                             $post_id = Qlib::get_id_by_token($token);
 
-                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,'resumo',$resPagamento);
+                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,'resumo_pagamento',$resPagamento);
                             $ret['salvarStatus'] = Qlib::update_postmeta($post_id,'pago','s');
                         }elseif(isset($ret['criarCobrancaCartao']['asaas']['errors'][0]['description']) && ($mes=$ret['criarCobrancaCartao']['asaas']['errors'][0]['description'])){
                             $ret['mens'] = Qlib::formatMensagemInfo($mes,'danger');
@@ -356,7 +356,7 @@ class AsaasController extends Controller
                         $ret['mens'] = Qlib::formatMensagemInfo('Forma de pagamento não selecionada!','danger');
                     }
                 }
-                if($forma_pagamento=='boleto' || $forma_pagamento== 'pix'){
+                if(($forma_pagamento=='boleto' || $forma_pagamento== 'pix') && $id_asaas){
                     $fp = 'BOLETO';
                     if($forma_pagamento=='pix'){
                         $filderPayCallback = 'criarCobrancaPix';
@@ -364,34 +364,35 @@ class AsaasController extends Controller
                         $vencimento = date('d/m/Y');
                     }else{
                         $prazo_boleto = Qlib::qoption('prazo_boleto') ? Qlib::qoption('prazo_boleto') : 1;
-                        $vencimento = isset($confi['compra']['Vencimento']) ? $confi['compra']['Vencimento'] : CalcularVencimento2(date('d/m/Y'),$prazo_boleto);
+                        $vencimento = isset($confi['compra']['Vencimento']) ? $confi['compra']['Vencimento'] : Qlib::CalcularVencimento2(date('d/m/Y'),$prazo_boleto);
                         $filderPayCallback = 'criarCobrancaBoleto';
                     }
                     if(isset($dadosCliCad['exec'])){
-                        $confic['customer'] 		= isset($confi['customer']) ? $confi['customer'] 	: $dadosCliCad['dadosCli']['id_asaas']; //formato: uniqid
+                        $confic['customer'] 		= isset($confi['customer']) ? $confi['customer'] 	: $id_asaas; //formato: uniqid
                         $confic['billingType']	= isset($confi['billingType']) ? $confi['billingType'] 	: $fp;
-                        $confic['dueDate']	 = isset($confi['dueDate']) ? $confi['dueDate']	: dtBanco($vencimento);
-                        $confic['value']	= isset($confi['compra']['valor']) ? $confi['compra']['valor']	: $dadosCompra[0]['total'];
-                        if(!$confic['value']){
-                            $vl = (double)$dadosCurso[0]['valor'];$ins=(double)$dadosCurso[0]['inscricao'];
-                            $confic['value'] =  precoDbdase($vl+ $ins);
-                            // Qlib::lib_print($dadosCurso[0]);
-                            // dd($confic);
-                        }
+                        $confic['dueDate']	 = isset($confi['dueDate']) ? $confi['dueDate']	: Qlib::dtBanco($vencimento);
+                        $confic['value']	= isset($confi['compra']['valor']) ? $confi['compra']['valor']	: 0;
+                        // if(!$confic['value']){
+                        //     $vl = (double)$dadosCurso[0]['valor'];$ins=(double)$dadosCurso[0]['inscricao'];
+                        //     $confic['value'] =  Qlib::precoDbdase($vl+ $ins);
+                        //     // Qlib::lib_print($dadosCurso[0]);
+                        //     // dd($confic);
+                        // }
                         //$confic['installmentCount']= isset($confi['installmentCount']) ? $confi['installmentCount'] 							: false;
                         //$confic['installmentValue']= isset($confi['installmentValue']) ? $confi['installmentValue'] 								: false;
-                        $description = false;
-                        $categoriaCurso = buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'categoria');
-                        if($categoriaCurso != 'cursos_online'){
-                            $description = 'Matrícula ';
-                        }
-                        $description .= buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
+                        // $description = false;
+                        // $categoriaCurso = buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'categoria');
+                        // if($categoriaCurso != 'cursos_online'){
+                        //     $description = 'Matrícula ';
+                        // }
+                        // $description .= buscaValorDb($GLOBALS['tab10'],'id',$dadosCompra[0]['id_curso'],'nome');
                         $confic['description'] = isset($confi['description']) ? $confi['description']: $description;
                         //$confic['externalReference']										= isset($confi['externalReference']) ? $confi['externalReference'] 						: $confi['compra']['token'];
-                        $confic['externalReference']= isset($dadosCompra[0]['token']) ? $dadosCompra[0]['token'] 	: uniqid();
+                        $confic['externalReference']= $token;
                         $confic['fine'] = isset($confi['multa']) ? $confi['multa'] : array('value'=>0); //Informações de multa para pagamento após o vencimento
                         $confic['interest'] = isset($confi['juros']) ? $confi['juros'] : array('value'=>0,'dueDateLimitDays'=>0); //Informações de multa para pagamento após o vencimento
                         $confic['value'] = number_format((double)$confic['value'],2,'.','');
+                        // dd($confic);
                         if($confi['compra']['forma_pagamento']=='pix'){
                             $ret[$filderPayCallback] = $this->cobrancaPix($confic);
                         }else{
@@ -401,11 +402,15 @@ class AsaasController extends Controller
                             $ret['exec'] = true;
                             $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
                             $resPagamento = json_encode($ret[$filderPayCallback]);
-                            $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
-                            if(isAdmin(1) || isset($_GET['fq'])){
-                                $ret['urlUpd'] = $urlUpd;
-                            }
-                            $ret['salvarResumo'] = salvarAlterar($urlUpd);
+                            // $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
+                            $post_id = Qlib::get_id_by_token($token);
+                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,'resumo_pagamento',$resPagamento);
+                            $ret['salvarStatus'] = Qlib::update_postmeta($post_id,'pago','a');
+                            // $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
+                            // if(isAdmin(1) || isset($_GET['fq'])){
+                            //     $ret['urlUpd'] = $urlUpd;
+                            // }
+                            // $ret['salvarResumo'] = salvarAlterar($urlUpd);
                             // $ret['urlUpd'] = salvarAlterar($urlUpd);
                         }elseif(isset($ret[$filderPayCallback]['errors'][0]['description'])){
                             $ret['mens'] = Qlib::formatMensagemInfo($ret[$filderPayCallback]['errors'][0]['description'],'danger');
@@ -952,7 +957,7 @@ class AsaasController extends Controller
 			// 	$dadosCli[0]['Bairro'] = isset($dadosCli['config']['bairro']) ? $dadosCli['config']['bairro'] : $dadoEmpresa['bairro'];
 			// 	$dadosCli[0]['Cep'] = isset($dadosCli['config']['cep']) ? $dadosCli['config']['cep'] : $dadoEmpresa['cep'];
 			// }
-			$celular = str_replace('(','',$dadosCli['config']['celular']);
+			$celular = str_replace('(','',@$dadosCli['config']['celular']);
 			$celular = str_replace(')','',$celular);
 			$celular = str_replace('-','',$celular);
 

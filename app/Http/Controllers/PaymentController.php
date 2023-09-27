@@ -93,7 +93,7 @@ class PaymentController extends Controller
 				if(isset($ret['registrarCompra']['matricula']['tokenCad']) && !empty($ret['registrarCompra']['matricula']) && ($tokenCompra=$ret['registrarCompra']['matricula']['tokenCad'])){
 					$config['compra']['token'] = $tokenCompra;
 				}
-				$ret = (new integraAsaas)->integraCompraAsaas($config);
+				$ret = (new AsaasController)->integraCompraAsaas($config);
 				if(Qlib::isAdmin() || isset($_GET['fq'])){
 					$ret['debug_cad_cliente'] = $debug;
 				}
@@ -101,12 +101,12 @@ class PaymentController extends Controller
 		}
 		if($ret['exec'] && isset($config['compra']['token'])){
 			//Fazer lançamento da fatura referente ao pagamento feito no gateway
-			$ret['lancarFaturaPagamentoAsaas'] = (new ecomerce)->lancarFaturaPagamentoAsaas($config['compra']['token'],$config['compra']['forma_pagamento']);
+			// $ret['lancarFaturaPagamentoAsaas'] = (new ecomerce)->lancarFaturaPagamentoAsaas($config['compra']['token'],$config['compra']['forma_pagamento']);
 		}elseif(isset($ret['mens'])){
-			$ret['mens'] .= formatMensagemInfo('Erro ao efetuar a compra entre em contato com o nosso suporte','danger');
+            $ret['mens'] .= Qlib::formatMensagemInfo('Erro ao efetuar a compra entre em contato com o nosso suporte','danger');
 		}else{
 			$ret['mens'] = @$ret['mensa'];
-			$ret['mens'] .= formatMensagemInfo('Erro ao efetuar a compra entre em contato com o nosso suporte','danger');
+			$ret['mens'] .= Qlib::formatMensagemInfo('Erro ao efetuar a compra entre em contato com o nosso suporte','danger');
 		}
 		return $ret;
 	}
@@ -129,6 +129,7 @@ class PaymentController extends Controller
             if($leilao_id && $tk[1]=='01'){
                 $ul = $lc->get_lance_vencedor($leilao_id,false,'ultimo_lance');
                 //coletar o valor do leilao arrematado
+                // dd($ul);
                 if(isset($ul['ultimo_lance']['valor_lance']) && $ul['ultimo_lance']['valor_lance']>0){
                     $ret['type'] = $tk[1];
                     $ret['type_pagamento'] = 'leilao';
@@ -555,7 +556,39 @@ class PaymentController extends Controller
 
 			}
 		}
-		dd($ret);
+		// dd($ret);
 		return $ret;
 	}
+    /**
+     * Metodo para exibir informações de pagamento
+     * @param integer $post_id
+     */
+    public function get_info_pagamento($post_id) {
+        $status = Qlib::get_postmeta($post_id,'pago',true);
+        $json_info = Qlib::get_postmeta($post_id,'resumo_pagamento',true);
+        $arr_info = false;
+        if($json_info){
+            $arr_info = Qlib::lib_json_array($json_info);
+            if(isset($arr_info['dueDate'])){
+                $arr_info['vencimento'] = Qlib::dataExibe($arr_info['dueDate']);
+            }
+            if(isset($arr_info['clientPaymentDate'])){
+                $arr_info['pagamento'] = Qlib::dataExibe($arr_info['clientPaymentDate']);
+            }
+            if(isset($arr_info['value'])){
+                $arr_info['valor'] = Qlib::valor_moeda($arr_info['value'],'R$ ');
+            }
+            if(@$arr_info['billingType']=='CREDIT_CARD'){
+                $arr_info['forma_pagamento'] = __('Cartão de crédito');
+            }
+            if(@$arr_info['billingType']=='PIX'){
+                $arr_info['forma_pagamento'] = __('PIX');
+            }
+        }
+        return view('site.leiloes.payment.info_pagamento',[
+            'status'=>$status,
+            'info_asaas'=>$arr_info,
+            'id'=>$post_id,
+        ]);
+    }
 }

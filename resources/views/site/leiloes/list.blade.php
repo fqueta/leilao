@@ -32,7 +32,6 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                 </div>
                 <div class="card-body">
                     @if(isset($ganhos) && is_array($ganhos))
-
                         <table class="table table-striped">
                             <head>
                                 <tr>
@@ -50,12 +49,23 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                                         <td>{{$v['post_title']}}</td>
                                         <td>{{@$v['term']['html']}}</td>
                                         <td>{{App\Qlib\Qlib::valor_moeda(@$v['venc']['valor_lance'])}}</td>
-                                        <td class="text-center">@php echo @$v['situacao_pagamento'] @endphp</td>
-                                        <td class="text-end">@php
-                                                $acao = '<a href="'.@$v['link_pagamento'].'" class="btn btn-success">'.__('Pagar').'</a>';
-                                                echo $acao;
-                                            @endphp
+                                        <td class="text-center">
+                                            @php echo @$v['situacao_pagamento'] @endphp
                                         </td>
+                                        @if (isset($v['status_pago']) && ($v['status_pago']=='s' || $v['status_pago']=='a'))
+                                            <td class="">
+                                                @php
+                                                    echo (new App\Http\Controllers\PaymentController) -> get_info_pagamento($v['ID'])
+                                                @endphp
+                                            </td>
+                                        @else
+                                            <td class="text-end">
+                                                    @php
+                                                    $acao = '<a href="'.@$v['link_pagamento'].'" class="btn btn-success">'.__('Pagar').'</a>';
+                                                    echo $acao;
+                                                    @endphp
+                                            </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
