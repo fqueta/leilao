@@ -13,175 +13,195 @@ class AsaasController extends Controller
 	public $Api_key;
 	public $url;
     public $campo_cad_asaas;
+    public $campo_meta_status;
+    public $campo_meta_resumo;
 	public function __construct(){
 		$this->credenciais();
-	}
+        $this->campo_meta_status = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
+        $this->campo_meta_resumo = Qlib::qoption('meta_resumo_pagamento') ? Qlib::qoption('meta_resumo_pagamento') : 'resumo_pagamento';
+    }
 	public function credenciais(){
 		$this->Api_key = Qlib::qoption('token-asaas');
 		$this->url = Qlib::qoption('url-asaas');//Produção : https://www.asaas.com
 		$this->campo_cad_asaas = 'id_asaas';//campo para salvar id do cliente no asaas
-	}
-	public function webhook($config=false){
+    }
+	public function webhook(){
 		$ret['exec'] = false;
 		@header("Content-Type: application/json");
 		$json = file_get_contents('php://input');
 
 			//echo $json = '{"event":"PAYMENT_CONFIRMED","payment":{"object":"payment","id":"pay_166785911972","dateCreated":"2020-06-02","customer":"cus_000013982310","installment":"ins_000001578134","value":25,"netValue":23.96,"originalValue":null,"interestValue":null,"description":"Parcela 1 de 10. Livox na Pr\u00e1tica","billingType":"CREDIT_CARD","confirmedDate":"2020-06-02","creditCard":{"creditCardNumber":"4616","creditCardBrand":"MASTERCARD"},"status":"CONFIRMED","dueDate":"2020-06-02","originalDueDate":"2020-06-02","paymentDate":null,"clientPaymentDate":"2020-06-02","invoiceUrl":"https://www.asaas.com/i/166785911972","invoiceNumber":"32282255","externalReference":"5ed6d121ecdec","deleted":false,"anticipated":false,"creditDate":null,"estimatedCreditDate":"2020-07-02","bankSlipUrl":null,"lastInvoiceViewedDate":"2020-06-02T22:22:45Z","lastBankSlipViewedDate":null,"postalService":false}}';
 			if(!empty($json)){
-				$arr_resp = json_decode($json,true);
-				$payk='id';
-				$dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
-				if(!$dadosFatura){
-					$payk='externalReference';
-					$dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
-				}
-				if($arr_resp['event']=='PAYMENT_RECEIVED' && $arr_resp['payment'][$payk]){
-					$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".precoDbdase($arr_resp['payment']['netValue'])."', `pago`='s',
-					`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."'
-					WHERE `token`='".$arr_resp['payment'][$payk]."'";
-					// dd($ret['sql']);
-						// dd($ret['sql']);
-					$ret['exec'] = salvarAlterar($ret['sql']);
-					if($ret['exec']){
-						// dd($arr_resp);
-						if($dadosFatura){
-							$ret['categoriaMatricula'] = $GLOBALS['categoriaMatricula'];
-							$ret['categoriaMensalidade'] = $GLOBALS['categoriaMensalidade'];
-							$ret['dadosF'] = $dadosFatura;
-							$categoria = $dadosFatura[0]['categoria'];
-							$tokenMatricula = $dadosFatura[0]['ref_compra'];
-							if(($categoria == $GLOBALS['categoriaMatricula'] || $categoria == $GLOBALS['categoriaMensalidade']) && !empty($tokenMatricula)){
-								$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
-								if($statusAtual == 1){
-									$status = 2;
-								}else{
-									$status = $statusAtual;
-								}
-								$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'pagamento_boleto');
-								//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
-								$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
+                $arr_resp = json_decode($json,true);
+                $payk='id';
+				if(isset($arr_resp['event']) && $arr_resp['event']=='PAYMENT_RECEIVED' && isset($arr_resp['payment']['externalReference']) && ($token=$arr_resp['payment']['externalReference'])){
+                    $post_id = Qlib::get_id_by_token($token);
 
-							}else{
-								if($arr_resp['payment']['billingType']=='BOLETO' || $arr_resp['payment']['billingType']=='PIX'){
-									if($dadosFatura[0]['parcela']==1){
-										$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
-										if($statusAtual == 1){
-											$status = 3;
-										}else{
-											$status = $statusAtual;
-										}
-										$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'pagamento_boleto');
-										//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
-										$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
-									}
-								}
-							}
-						}else{
-							echo 'Erro: Fatura não encontrada';
-						}
-						echo json_encode($ret);exit;
-					}
-				}elseif(($arr_resp['event']=='RECEIVED_IN_CASH' || $arr_resp['event']=='PAYMENT_RECEIVED')&& $arr_resp['payment'][$payk]){
-					$arr_resp['payment']['netValue'] = str_replace(',','.',$arr_resp['payment']['netValue']);
-					$arr_resp['payment']['value'] = str_replace(',','.',$arr_resp['payment']['value']);
+                    $ret['salvarResumo'] = Qlib::update_postmeta($post_id,$this->campo_meta_resumo,$json);
+                    $ret['salvarStatus'] = Qlib::update_postmeta($post_id,$this->campo_meta_status,'s');
+                    if($ret['salvarResumo'] && $ret['salvarStatus']){
+                        $ret['exec'] = true;
+                    }
+                    // return $post_id;
+                }
+                return $ret;
+            }
+            // if(!empty($json)){
+			// 	$arr_resp = json_decode($json,true);
+			// 	return $arr_resp;
+            //     $payk='id';
+			// 	$dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
+			// 	if(!$dadosFatura){
+			// 		$payk='externalReference';
+			// 		$dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
+			// 	}
+			// 	if($arr_resp['event']=='PAYMENT_RECEIVED' && $arr_resp['payment'][$payk]){
+			// 		$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".precoDbdase($arr_resp['payment']['netValue'])."', `pago`='s',
+			// 		`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."'
+			// 		WHERE `token`='".$arr_resp['payment'][$payk]."'";
+			// 		// dd($ret['sql']);
+			// 			// dd($ret['sql']);
+			// 		$ret['exec'] = salvarAlterar($ret['sql']);
+			// 		if($ret['exec']){
+			// 			// dd($arr_resp);
+			// 			if($dadosFatura){
+			// 				$ret['categoriaMatricula'] = $GLOBALS['categoriaMatricula'];
+			// 				$ret['categoriaMensalidade'] = $GLOBALS['categoriaMensalidade'];
+			// 				$ret['dadosF'] = $dadosFatura;
+			// 				$categoria = $dadosFatura[0]['categoria'];
+			// 				$tokenMatricula = $dadosFatura[0]['ref_compra'];
+			// 				if(($categoria == $GLOBALS['categoriaMatricula'] || $categoria == $GLOBALS['categoriaMensalidade']) && !empty($tokenMatricula)){
+			// 					$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
+			// 					if($statusAtual == 1){
+			// 						$status = 2;
+			// 					}else{
+			// 						$status = $statusAtual;
+			// 					}
+			// 					$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'pagamento_boleto');
+			// 					//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
+			// 					$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
 
-					$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `pago`='s',
-					`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."'
-						WHERE `token`='".$arr_resp['payment'][$payk]."'";
-					$ret['exec'] = salvarAlterar($ret['sql']);
-					if($ret['exec']){
-						// $dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
-						if($dadosFatura){
-							$categoria = $dadosFatura[0]['categoria'];
-							$tokenMatricula = $dadosFatura[0]['ref_compra'];
-							if($categoria == $GLOBALS['categoriaMatricula'] && !empty($tokenMatricula)){
-								$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
-								if($statusAtual == 1){
-									$status = 2;
-								}else{
-									$status = $statusAtual;
-								}
-								$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
-								//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
-								$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
-							}else{
-								if($arr_resp['payment']['billingType']=='BOLETO'){
-									if($dadosFatura[0]['parcela']==1){
-										$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
-										if($statusAtual == 1){
-											$status = 3;
-										}else{
-											$status = $statusAtual;
-										}
-										$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
-										//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
-										$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
-									}
-								}
-							}
-						}else{
-							echo 'Erro: Fatura não encontrada';
-						}
-						echo json_encode($ret);exit;
-					}
-				}elseif($arr_resp['event']=='PAYMENT_CONFIRMED' && $arr_resp['payment'][$payk]){
-					$arr_resp['payment']['netValue'] = str_replace(',','.',$arr_resp['payment']['netValue']);
-					$arr_resp['payment']['value'] = str_replace(',','.',$arr_resp['payment']['value']);
-					if(isset($arr_resp['payment']['billingType'])){
-						if($arr_resp['payment']['billingType']=='CREDIT_CARD'){
-							$forma_pagamento = 3;
-							$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['confirmedDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
-						}elseif($arr_resp['payment']['billingType']=='BOLETO'){
-							$forma_pagamento = 3;
-							$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
-						}else{
-							$forma_pagamento = 3;
-							$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
-						}
-					}else{
-						$forma_pagamento = 3;
-						$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
-					}
-					$ret['resposta'] =  'pagamento recebido';
-					$ret['exec'] = salvarAlterar($ret['sql']);
-					if($ret['exec']){
-						//$dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
-						if($dadosFatura){
-							$categoria = $dadosFatura[0]['categoria'];
-							$tokenMatricula = $dadosFatura[0]['ref_compra'];
-							if($categoria == $GLOBALS['categoriaMatricula'] && !empty($tokenMatricula)){
-								$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
-								if($statusAtual == 1){
-									$status = 2;
-								}else{
-									$status = $statusAtual;
-								}
-								$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
-								//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
-								$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
-							}else{
-								if($arr_resp['payment']['billingType']=='BOLETO'){
-									if($dadosFatura[0]['parcela']==1){
-										$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
-										if($statusAtual == 1){
-											$status = 3;
-										}else{
-											$status = $statusAtual;
-										}
-										$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
-										$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
-									}
-								}
-							}
-						}else{
-							$ret['mens'] = 'Erro: Fatura não encontrada';
-						}
-						$ret['resEAD']='chegou';
-						echo json_encode($ret);exit;
-					}
+			// 				}else{
+			// 					if($arr_resp['payment']['billingType']=='BOLETO' || $arr_resp['payment']['billingType']=='PIX'){
+			// 						if($dadosFatura[0]['parcela']==1){
+			// 							$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
+			// 							if($statusAtual == 1){
+			// 								$status = 3;
+			// 							}else{
+			// 								$status = $statusAtual;
+			// 							}
+			// 							$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'pagamento_boleto');
+			// 							//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
+			// 							$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
+			// 						}
+			// 					}
+			// 				}
+			// 			}else{
+			// 				echo 'Erro: Fatura não encontrada';
+			// 			}
+			// 			echo json_encode($ret);exit;
+			// 		}
+			// 	}elseif(($arr_resp['event']=='RECEIVED_IN_CASH' || $arr_resp['event']=='PAYMENT_RECEIVED')&& $arr_resp['payment'][$payk]){
+			// 		$arr_resp['payment']['netValue'] = str_replace(',','.',$arr_resp['payment']['netValue']);
+			// 		$arr_resp['payment']['value'] = str_replace(',','.',$arr_resp['payment']['value']);
 
-				}
-			}
+			// 		$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `pago`='s',
+			// 		`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."'
+			// 			WHERE `token`='".$arr_resp['payment'][$payk]."'";
+			// 		$ret['exec'] = salvarAlterar($ret['sql']);
+			// 		if($ret['exec']){
+			// 			// $dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
+			// 			if($dadosFatura){
+			// 				$categoria = $dadosFatura[0]['categoria'];
+			// 				$tokenMatricula = $dadosFatura[0]['ref_compra'];
+			// 				if($categoria == $GLOBALS['categoriaMatricula'] && !empty($tokenMatricula)){
+			// 					$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
+			// 					if($statusAtual == 1){
+			// 						$status = 2;
+			// 					}else{
+			// 						$status = $statusAtual;
+			// 					}
+			// 					$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
+			// 					//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
+			// 					$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
+			// 				}else{
+			// 					if($arr_resp['payment']['billingType']=='BOLETO'){
+			// 						if($dadosFatura[0]['parcela']==1){
+			// 							$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
+			// 							if($statusAtual == 1){
+			// 								$status = 3;
+			// 							}else{
+			// 								$status = $statusAtual;
+			// 							}
+			// 							$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
+			// 							//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
+			// 							$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
+			// 						}
+			// 					}
+			// 				}
+			// 			}else{
+			// 				echo 'Erro: Fatura não encontrada';
+			// 			}
+			// 			echo json_encode($ret);exit;
+			// 		}
+			// 	}elseif($arr_resp['event']=='PAYMENT_CONFIRMED' && $arr_resp['payment'][$payk]){
+			// 		$arr_resp['payment']['netValue'] = str_replace(',','.',$arr_resp['payment']['netValue']);
+			// 		$arr_resp['payment']['value'] = str_replace(',','.',$arr_resp['payment']['value']);
+			// 		if(isset($arr_resp['payment']['billingType'])){
+			// 			if($arr_resp['payment']['billingType']=='CREDIT_CARD'){
+			// 				$forma_pagamento = 3;
+			// 				$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['confirmedDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
+			// 			}elseif($arr_resp['payment']['billingType']=='BOLETO'){
+			// 				$forma_pagamento = 3;
+			// 				$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
+			// 			}else{
+			// 				$forma_pagamento = 3;
+			// 				$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
+			// 			}
+			// 		}else{
+			// 			$forma_pagamento = 3;
+			// 			$ret['sql'] = "UPDATE IGNORE ".$GLOBALS['lcf_entradas']." SET `valor_pago`='".$arr_resp['payment']['netValue']."', `valor`='".$arr_resp['payment']['value']."', `pago`='s',`data_pagamento`= '".$arr_resp['payment']['paymentDate']."',reg_asaas = '".json_encode($arr_resp['payment'],JSON_UNESCAPED_UNICODE)."' WHERE `token`='".$arr_resp['payment'][$payk]."'";
+			// 		}
+			// 		$ret['resposta'] =  'pagamento recebido';
+			// 		$ret['exec'] = salvarAlterar($ret['sql']);
+			// 		if($ret['exec']){
+			// 			//$dadosFatura = dados_tab($GLOBALS['lcf_entradas'],'token,categoria,id,parcela,ref_compra',"WHERE token='".$arr_resp['payment'][$payk]."'");
+			// 			if($dadosFatura){
+			// 				$categoria = $dadosFatura[0]['categoria'];
+			// 				$tokenMatricula = $dadosFatura[0]['ref_compra'];
+			// 				if($categoria == $GLOBALS['categoriaMatricula'] && !empty($tokenMatricula)){
+			// 					$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
+			// 					if($statusAtual == 1){
+			// 						$status = 2;
+			// 					}else{
+			// 						$status = $statusAtual;
+			// 					}
+			// 					$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
+			// 					//ENVIAR EMAIL COM CONFIRMAÇÃO DE PAGAMENTO E ACESSO AO CONTEUDO
+			// 					$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
+			// 				}else{
+			// 					if($arr_resp['payment']['billingType']=='BOLETO'){
+			// 						if($dadosFatura[0]['parcela']==1){
+			// 							$statusAtual = buscaValorDb($GLOBALS['tab12'],'token',$tokenMatricula,'status');
+			// 							if($statusAtual == 1){
+			// 								$status = 3;
+			// 							}else{
+			// 								$status = $statusAtual;
+			// 							}
+			// 							$ret['sqlMatricula'] = registrarMatriculaSYS($tokenMatricula,$status,'via_site');
+			// 							$ret['emailLinkCurso'] = emailLinkCurso(['valor'=>$tokenMatricula]); //app/email
+			// 						}
+			// 					}
+			// 				}
+			// 			}else{
+			// 				$ret['mens'] = 'Erro: Fatura não encontrada';
+			// 			}
+			// 			$ret['resEAD']='chegou';
+			// 			echo json_encode($ret);exit;
+			// 		}
+
+			// 	}
+			// }
 
 			echo json_encode($ret);
 	}
@@ -343,12 +363,13 @@ class AsaasController extends Controller
                         // dd($ret);
                         if(isset($ret['criarCobrancaCartao']['asaas']['id'])){
                             $ret['exec'] = true;
+                            $ret['token'] = $token;
                             $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
                             $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
                             $post_id = Qlib::get_id_by_token($token);
 
-                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,'resumo_pagamento',$resPagamento);
-                            $ret['salvarStatus'] = Qlib::update_postmeta($post_id,'pago','s');
+                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,$this->campo_meta_resumo,$resPagamento);
+                            $ret['salvarStatus'] = Qlib::update_postmeta($post_id,$this->campo_meta_status,'s');
                         }elseif(isset($ret['criarCobrancaCartao']['asaas']['errors'][0]['description']) && ($mes=$ret['criarCobrancaCartao']['asaas']['errors'][0]['description'])){
                             $ret['mens'] = Qlib::formatMensagemInfo($mes,'danger');
                         }
@@ -400,12 +421,14 @@ class AsaasController extends Controller
                         }
                         if(isset($ret[$filderPayCallback]['object']) || (@$ret[$filderPayCallback]['exec'])){
                             $ret['exec'] = true;
+                            $ret['token'] = $token;
                             $ret['mens'] = Qlib::formatMensagemInfo('Pagamento Efetuado com sucesso!','success');
                             $resPagamento = json_encode($ret[$filderPayCallback]);
                             // $resPagamento = json_encode($ret['criarCobrancaCartao']['asaas']);
                             $post_id = Qlib::get_id_by_token($token);
-                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,'resumo_pagamento',$resPagamento);
-                            $ret['salvarStatus'] = Qlib::update_postmeta($post_id,'pago','a');
+                            $ret['salvarResumo'] = Qlib::update_postmeta($post_id,$this->campo_meta_resumo,$resPagamento);
+                            $ret['salvarStatus'] = Qlib::update_postmeta($post_id,$this->campo_meta_status,'a');
+
                             // $urlUpd = "UPDATE ".$GLOBALS['tab12']." SET `pagamento_asaas`='".$resPagamento."' WHERE token='".$dadosCompra[0]['token']."'";
                             // if(isAdmin(1) || isset($_GET['fq'])){
                             //     $ret['urlUpd'] = $urlUpd;

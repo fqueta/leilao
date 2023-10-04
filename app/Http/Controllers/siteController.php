@@ -59,12 +59,12 @@ class siteController extends Controller
         if($post_id){
             $dados = Post::Find($post_id);
             if(isset($dados['post_content'])){
-
                 $ret = $dados['post_content'];
                 $lc = new LeilaoController;
                 $lac = new LanceController;
                 $uc = new UserController;
                 $pa = new PaymentController;
+                $mensagem_agradecimento = '<p>Obrigado pela sua compra <b>{nome}</b></p>';
                 $arr_shortC = [
                     'form_leilao' => $lc->form_leilao($post_id,$dados),
                     'list_leilao' => $lc->list_leilao($post_id,$dados),
@@ -76,6 +76,9 @@ class siteController extends Controller
                     'payment' => $pa->form($post_id,$dados),
                     'teste' => 'teste de conteudo do formulario para gadastr',
                 ];
+                if($this->sec1=='obrigado-pela-compra'){
+                    $arr_shortC['agradecimento'] = $pa->agradecimento($mensagem_agradecimento);
+                }
                 $arr_short = [];
                 $arr_k = explode('[sc ac="',$ret);
                 if(isset($arr_k[1]) && !empty($arr_k[1])){

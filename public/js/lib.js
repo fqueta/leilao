@@ -2294,6 +2294,8 @@ function dataContratos(obj) {
                     // document.querySelector('.select2-selection__choice__remove').click();
                     $('[name="config[total_horas]"]').val('');
                     $('[name="config[valor_r]"]').val('');
+                    $('[name="post_content"]').val('');
+                    $('[name="config[valor_atual]"]').val('');
                     return;
                 }
                 if(res.total_horas){
@@ -2302,11 +2304,16 @@ function dataContratos(obj) {
                     $('[name="config[total_horas]"]').val(0);
                 }
                 if(res.valor_r){
-                    $('[name="config[valor_r]"]').val(number_format(res.valor_r,'2',',','.'));
+                    var vl_r = number_format(res.valor_r,'2',',','.');
+                    $('[name="config[valor_r]"]').val(vl_r);
+                    $('[id="txt-config[valor_r]"]').html(vl_r);
                     // $('[name="config[valor_r]"]').maskMoney({symbol:'R$ ', thousands:'.', decimal:',', symbolStay: true});
                 }else{
                     $('[name="config[valor_r]"]').val(0);
                 }
+                $('[name="post_content"]').val(res.description);
+                $('#txt-post_content').html(res.description);
+                $('[name="config[valor_atual]"]').val(res.valor_atual);
                 // console.log(res);
                 // if(m=res.value.matricula){
                 //     $('[name="matricula"]').val(m);
@@ -2570,7 +2577,7 @@ function eco_submitCompra(){
 					if(response.exec == true){
 						$('#preload').fadeIn();
 						// $('#frm-pag-v2').hide();
-						window.location = '/obrigado-pela-compra';
+						window.location = '/obrigado-pela-compra/'+response.token;
 					}else{
 						if(response.criarCobrancaCartao.asaas.errors[0]){
 							alert(response.criarCobrancaCartao.asaas.errors[0].description);
@@ -2579,7 +2586,7 @@ function eco_submitCompra(){
 							window.location = '/obrigado-pela-compra?token='+btoa(response.lancarFaturaPagamentoAsaas.dadosCompraFinalizada.id);
 							//alert('redireciona para pagina de agradecimeno')
 						}else{
-							window.location = '/obrigado-pela-compra';
+							window.location = '/obrigado-pela-compra/'+response.token;
 						}
 					}
 				} catch (error) {

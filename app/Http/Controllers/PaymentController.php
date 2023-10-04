@@ -11,10 +11,13 @@ use Illuminate\Support\Facades\Auth;
 class PaymentController extends Controller
 {
     protected $instance = null;
-
+    public $meta_status_pagamento;
+    public $meta_resumo_pagamento;
 	public function __construct()
 
 	{
+        $this->meta_status_pagamento = Qlib::qoption('meta_status_pagamento')?Qlib::qoption('meta_status_pagamento'):'pago';
+        $this->meta_resumo_pagamento = Qlib::qoption('meta_resumo_pagamento')?Qlib::qoption('meta_resumo_pagamento'):'resumo_pagamento';
 
 		// $this->get_instance();
 
@@ -127,6 +130,7 @@ class PaymentController extends Controller
             //se $tk[1]==01 é para pagar leilao se $tk[1]==02 é para pagar o compreja
             $lc = new LeilaoController; //LeilaoController
             if($leilao_id && $tk[1]=='01'){
+                //dados do ultimo lance
                 $ul = $lc->get_lance_vencedor($leilao_id,false,'ultimo_lance');
                 //coletar o valor do leilao arrematado
                 // dd($ul);
@@ -560,35 +564,160 @@ class PaymentController extends Controller
 		return $ret;
 	}
     /**
-     * Metodo para exibir informações de pagamento
-     * @param integer $post_id
+     * Metodo para unificar a estrurua do array de pagamento do asaas
+     * @param string $json da resposta do asaas
      */
-    public function get_info_pagamento($post_id) {
-        $status = Qlib::get_postmeta($post_id,'pago',true);
-        $json_info = Qlib::get_postmeta($post_id,'resumo_pagamento',true);
-        $arr_info = false;
-        if($json_info){
-            $arr_info = Qlib::lib_json_array($json_info);
+    public function scheme_info_pagamento($json=false) {
+        $arr_info = [];
+        if($json){
+			$arr_info = Qlib::lib_json_array($json);
+            if(isset($arr_info['payment'])){
+				$arr_info = $arr_info['payment'];
+            }
             if(isset($arr_info['dueDate'])){
-                $arr_info['vencimento'] = Qlib::dataExibe($arr_info['dueDate']);
+				$arr_info['vencimento'] = Qlib::dataExibe($arr_info['dueDate']);
             }
             if(isset($arr_info['clientPaymentDate'])){
-                $arr_info['pagamento'] = Qlib::dataExibe($arr_info['clientPaymentDate']);
+				$arr_info['pagamento'] = Qlib::dataExibe($arr_info['clientPaymentDate']);
             }
             if(isset($arr_info['value'])){
-                $arr_info['valor'] = Qlib::valor_moeda($arr_info['value'],'R$ ');
+				$arr_info['valor'] = Qlib::valor_moeda($arr_info['value'],'R$ ');
             }
             if(@$arr_info['billingType']=='CREDIT_CARD'){
-                $arr_info['forma_pagamento'] = __('Cartão de crédito');
+				$arr_info['forma_pagamento'] = __('Cartão de crédito');
             }
             if(@$arr_info['billingType']=='PIX'){
                 $arr_info['forma_pagamento'] = __('PIX');
+
             }
         }
-        return view('site.leiloes.payment.info_pagamento',[
+        return $arr_info;
+    }
+    /**
+     * Metodo para exibir informações de pagamento
+     * @param integer $post_id
+     */
+    public function get_info_pagamento($post_id,$file_blade='modal_info_pagamento') {
+        $status = Qlib::get_postmeta($post_id,$this->meta_status_pagamento,true);
+        $json_info = Qlib::get_postmeta($post_id,$this->meta_resumo_pagamento,true);
+        $arr_info = false;
+        if($json_info){
+            $arr_info = $this->scheme_info_pagamento($json_info);
+        }
+        return view('site.leiloes.payment.'.$file_blade,[
             'status'=>$status,
             'info_asaas'=>$arr_info,
             'id'=>$post_id,
         ]);
+    }
+    /**
+     * Metodo para restagar o status de pagamento de um leilao
+     * @param int $post_id
+     * @return string $situacao_pagamento
+     */
+    public function get_status_payment($post_id,$type='html'){
+        // $meta_status_pagamento = Qlib::qoption('meta_status_pagamento')?Qlib::qoption('meta_status_pagamento'):'pago';
+        $sp = Qlib::get_postmeta($post_id,$this->meta_status_pagamento,true);
+        if($sp=='s'){
+            $sp = 'Pago';
+            if($type=='html'){
+                $situacao_pagamento = '<span class="text-success">'.$sp.'</span>';
+            }else{
+                $situacao_pagamento = $sp;
+            }
+        }elseif($sp == 'a'){
+            $sp = 'Pix Gerado';
+            if($type=='html'){
+                $situacao_pagamento = '<span class="text-warning">'.$sp.'</span>';
+            }else{
+                $situacao_pagamento = $sp;
+            }
+        }else{
+            $sp = 'Aguardando pagamento';
+            if($type=='html'){
+                $situacao_pagamento = '<span class="text-danger">'.$sp.'</span>';
+            }else{
+                $situacao_pagamento = $sp;
+            }
+        }
+        return $situacao_pagamento;
+    }
+    /**
+     * Metodo exibir pagina de agradecimento
+     * @param int $post_id || $dados = dados do post
+     * @return string $situacao_pagamento
+     */
+    public function agradecimento($mensagem=false){
+        $seg1 = request()->segment(1);
+        $seg2 = request()->segment(2);
+        $ret = false;
+        if($seg1 && $seg2 && $mensagem){
+            $status = 501;
+            $token = $seg2;
+            $leilao_id = Qlib::get_id_by_token($token);
+            $dl = Post::FindOrFail($leilao_id);
+
+            if(!$leilao_id){
+                //Leião nem foi encontrado
+                return view('site.meio404');
+            }
+            $lc = new LeilaoController; //LeilaoController
+            //dados do ultimo lance
+            $ul = $lc->get_lance_vencedor($leilao_id,false,'ultimo_lance');
+            $ul = isset($ul['ultimo_lance']) ? $ul['ultimo_lance'] : false;
+            $dc = false; //dados do contrato
+            $dt = false; //dados do termino ou informações do termino
+            // $mensagem = $mensagem;
+            if($dl->count()){
+                $dl = $dl->toArray();
+                $dl['thumbnail'] = Qlib::get_thumbnail_link($dl['ID']);
+                $dt = $lc->info_termino($leilao_id,$dl);
+                if(isset($dl['config']['contrato']) && !empty($dl['config']['contrato'])){
+                    $dc0 = Post::where('token',$dl['config']['contrato'])->get()->toArray();
+                    if(isset($dc0[0])){
+                        $dc = $dc0[0];
+                    }
+                }
+            }else{
+                //Leião nem foi encontrado
+                return view('site.meio404');
+            }
+            if(isset($ul['nome'])){
+                $nome_cliente   = isset($ul['nome'])?$ul['nome']:false;
+                $mensagem = str_replace('{nome}',$nome_cliente,$mensagem);
+            }else{
+                //Se não tiver um cliente que deu o ultimo lance não aparece
+                return view('site.meio404');
+            }
+            $pago = Qlib::get_postmeta($leilao_id,$this->meta_status_pagamento,true);
+            $json_info = Qlib::get_postmeta($leilao_id,$this->meta_resumo_pagamento,true);
+            $arr_info = [];
+            if($json_info){
+                $arr_info = $this->scheme_info_pagamento($json_info);
+            }
+            if($pago=='a'){
+                //Solicitação de geração do pix foi enviado para o gateway
+                $status = 201;
+            }elseif($pago=='s'){
+                //pagamento ja foi realizado
+                $status = 200;
+            }
+            if(isset($arr_info['value'])){
+                $arr_info['valor'] = Qlib::valor_moeda($arr_info['value']);
+            }
+            $dview = [
+                'status'=>$status,
+                'dl'=>$dl, //dados do leilao
+                'dc'=>$dc, //dados do contrato
+                'ul'=>$ul, //dados do ultimo lance
+                'dt'=>$dt, //dados do termino
+                'arr_info_pagamento'=>$arr_info, //Informações do gamento vindas do Asaas
+                'mensagem'=>$mensagem,
+            ];
+            $ret = view('site.leiloes.payment.agradecimento',$dview);
+        }else{
+            $ret = view('site.meio404');
+        }
+        return $ret;
     }
 }

@@ -6,6 +6,7 @@
             </h4>
         </div>
         <div class="card-body">
+            {{-- {{dd($config)}} --}}
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -13,6 +14,7 @@
                         <th>{{__('Nome')}}</th>
                         <th>{{__('Termino')}}</th>
                         <th>{{__('Valor')}}</th>
+                        <th class="">{{__('Pagamento')}}</th>
                         <th class="text-right">{{__('Situação')}}</th>
                     </tr>
                 </thead>
@@ -33,7 +35,16 @@
                             <td>{{@$v['venc']['nome']}}</td>
                             <td>{{@$v['term']['html']}}</td>
                             <td>{{App\Qlib\Qlib::valor_moeda(@$v['venc']['valor_lance'])}}</td>
-                            <td class="text-right">{!!@$v['situacao_pagamento']!!}</td>
+                            <td>
+                                @if (isset($v['status_pago']) && ($v['status_pago']=='s' || $v['status_pago']=='a'))
+                                    @php
+                                        echo (new App\Http\Controllers\PaymentController) -> get_info_pagamento($v['ID'])
+                                    @endphp
+                                @endif
+                            </td>
+                            <td class="text-right">
+                                {!!@$v['situacao_pagamento']!!}
+                            </td>
                         </tr>
                     @endforeach
                 @endif

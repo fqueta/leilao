@@ -263,8 +263,11 @@ class LeilaoController extends Controller
                                 if(isset($post['config']['valor_r'])){
                                     $total_horas = (int)$post['config']['total_horas'];
                                     $valor_r = Qlib::precoBanco($post['config']['valor_r']);
+                                    $valor_atual = Qlib::precoBanco(@$post['config']['valor_atual']);
                                     $ret['valor_r'] += $valor_r;
                                     $ret['total_horas'] += $total_horas;
+                                    $ret['description'] = $post['post_content'];
+                                    $ret['valor_atual'] = $valor_atual;
                                     $ret['exec'] = true;
                                 }
                             }else{
@@ -453,7 +456,6 @@ class LeilaoController extends Controller
                 }
                 //list lances
                 $ll = $lc->get_lances($dl[0]['ID'],true);
-
                 $dl[0]['link_thumbnail'] = Qlib::get_thumbnail_link($dl[0]['ID']);
                 $dl[0]['the_permalink'] = Qlib::get_the_permalink($dl[0]['ID']);
                 $dl[0]['termino'] = $termino;
@@ -611,7 +613,7 @@ class LeilaoController extends Controller
         }
         if($dl && $tipo_responsavel=='ganhador'){
             $meta_notific = 'notifica_email_termino_leilao';
-            $meta_pago = 'pago';
+            $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
             //Verifica quem é o ganhador
             $dg = $this->get_lance_vencedor($post_id,$dl,'ultimo_lance');//dados do ganhador
             //Verifica se ja foi enviado a notificação antes
@@ -891,6 +893,7 @@ class LeilaoController extends Controller
         where('config','LIKE','%status":"publicado%')->
         where('config','LIKE','%contrato":"%')->
         get();
+        $pc = new PaymentController();
         if($list->count()){
             $arr_l = $list->toArray();
             foreach ($arr_l as $key => $value) {
@@ -898,6 +901,7 @@ class LeilaoController extends Controller
                 if(isset($df['termino']) && $df['termino']){
                     $venc = $this->get_lance_vencedor($value['ID'],false,'ultimo_lance');
                     $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:false;
+
                     if($user_id){
                         if(isset($venc['author']) && $venc['author']==$user_id){
                             // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
@@ -907,13 +911,14 @@ class LeilaoController extends Controller
                             $ret[$key]['term'] = $df;
                             $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
                             $link_leilao_front = $this->get_link_front($leilao_id);
-                            if($sp=='s'){
-                                $situacao_pagamento = '<span class="text-success">Pago</span>';
-                            }elseif($sp=='a'){
-                                $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
-                            }else{
-                                $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
-                            }
+                            // if($sp=='s'){
+                            //     $situacao_pagamento = '<span class="text-success">Pago</span>';
+                            // }elseif($sp=='a'){
+                            //     $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
+                            // }else{
+                            //     $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
+                            // }
+                            $situacao_pagamento = $pc->get_status_payment($leilao_id);
                             $ret[$key]['status_pago'] = $sp;
                             $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
                             $ret[$key]['link_leilao_front'] = $link_leilao_front;
@@ -923,19 +928,18 @@ class LeilaoController extends Controller
                         // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
                         $leilao_id = $value['ID'];
                         $ret[$key] = $value;
-                        $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:false;
+                        $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:$venc;
                         $ret[$key]['venc'] = $venc;
                         $ret[$key]['term'] = $df;
-                        $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
+
                         $link_leilao_front = $this->get_link_front($leilao_id);
-                        if($sp=='s'){
-                            $situacao_pagamento = '<span class="text-success">Pago</span>';
-                        }else{
-                            $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
-                        }
+                        $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
+                        $situacao_pagamento = $pc->get_status_payment($leilao_id);
+                        $ret[$key]['status_pago'] = $sp;
                         $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
                         $ret[$key]['link_leilao_front'] = $link_leilao_front;
                         $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
+                        // dd($ret);
                     }
 
                 }

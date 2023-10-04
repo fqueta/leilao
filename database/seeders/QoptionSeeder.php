@@ -61,6 +61,16 @@ class QoptionSeeder extends Seeder
                 'valor'=>'s', //url do sandbox
             ],
             [
+                'nome'=>'Campo Meta para status de pagamento',
+                'url'=>'meta_pago',
+                'valor'=>'pago',
+            ],
+            [
+                'nome'=>'Campo Meta para resumo de pagamento',
+                'url'=>'meta_resumo_pagamento',
+                'valor'=>'resumo_pagamento',
+            ],
+            [
                 'nome'=>'Dados da Empresa',
                 'url'=>'dados_empresa',
                 'valor'=>Qlib::lib_array_json([
