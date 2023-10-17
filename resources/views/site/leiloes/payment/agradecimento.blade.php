@@ -7,14 +7,12 @@
     $thumbnail      = isset($dl['thumbnail'])?$dl['thumbnail']:false;
     $leilao         = isset($dl['post_title'])?$dl['post_title']:false;
     $contrato       = isset($dc['post_title'])?$dc['post_title']:false;
-    $valor    = isset($ul['valor_lance'])?$ul['valor_lance']:false;
+    $valor          = isset($ul['valor_lance'])?$ul['valor_lance']:@$valor;
     $nome_cliente   = isset($ul['nome'])?$ul['nome']:false;
     $data_lance     = isset($ul['created_at'])?$ul['created_at']:false;
-    $termino       = isset($dt['html'])?$dt['html']:false;
-    // // dd($dt);
+    $termino        = isset($dt['html'])?$dt['html']:false;
     $valor_pix = '<span>'.App\Qlib\Qlib::valor_moeda($valor,'R$ ').'</span><input type="hidden" class="total-pix" name="compra[valor]" value="'.$valor.'" />';
 	$valor_boleto = '<span>'.App\Qlib\Qlib::valor_moeda($valor,'R$ ').'</span><input type="hidden" class="total-boleto" name="compra[valor]" value="'.$valor.'" />';
-
 @endphp
 
 @if(isset($dl))
@@ -38,6 +36,7 @@
                     <h3>{{$leilao}}</h3>
                     <h5>{{$contrato}}</h5>
                     <h3>{{App\Qlib\Qlib::valor_moeda($valor,'R$ ')}}</h3>
+                    @if(isset($ul['id']) && !empty($ul['id']))
                     <ul>
                         <li>
                             <small><b>Termino:</b> {{$termino}}</small>
@@ -49,6 +48,7 @@
                             <small><b>Data do Lance:</b> {{App\Qlib\Qlib::dataExibe($data_lance)}}</small>
                         </li>
                     </ul>
+                    @endif
                 </div>
             </div>
             <div class="row">

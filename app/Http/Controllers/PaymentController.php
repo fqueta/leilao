@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\AsaasController;
 use App\Models\Post;
+use App\Models\User;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -698,6 +699,31 @@ class PaymentController extends Controller
         return $situacao_pagamento;
     }
     /**
+     * Metodo para exibir dados do usuario que pagou o leilao
+     * @param int $leilao_id
+     * @return array $ret
+     */
+    public function get_customer_leilao($leilao_id=false){
+        $arr_info = [];
+        if($leilao_id){
+            $pago = Qlib::get_postmeta($leilao_id,$this->meta_status_pagamento,true);
+            $json_info = Qlib::get_postmeta($leilao_id,$this->meta_resumo_pagamento,true);
+            if($json_info){
+                $arr_info = $this->scheme_info_pagamento($json_info);
+            }
+            if(isset($arr_info['customer']) && !empty($arr_info['customer'])){
+                $id_cliente_pago = Qlib::buscaValorDb0('usermeta','meta_value',$arr_info['customer'],'user_id');
+                $du = User::Find($id_cliente_pago);
+                if($du->count() > 0){
+                    $arr_info['user'] = $du->toArray();
+                }
+                //criar um metodo get_customer_leilao =
+                //dd($id_cliente_pago);
+            }
+        }
+        return $arr_info;
+    }
+    /**
      * Metodo exibir pagina de agradecimento
      * @param int $post_id || $dados = dados do post
      * @return string $situacao_pagamento
@@ -733,23 +759,32 @@ class PaymentController extends Controller
                         $dc = $dc0[0];
                     }
                 }
+                //Veriricar o nome de quel pagou este leilai na modalidade compre já
+                // dd($dl);
             }else{
                 //Leião nem foi encontrado
                 return view('site.meio404');
             }
+            $pago = Qlib::get_postmeta($leilao_id,$this->meta_status_pagamento,true);
+            // $json_info = Qlib::get_postmeta($leilao_id,$this->meta_resumo_pagamento,true);
+            $arr_info = $this->get_customer_leilao($leilao_id);
+            // dd($arr_info);
+            // if($json_info){
+            //     $arr_info = $this->scheme_info_pagamento($json_info);
+            // }
+            $nome_cliente = false;
             if(isset($ul['nome'])){
                 $nome_cliente   = isset($ul['nome'])?$ul['nome']:false;
-                $mensagem = str_replace('{nome}',$nome_cliente,$mensagem);
+            }elseif(isset($arr_info['user']['name']) && isset($arr_info['value'])){
+                // dd($arr_info);
+                $nome_cliente = $arr_info['user']['name'];
+                $ul['valor_lance'] = $arr_info['value'];
             }else{
                 //Se não tiver um cliente que deu o ultimo lance não aparece
                 return view('site.meio404');
             }
-            $pago = Qlib::get_postmeta($leilao_id,$this->meta_status_pagamento,true);
-            $json_info = Qlib::get_postmeta($leilao_id,$this->meta_resumo_pagamento,true);
-            $arr_info = [];
-            if($json_info){
-                $arr_info = $this->scheme_info_pagamento($json_info);
-            }
+            $mensagem = str_replace('{nome}',$nome_cliente,$mensagem);
+            // dd($arr_info);
             if($pago=='a'){
                 //Solicitação de geração do pix foi enviado para o gateway
                 $status = 201;
