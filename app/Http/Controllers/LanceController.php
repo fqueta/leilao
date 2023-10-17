@@ -546,10 +546,13 @@ class LanceController extends Controller
      * @param integer $leilao_id
      * @return integer $ret
      */
-    public function proximo_lance($leilao_id=false){
+    public function proximo_lance($leilao_id=false,$dl=false){
         $ret = 0;
         $lance_atual = $this->ultimo_lance($leilao_id);
-        $dl = Post::Find($leilao_id);
+        // $dl = Post::Find($leilao_id);
+        if($leilao_id && !$dl){
+            $dl = (new LeilaoController)->get_leilao($leilao_id);
+        }
         $campo_valor = 'valor_r';
         if(isset($dl['config']['incremento']) && ($inc = $dl['config']['incremento'])){
             if($lance_atual==0 && isset($dl['config'][$campo_valor])){
@@ -560,7 +563,6 @@ class LanceController extends Controller
                 $ret = $lance_atual+$inc;
             }
         }
-        //$incremento =
         return $ret;
     }
     /**

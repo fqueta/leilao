@@ -1138,6 +1138,7 @@ function qFormCampos(config){
     };
     var r = '';
     var ret = '';
+    console.log(config);
     if(Object.entries(config).length>0){
         Object.entries(config).forEach(([key, v]) => {
             if(v.js || v.active){
@@ -2299,17 +2300,26 @@ function dataContratos(obj) {
                     return;
                 }
                 if(res.total_horas){
+                    let vl_th = res.total_horas;
+                    let incremento = res.incremento;
                     $('[name="config[total_horas]"]').val(res.total_horas);
+                    $('[id="txt-config[total_horas]"]').html(vl_th);
+                    $('[id="txt-config[incremento]"]').html(incremento);
                 }else{
                     $('[name="config[total_horas]"]').val(0);
+                    $('[id="txt-config[total_horas]"]').html('');
+                    $('[id="txt-config[incremento]"]').html('');
                 }
                 if(res.valor_r){
-                    var vl_r = number_format(res.valor_r,'2',',','.');
+                    let vl_r = number_format(res.valor_r,'2',',','.');
                     $('[name="config[valor_r]"]').val(vl_r);
                     $('[id="txt-config[valor_r]"]').html(vl_r);
+                    $('[id="txt-config[valor_venda]"]').html(res.config.valor_venda);
                     // $('[name="config[valor_r]"]').maskMoney({symbol:'R$ ', thousands:'.', decimal:',', symbolStay: true});
                 }else{
                     $('[name="config[valor_r]"]').val(0);
+                    $('[id="txt-config[valor_r]"]').html('');
+                    $('[id="txt-config[valor_venda]"]').html('');
                 }
                 $('[name="post_content"]').val(res.description);
                 $('#txt-post_content').html(res.description);
@@ -2616,4 +2626,32 @@ function eco_submitCompra(){
 	// $('#'+id_form).submit(function(){
 
 	// });
+}
+function select_contrato(obj){
+    let id_resp = obj.value;
+    if(id_resp){
+        try {
+            let url = lib_trataAddUrl('post_author',id_resp);
+            //preloader
+            window.location = url;
+            // getAjax({
+            //     url:'/leiloes/list-contratos/'+id_resp,
+            //     // data:dpost,
+            // },function(res){
+            //     $('#preload').fadeOut("fast");
+            //     if(res.campo){
+            //         var et = qFormCampos(res.compo);
+            //         if(et.length){
+            //             $('[div-id="config[contrato]"]').remove();
+            //             $(et).insertAfter('[div-id="config[status]"]');
+            //         }
+            //         console.log(et);
+            //     }
+
+            // });
+        } catch (error) {
+            alert('erro')
+            console.log(error);
+        }
+    }
 }

@@ -72,6 +72,16 @@
                 @endif
             @endif
         </div>
+    @elseif ($config['type']=='html_script')
+        @php
+           $config['script'] = isset($config['script'])?$config['script']:false;
+        @endphp
+        <div class="col-{{$config['col']}}-{{$config['tam']}} {{$config['class_div']}}" div-id="{{$config['campo']}}">
+            @if ($config['script'])
+                {!!$config['script']!!}
+            @endif
+        </div>
+
     @elseif ($config['type']=='html_vinculo')
         <div class="col-{{$config['tam']}} {{$config['class_div']}}" div-id="{{$config['campo']}}">
             <div class="card card-secondary card-outline">

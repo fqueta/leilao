@@ -901,8 +901,11 @@ class Qlib
         $ret = url('/');
         if(!$dados && $post_id){
             $dados = Post::Find($post_id);
+            if($dados->count() > 0){
+                $dados = $dados->toArray();
+            }
         }
-        if($dados->count() > 0){
+        if($dados){
             $seg1 = request()->segment(1);
             if($seg1){
                 if($dados['post_type'] == 'leiloes_adm' && $seg1==self::get_slug_post_by_id(37)){

@@ -22,9 +22,21 @@
             </select>
         </div>
         <div class="col-6">
-            <button id="btn-frm-lance" class="btn btn-primary btn-block float-end" data-bs-toggle="modal" data-bs-target="#modal-dar-lance" {{$disbledL}} type="button"><i class="fas fa-gavel"></i> {{__('Dar Lance')}}</button>
+            <button id="btn-frm-lance" class="btn btn-primary btn-block float-end" data-bs-toggle="modal" data-bs-target="#modal-dar-lance" {{$disbledL}} type="button"><i class="fas fa-gavel"></i> {{__('Dar Lance')}}
+            </button>
         </div>
     </div>
+    @if(isset($dados['desconto_s_atual']['valor']) && $dados['desconto_s_atual']['valor']>0)
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <p>{{__('Ao realizar o lance acima você tem uma economia de ')}}<br> <b>{{@$dados['desconto_s_atual']['html']}} </b> (<b>{{@$dados['desconto_s_atual']['porcento']}}% OFF </b>) {{__('Sobre o preço atual do pacote')}}</p>
+                @if(isset($dados['valor_atual']))
+                    <p>{{__('Preço atual do pacote')}} {{$dados['valor_atual']}}</p>
+                @endif
+
+            </div>
+        </div>
+    @endif
     <div class="row mb-3">
         <div class="col-md-12">
             @php

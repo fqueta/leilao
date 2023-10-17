@@ -110,14 +110,14 @@
             @if ($config['label'])
                 <label for="{{$config['campo']}}">{{$config['label']}}:</label>
             @endif
-            <span id="txt-{{$config['campo']}}">
+            <span id="txt-{{$config['campo']}}" class="{{$config['class']}}">
                 @if (isset($config['arr_opc']) && is_array($config['arr_opc']))
-                {{@$config['arr_opc'][$config['value']]}}
+                {!!@$config['arr_opc'][$config['value']]!!}
                 @else
-                {{$config['value']}}
+                {!!$config['value']!!}
                 @endif
             </span>
-            <input type="hidden" class="form-control @error($config['campo']) is-invalid @enderror {{$config['class']}}" id="inp-{{$config['campo']}}" name="{{$config['campo']}}" aria-describedby="{{$config['campo']}}" placeholder="{{$config['placeholder']}}" value="@if(isset($config['value'])){{$config['value']}}@elseif($config['ac']=='cad'){{old($config['campo'])}}@endif" {{$config['event']}} />
+            <input type="hidden" class="form-control @error($config['campo']) is-invalid @enderror" id="inp-{{$config['campo']}}" name="{{$config['campo']}}" aria-describedby="{{$config['campo']}}" placeholder="{{$config['placeholder']}}" value="@if(isset($config['value'])){{$config['value']}}@elseif($config['ac']=='cad'){{old($config['campo'])}}@endif" {{$config['event']}} />
             @error($config['campo'])
                 <div class="alert alert-danger">{{ $message }}</div>
             @enderror

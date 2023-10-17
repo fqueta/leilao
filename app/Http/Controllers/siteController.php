@@ -25,6 +25,10 @@ class siteController extends Controller
         $ret['exec']=false;
         $ret['dados']=false;
         if($slug1){
+            if($slug1 == 'home'){
+                $url = url('/').'/'.Qlib::get_slug_post_by_id(37);
+                return redirect()->to($url);
+            }
             $ds = Post::where('post_name', $slug1)->where('post_status', 'publish')->get();
             if($ds->count()){
                 $dados=$ds[0];
@@ -65,20 +69,26 @@ class siteController extends Controller
                 $uc = new UserController;
                 $pa = new PaymentController;
                 $mensagem_agradecimento = '<p>Obrigado pela sua compra <b>{nome}</b></p>';
-                $arr_shortC = [
-                    'form_leilao' => $lc->form_leilao($post_id,$dados),
-                    'list_leilao' => $lc->list_leilao($post_id,$dados),
-                    'list_lances' => $lac->list_lances($post_id,$dados),
-                    'list_lance_user' => $lac->list_lance_user(), //Lista os lances do usuario no frontend
-                    'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
-                    'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
-                    'ger_user' => $uc->ger_user($post_id,$dados), //Metodo para gerenciar usuarios no site
-                    'payment' => $pa->form($post_id,$dados),
-                    'teste' => 'teste de conteudo do formulario para gadastr',
-                ];
-                if($this->sec1=='obrigado-pela-compra'){
+                if($this->sec1==Qlib::get_slug_post_by_id(5)){
+                    //obrigado-pela-compra
                     $arr_shortC['agradecimento'] = $pa->agradecimento($mensagem_agradecimento);
+                }elseif($this->sec1==Qlib::get_slug_post_by_id(37)){
+                    //leiloes-publicos
+                    $arr_shortC['leiloes_publicos'] = $lc->leiloes_publicos($post_id,$dados);
+                }else{
+                    $arr_shortC = [
+                        'form_leilao' => $lc->form_leilao($post_id,$dados),
+                        'list_leilao' => $lc->list_leilao($post_id,$dados),
+                        'list_lances' => $lac->list_lances($post_id,$dados),
+                        'list_lance_user' => $lac->list_lance_user(), //Lista os lances do usuario no frontend
+                        // 'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
+                        'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
+                        'ger_user' => $uc->ger_user($post_id,$dados), //Metodo para gerenciar usuarios no site
+                        'payment' => $pa->form($post_id,$dados),
+                        'teste' => 'teste de conteudo do formulario para gadastr',
+                    ];
                 }
+
                 $arr_short = [];
                 $arr_k = explode('[sc ac="',$ret);
                 if(isset($arr_k[1]) && !empty($arr_k[1])){

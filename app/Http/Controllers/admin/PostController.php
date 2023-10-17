@@ -190,11 +190,12 @@ class PostController extends Controller
             ],
             'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'2','cp_busca'=>'config][total_horas','title'=>'Número total de horas que serão leiloadas'],
             'config[valor_r]'=>['label'=>'Valor da Rescisão','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor da rescisão, este também será o valor de lance inicial quando o cliente criar o leilão'],
+            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'','tam'=>'4','cp_busca'=>'config][incremento','class'=>'','title'=>'Valor de incremento em cada lançe do Leilão'],
             // 'config[valor_h]'=>['label'=>'Valor Hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_h','title'=>'Valor do hora no contrato'],
             // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
             // 'config[lance_total]'=>['label'=>'Lance total','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][lance_total','title'=>'Valor unitário do Lançe mutiplicado pela quantidade de horas'],
-            'config[valor_venda]'=>['label'=>'Compre já','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
-            'config[valor_atual]'=>['label'=>'Valor Atual','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_atual','title'=>'Valor atual do pacote no Aeroclube'],
+            'config[valor_venda]'=>['label'=>'Compre já','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            'config[valor_atual]'=>['label'=>'Valor Atual','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][valor_atual','title'=>'Valor atual do pacote no Aeroclube'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
@@ -206,12 +207,31 @@ class PostController extends Controller
     }
     public function campos_leilao($post_id=false,$post_type=false,$data=false){
         $hidden_editor = '';
+        $seg3 = request()->segment(3);
+        if($seg3=='create'){
+            $ac = 'cad';
+        }else{
+            $ac = 'alt';
+        }
         if(Qlib::qoption('editor_padrao')=='laraberg'){
             $hidden_editor = 'hidden';
         }
         $user = Auth::user();
         if($post_id && !$data){
-            $data = Post::Find($post_id);
+            // $data = Post::Find($post_id);
+            $data = Post::where('ID','=',$post_id)->get()->toArray();// Post::Find($leilao_id);
+            if(isset($data[0])){
+                $data = $data[0];
+            }
+        }
+        if($data && isset($data['config']['contrato'])){
+            $contrato = (new LeilaoController)->get_data_contrato($data['config']['contrato']);
+            if(isset($contrato['config'])){
+                foreach ($contrato['config'] as $kc => $vc) {
+                    $data['config'][$kc] = $vc;
+                }
+            }
+            // dd($data);
         }
         $post_type = $post_type?$post_type:$this->post_type;
         $name_route = request()->route()->getName();
@@ -219,17 +239,25 @@ class PostController extends Controller
             'edicao' => 'Em edição',
             'publicado' => 'Publicado',
         ];
-        $ac = 'alt';
         $lc = new LeilaoController;
         $event_status = 'required';
         $arr_itens=[];
+        if($ac=='cad'){
+            @$data['token'] = uniqid();
+            $data['post_title'] = 'Leilão '.$data['token'];
+            $data['post_author'] = isset($_GET['post_author']) ? $_GET['post_author'] : false;
+        }else{
+            // if(count($arr_itens)==0 && isset($data['config']['itens']) && count($data['config']['itens'])){
+                //     $arr_itens = $data['config']['itens'];
+                // }
+            $data['post_author'] = isset($_GET['post_author']) ? $_GET['post_author'] : @$data['post_author'];
+        }
         if(Qlib::is_backend()){
             $event_status = ' onchange=exibeStatus(this);';
             $arr_itens = $lc->array_contratos();
-            $seg3 = request()->segment(3);
             if($seg3=='create'){
                 $ac = 'cad';
-                $arr_itens = $lc->array_contratos();
+                $arr_itens = $lc->array_contratos(@$data['post_author']);
             }else{
                 $arr_itens = $lc->array_contratos(@$data['post_author']);
             }
@@ -244,14 +272,7 @@ class PostController extends Controller
             if(isset($user->id))
                 $arr_itens = $lc->array_contratos($user->id);
         }
-        if($ac=='cad'){
-            @$data['token'] = uniqid();
-            $data['post_title'] = 'Leilão '.$data['token'];
-        }else{
-            // if(count($arr_itens)==0 && isset($data['config']['itens']) && count($data['config']['itens'])){
-            //     $arr_itens = $data['config']['itens'];
-            // }
-        }
+
         $ret = [
             'sep1'=>['label'=>'Dados do Leilão','active'=>false,'tam'=>'12','script'=>'<h5 class="pt-1">'.__('Dados do Leilão').'</h5>','type'=>'html_script','class_div'=>'bg-secondary'],
             'ID'=>['label'=>'Id','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
@@ -264,23 +285,12 @@ class PostController extends Controller
                 'active'=>true,
                 'type'=>'select',
                 'arr_opc'=>Qlib::sql_array("SELECT id,name FROM users WHERE ativo='s' AND id_permission>'1'",'name','id'),'exibe_busca'=>'d-block',
-                'event'=>'required',
+                'event'=>'required onchange=select_contrato(this)',
                 'tam'=>'12',
                 'exibe_busca'=>true,
                 'option_select'=>true,
                 'class'=>'select2',
-            ],
-            'config[status]'=>[
-                'label'=>'Status*',
-                'active'=>true,
-                'type'=>'select',
-                'arr_opc'=>$arr_status,'exibe_busca'=>'d-block',
-                'event'=>$event_status,
-                'tam'=>'12',
-                'class'=>'',
-                'exibe_busca'=>true,
-                'option_select'=>false,
-                'cp_busca'=>'config][status',
+                'value'=>@$data['post_author'],
             ],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             // 'config[itens][]'=>[
@@ -296,8 +306,8 @@ class PostController extends Controller
                 //     'cp_busca'=>'config][itens',
                 //     'class'=>'select2',
                 // ],
-                'callback_contrato'=>[],
-                'config[contrato]'=>[
+            'callback_contrato'=>[],
+            'config[contrato]'=>[
                     'label'=>'Contratos*',
                 'active'=>true,
                 'type'=>'select',
@@ -310,16 +320,31 @@ class PostController extends Controller
                 'cp_busca'=>'config][contrato',
                 'class'=>'select2',
             ],
-            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
-            // 'config[valor_r]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
-            'config[valor_r]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
+            'config[status]'=>[
+                'label'=>'Status*',
+                'active'=>true,
+                'type'=>'select',
+                'arr_opc'=>$arr_status,'exibe_busca'=>'d-block',
+                'event'=>$event_status,
+                'tam'=>'12',
+                'class'=>'',
+                'exibe_busca'=>true,
+                'option_select'=>false,
+                'cp_busca'=>'config][status',
+            ],
+            // 'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
+            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','class'=>'text-field-leilao','tam'=>'6','cp_busca'=>'config][total_horas','value'=>@$data['config']['total_horas'],'title'=>'Número total de horas'],
+            // 'config[valor_r]'=>['label'=>'Lance inicial','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
+            'config[valor_r]'=>['label'=>'Lance inicial','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','class'=>'text-field-leilao','tam'=>'6','cp_busca'=>'config][valor_r','value'=>@$data['config']['valor_r'],'title'=>'Valor do reembolso'],
             // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
             // 'config[lance_inicial]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][lance_inicial','title'=>'Valor do lance inicial'],
-            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
-            'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            // 'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
+            'config[incremento]'=>['label'=>'Incremento','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','tam'=>'6','cp_busca'=>'config][incremento','class'=>'text-field-leilao','value'=>@$data['config']['incremento'],'title'=>'Valor de incremento em cada lançe'],
+            // 'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_venda','value'=>@$data['config']['valor_venda'],'title'=>'Valor para venda sem leilão'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
-            'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Boleto').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
+            'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Pix').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
             //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
             //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
             // 'config[parcelamento]'=>[
@@ -356,6 +381,22 @@ class PostController extends Controller
         if(Qlib::is_backend()){
             $ret['ID']['active'] = true;
             $ret['post_status'] = ['label'=>'Liberado','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
+            //Se tem um contrato cadastrado impedir de mudar o proprietário
+            if(isset($data['post_author']) && ($author_id = $data['post_author']) && isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
+                $d_user = User::Find($author_id);
+                if($d_user){
+                    // $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','value'=>$author_id,'tam'=>'12'];
+                    // dd($d_user);
+                    $d_user['config'] = @Qlib::lib_json_array($d_user['config']);
+                    $link = $lc->get_link_front($post_id);
+                    $script = '<p><b>Ver no site: </b><a style="text-decoration:underline" href="'.$link.'" target="_blank">'.$data['post_title'].'</a></p>';
+                    $script .= '<p><b>Responsável:</b><span> '.$d_user['name'].'</span><input type="hidden" name="post_author" value="'.$d_user['id'].'"></p>';
+                    $script .= '<p><b>Email:</b> '.$d_user['email'].' <b>Celular:</b> '.$d_user['config']['celular'].'</p>';
+                    $script .= '<p><b>CPF:</b> '.$d_user['cpf'].'</p>';
+                    $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'html_script','exibe_busca'=>'d-block','script'=>$script,'script_show'=>$script,'tam'=>'12'];
+                    // dd($ret);
+                }
+            }
         }
         if(Qlib::is_frontend()){
             $value_author = false;
@@ -366,16 +407,26 @@ class PostController extends Controller
             $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','value'=>$value_author,'tam'=>'2'];
         }
         if($ac!='cad'){
+            $link = $lc->get_link_front($post_id);
+            $script = '<p><b>Ver no site: </b><a style="text-decoration:underline" href="'.$link.'" target="_blank">'.@$data['post_title'].'</a></p>';
+            // dd($data);
             if(isset($data['config']['itens'][0]) && !empty($data['config']['itens'][0])){
                 $ctt = false;
                 $nome_contrato = Qlib::buscaValorDb0('posts','token',$data['config']['itens'][0],'post_title');
-                $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span> <button type="button" id="btn-remove-contrato" class="btn btn-outline-secondary" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button>','type'=>'html_script','class_div'=>'mt-2 mb-2'];
+                $script .= '<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span> <button type="button" id="btn-remove-contrato" class="btn btn-outline-secondary" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button>';
+                $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>$script,'type'=>'html_script','class_div'=>'mt-2 mb-2'];
                 $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
             }
             if(isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
                 $ctt = $data['config']['contrato'];
                 $nome_contrato = Qlib::buscaValorDb0('posts','token',$ctt,'post_title');
-                $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>'<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span> <button type="button" id="btn-remove-contrato" class="btn btn-outline-secondary" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button>','type'=>'html_script','class_div'=>'mt-2 mb-2'];
+                $btn_edit_contrato = false;
+                if(Qlib::isAdmin(2)){
+                    $id_contrato = Qlib::get_id_by_token($ctt);
+                    $btn_edit_contrato = '<a href="'.url('/').'/admin/produtos/'.$id_contrato.'/edit" class="btn btn-outline-secondary" target="_blank"> '.__('Editar Contrato').'</a>';
+                }
+                $script .= '<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span><br><button type="button" id="btn-remove-contrato" class="btn btn-outline-danger" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button> '.$btn_edit_contrato;
+                $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>$script,'type'=>'html_script','class_div'=>'mt-2 mb-2'];
                 $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
 
             }
@@ -778,7 +829,7 @@ class PostController extends Controller
             }
             $listFiles = false;
             //$dados['renda_familiar'] = number_format($dados['renda_familiar'],2,',','.');
-            $campos = $this->campos();
+            $campos = $this->campos($id);
             if(isset($dados['token'])){
                 $listFiles = _upload::where('token_produto','=',$dados['token'])->get();
             }

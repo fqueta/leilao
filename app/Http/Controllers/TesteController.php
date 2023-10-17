@@ -38,31 +38,36 @@ class TesteController extends Controller
         // $ret = (new AsaasController)->cadastrarCliente(['id_cliente'=>6],true);
         // $ret = (new AsaasController)->deletarCliente('cus_000005435290');
         // $ret = (new AsaasController)->deletarCliente(6);
-          $conf=[
-            'compra' => [
-                'token' =>'64b0769e47002',
-                'id_cliente' =>6,
-                'valor' =>'',
-                'forma_pagamento' =>'cred_card',
-                'descricao' =>'Pagamento de leilao 14',
-            ],
-            'cartao' => [
-                'valor' =>'02X25.36',
-                'nome_no_cartao' =>'Jose Onifarsio',
-                'numero_cartao' =>'000000000000000000001',
-                'validade_mes' =>'05',
-                'validade_ano' =>'2025',
-                'codigo_seguranca' =>'123',
-            ],
-            // 'responsavel' => [],
-        ];
+        //   $conf=[
+        //     'compra' => [
+        //         'token' =>'64b0769e47002',
+        //         'id_cliente' =>6,
+        //         'valor' =>'',
+        //         'forma_pagamento' =>'cred_card',
+        //         'descricao' =>'Pagamento de leilao 14',
+        //     ],
+        //     'cartao' => [
+        //         'valor' =>'02X25.36',
+        //         'nome_no_cartao' =>'Jose Onifarsio',
+        //         'numero_cartao' =>'000000000000000000001',
+        //         'validade_mes' =>'05',
+        //         'validade_ano' =>'2025',
+        //         'codigo_seguranca' =>'123',
+        //     ],
+        //     // 'responsavel' => [],
+        // ];
+
         // $ret = (new AsaasController)->integraCompraAsaas($conf);
         // dd($ret);
         // $post_id = Qlib::get_id_by_token('64b6e7630678d');
         // dd($post_id);
         $post_id = 36;
+        // $dlt = $this->get_leilao($seg2);
+    $ret = (new LeilaoController)->get_leilao(58,false,[
+        'desconto'=>true
+    ]);
         // $ret = Qlib::get_postmeta($post_id,'pago');
-        $ret = (new PaymentController) -> get_info_pagamento($post_id);
+        // $ret = (new PaymentController) -> get_info_pagamento($post_id);
         return $ret;
         // dd(Auth::user());
         // $ret = env('APP_NAME');

@@ -45,7 +45,8 @@ class LeilaoController extends Controller
         if($leilao_id){
             $ac = 'alt';
             $leilao_id = Qlib::buscaValorDb0('posts','token',$leilao_id,'ID');
-            $dadosLeilao = Post::Find($leilao_id);
+            // $dadosLeilao = Post::Find($leilao_id);
+            $dadosLeilao = $this->get_leilao($leilao_id);
             // if($dadosLeilao->count() > 0){
             //     $dadosLeilao['id'] = $dadosLeilao['ID'];
             // }
@@ -247,8 +248,10 @@ class LeilaoController extends Controller
                 }
             }else{
                 $id = Qlib::buscaValorDb0('posts','token',$token,'ID');
+                // dd($id);
             }
         }
+        $ret['config'] = false;
         if($id){
             if(is_array($id)){
                 if($somar){
@@ -259,15 +262,18 @@ class LeilaoController extends Controller
                     $post = Post::Find($v);
                     if($post->count() > 0){
                         if(isset($post['config'])){
+                            $ret['config'] = $post['config'];
                             if($somar){
                                 if(isset($post['config']['valor_r'])){
                                     $total_horas = (int)$post['config']['total_horas'];
                                     $valor_r = Qlib::precoBanco($post['config']['valor_r']);
                                     $valor_atual = Qlib::precoBanco(@$post['config']['valor_atual']);
+                                    $incremento = Qlib::precoBanco(@$post['config']['incremento']);
                                     $ret['valor_r'] += $valor_r;
                                     $ret['total_horas'] += $total_horas;
                                     $ret['description'] = $post['post_content'];
                                     $ret['valor_atual'] = $valor_atual;
+                                    $ret['incremento'] = $incremento;
                                     $ret['exec'] = true;
                                 }
                             }else{
@@ -281,7 +287,10 @@ class LeilaoController extends Controller
                 if($post->count() > 0){
                     if(isset($post['config'])){
                         $ret = $post['config'];
+                        $ret['config'] = $post['config'];
+                        $ret['id'] = $id;
                         $ret['exec']=true;
+                        $ret['post_content']=$post['post_content'];
                     }
                 }
             }
@@ -328,6 +337,7 @@ class LeilaoController extends Controller
     public function array_contratos($id_cliente=false, $is_linked=true){
         $ret = array();
         $r = [];
+        // dd($id_cliente, $is_linked);
         if($id_cliente){
             $r = Qlib::sql_array("SELECT token,post_title FROM posts WHERE post_status='publish'  AND post_type='produtos' AND config LIKE '%\"cliente\":\"".$id_cliente."\"%'",'post_title','token');
         }else{
@@ -379,7 +389,7 @@ class LeilaoController extends Controller
     public function get_lance_vencedor($leilao_id=false,$dl=false,$get_meta_tipo=false){
         $ret=false;
         if(!$dl && $leilao_id){
-            $dl = Post::Find($leilao_id);
+            $dl = $this->get_leilao($leilao_id);
         }
         if($dl){
             $termino = $this->info_termino($leilao_id,$dl);
@@ -419,8 +429,12 @@ class LeilaoController extends Controller
         if($seg2){
             $_GET['filter']['ID'] = $seg2;
             $_GET['filter']['post_status'] = 'publish';
-            $dl = Post::where('ID','=',$seg2)->where('post_status', '=', 'publish')->get();
-            if($dl->count() > 0){
+            // echo $seg2;
+            // $dl = Post::where('ID','=',$seg2)->where('post_status', '=', 'publish')->get();
+            $dlt = $this->get_leilao($seg2);
+            if(isset($dlt['post_status']) && $dlt['post_status']=='publish'){
+                $dl[0] = $dlt;
+                // dd($dl);
                 //Verificar se estão devidamente publicados
                 if(!isset($dl[0]['config']['status'])){
                     $title = __('Página não encontrada');
@@ -443,12 +457,12 @@ class LeilaoController extends Controller
                 $titulo = $title;
                 $c_l = isset($dl[0]['config'])?$dl[0]['config']:[]; //config leilao
                 // $d1 = @$dl[0]['config']['termino'].' '.@$dl[0]['config']['hora_termino'];
-                $it = $this->info_termino($dl[0]['ID']);
+                $it = isset($dlt['termino']) ? $dlt['termino'] : $this->info_termino($dl[0]['ID']);
                 $dl[0]['finalizado'] = @$it['termino']; //inform para a view se o leilão termniou ou não
                 $termino = $it['html'];
                 $lc = new LanceController;
                 $ultimoLance = $lc->ultimo_lance($seg2);
-                $arr_lances = self::arr_lances($seg2,$dl[0],20);
+                // $arr_lances = self::arr_lances($seg2,$dl[0],20);
                 if($ultimoLance){
                     $lance_atual = Qlib::valor_moeda($ultimoLance,'R$ ');
                 }else{
@@ -493,15 +507,31 @@ class LeilaoController extends Controller
         }else{
             $queryPost = $pst->queryPost($_GET,$dados,$this->post_type);
             $dados = [];
-            if(isset($queryPost['post']) && is_object($queryPost['post'])){
-                foreach ($queryPost['post'] as $kp => $vp) {
+            if(isset($queryPost['post']) && $queryPost['post']->count()>0 && is_object($queryPost['post'])){
+                $arrPost = $queryPost['post']->toArray();
+                // dd($arrPost['data']);
+                foreach ($arrPost['data'] as $kp => $vp) {
                     if(isset($vp['config']['itens']) && is_array($vp['config']['itens']) && count($vp['config']['itens'])>0){
                         $dados[$kp] = $vp;
+                        $src = Qlib::get_thumbnail_link($vp['ID']);
+                        $dados[$kp]['src'] = $src;
+                        $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
+                        $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
                     }elseif(isset($vp['config']['contrato']) && !empty($vp['config']['contrato'])){
                         $dados[$kp] = $vp;
+                        $src = Qlib::get_thumbnail_link($vp['ID']);
+                        // Qlib::lib_print($src);
+                        if(empty($src) && $vp['config']['contrato']){
+                            $id_contrato = Qlib::buscaValorDb0('posts','token',$vp['config']['contrato'],'ID');
+                            $src = Qlib::get_thumbnail_link($id_contrato);
+                        }
+                        $dados[$kp]['src'] = $src;
+                        $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
+                        $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
                     }
                 }
             }
+            // dd($dados);
         }
         $queryPost['config']['exibe'] = 'html';
         $route = $this->post_type;
@@ -528,10 +558,85 @@ class LeilaoController extends Controller
 
         return view('site.leiloes.list',$ret);
     }
-    public static function get_leilao($leilao_id=false,$data=false){
+    /**
+     * Metodo para recupaerar todos os dados de um leilao
+     * @param int $leilao_id, array $data = caso esse parametro for informado sistema entende que pode aproveitar como cache, array $config = lista de solicitações para informar junto.
+     */
+    public function get_leilao($leilao_id=false,$data=false,$config=[]){
         $ret = false;
         if(!$data && $leilao_id){
-            $data = Post::Find($leilao_id);
+            $data = Post::where('ID','=',$leilao_id)->where('post_status', '=', 'publish')->get()->toArray();// Post::Find($leilao_id);
+            if(isset($data[0])){
+                $data = $data[0];
+            }
+        }
+        if(isset($data['ID']) && ($leilao_id=$data['ID'])){
+            $data['id'] = $data['ID'];
+        }else{
+            return $ret;
+        }
+        $lc = new LeilaoController;
+        $lac = new LanceController;
+        if($data && isset($data['config']['contrato'])){
+            $contrato = $lc->get_data_contrato($data['config']['contrato']);
+            if(isset($contrato['post_content']) && !empty($contrato['post_content'])){
+                $data['post_content'] = $contrato['post_content'];
+            }
+
+            if(isset($contrato['config'])){
+                foreach ($contrato['config'] as $kc => $vc) {
+                    $data['config'][$kc] = $vc;
+                }
+            }
+        }
+        //Verifica se o leilao ja terminou e informa dos dados do ga
+        // $data['dg'] = $lc->get_lance_vencedor($leilao_id,$data,'ultimo_lance');
+        $data['termino']            = $lc->info_termino($leilao_id);
+        $data['proximo_lance']      = $lac->proximo_lance($leilao_id,$data);
+        $data['exibe_btn_comprar']  = false;
+        //Solicitação para exibição de desconto sobre o preço atual
+
+        if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_atual']) && !empty($data['config']['valor_atual'])){
+            $va = Qlib::precoBanco($data['config']['valor_atual']);
+            $data['valor_atual'] = Qlib::valor_moeda($va,'R$');
+            if($pl<$va){
+                //tudo se realiza apenas se o proximo lance for menor que valor atual do pacote
+                $data['desconto_s_atual']['valor'] = 0;
+                $data['desconto_s_atual']['html'] = 0;
+                $data['desconto_s_atual']['porcento'] = 0;
+                $desc = $va - $pl;
+                if($desc){
+                    $porc = ($desc * 100)/$va;
+                    $data['desconto_s_atual']['valor'] = $desc;
+                    $data['desconto_s_atual']['html'] = Qlib::valor_moeda($desc,'R$');
+                    $data['desconto_s_atual']['porcento'] = round($porc,2);
+                }
+            }
+        }
+        if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_venda']) && !empty($data['config']['valor_venda'])){
+            //Exibir botão comprar
+            $vv = Qlib::precoBanco($data['config']['valor_venda']);
+            if($pl<$vv){
+                //Se proximo lance for menor que o valor de venda e tambem o primeiro lance
+                if(isset($data['config']['valor_r']) && !empty($data['config']['valor_r'])){
+                    //valor de rescição
+                    $vr = Qlib::precoBanco($data['config']['valor_r']);
+                    //incremento
+                    $inc = Qlib::precoBanco(@$data['config']['incremento']);
+                    //verifica se é o primeiro lance valor de rescisão + incremento = valor do proximo lance
+                    if($pl==($vr+$inc)){
+                        $data['exibe_btn_comprar'] = true;
+                    }else{
+                        //Se proximo lance for menor que o valor de venda aparece o botão aparece de forma randomica
+                        $value = rand(0,1) == 1;
+                        $data['exibe_btn_comprar'] = $value;
+                    }
+                }else{
+                    //Se proximo lance for menor que o valor de venda aparece o botão aparece de forma randomica
+                    $value = rand(0,1) == 1;
+                    $data['exibe_btn_comprar'] = $value;
+                }
+            }
         }
         $ret = $data;
         return $ret;
@@ -609,7 +714,8 @@ class LeilaoController extends Controller
     public function notifica_termino($post_id,$tipo_responsavel='ganhador',$dl=false){
         $ret['exec'] = false;
         if($post_id &&!$dl){
-            $dl = Post::Find($post_id) ; //dados do leilao
+            // $dl = Post::Find($post_id) ; //dados do leilao
+            $dl = $this->get_leilao($post_id) ; //dados do leilao
         }
         if($dl && $tipo_responsavel=='ganhador'){
             $meta_notific = 'notifica_email_termino_leilao';
@@ -947,5 +1053,42 @@ class LeilaoController extends Controller
         }
         return $ret;
     }
-
+    /**
+     * Metodo que retodos todos os contratos disponivel de um usuario para o cadastro de lelões
+     * @param int $id = id do usuario
+     * @return array
+     */
+    public function view_list_contrato($id) {
+        //verificar que é administrador
+        $ret['exec'] = false;
+        $ret['arr_itens'] = false;
+        if(Qlib::isAdmin()){
+            $ret['id'] = $id;
+            $arr_itens = $this->array_contratos($id);
+        }else{
+            if(Auth::check()){
+                $id = Auth::id();
+                $ret['id'] = $id;
+                $arr_itens = $this->array_contratos($id);
+            }
+        }
+        if(isset($arr_itens)){
+            $ret['arr_itens'] = $arr_itens;
+            $ret['campo']['config[contrato]'] = [
+                'label'=>'Contratos*',
+                'active'=>true,
+                'type'=>'select',
+                'arr_opc'=>$arr_itens,'exibe_busca'=>'d-block',
+                'event'=>'required onchange=dataContratos(this)',
+                'tam'=>'12',
+                'class'=>'',
+                'exibe_busca'=>true,
+                'option_select'=>true,
+                'cp_busca'=>'config][contrato',
+                'class'=>'select2',
+                ];
+        }
+        //se for lista todos do contrario somento os dele
+        return response()->json($ret);
+    }
 }

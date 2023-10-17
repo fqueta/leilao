@@ -59,38 +59,37 @@ Route::prefix('admin')->group(function(){
         Route::put('/{id}',[UserController::class,'update'])->where('id', '[0-9]+')->name('users.update');
         Route::delete('/{id}',[UserController::class,'destroy'])->where('id', '[0-9]+')->name('users.destroy');
     });
-    /*
-    Route::prefix('permissions')->group(function(){
-        Route::get('/',[UserPermissions::class,'index'])->name('permissions.index');
-        Route::get('/create',[UserPermissions::class,'create'])->name('permissions.create');
-        Route::post('/',[UserPermissions::class,'store'])->name('permissions.store');
-        Route::get('/{id}/show',[UserPermissions::class,'show'])->where('id', '[0-9]+')->name('permissions.show');
-        Route::get('/{id}/edit',[UserPermissions::class,'edit'])->where('id', '[0-9]+')->name('permissions.edit');
-        Route::put('/{id}',[UserPermissions::class,'update'])->where('id', '[0-9]+')->name('permissions.update');
-        Route::delete('/{id}',[UserPermissions::class,'destroy'])->where('id', '[0-9]+')->name('permissions.destroy');
-    });*/
-    Route::prefix('bairros')->group(function(){
-        Route::get('/',[BairroController::class,'index'])->name('bairros.index');
-        Route::get('/create',[BairroController::class,'create'])->name('bairros.create');
-        Route::post('/',[BairroController::class,'store'])->name('bairros.store');
-        Route::get('/{id}/show',[BairroController::class,'show'])->name('bairros.show');
-        Route::get('/{id}/edit',[BairroController::class,'edit'])->name('bairros.edit');
-        Route::put('/{id}',[BairroController::class,'update'])->where('id', '[0-9]+')->name('bairros.update');
-        Route::delete('/{id}',[BairroController::class,'destroy'])->where('id', '[0-9]+')->name('bairros.destroy');
-        Route::get('export/all', [BairroController::class, 'exportAll'])->name('bairros.export_all');
-        Route::get('export/filter', [BairroController::class, 'exportFilter'])->name('bairros.export_filter');
-    });
+    // Route::prefix('permissions')->group(function(){
+    //     Route::get('/',[UserPermissions::class,'index'])->name('permissions.index');
+    //     Route::get('/create',[UserPermissions::class,'create'])->name('permissions.create');
+    //     Route::post('/',[UserPermissions::class,'store'])->name('permissions.store');
+    //     Route::get('/{id}/show',[UserPermissions::class,'show'])->where('id', '[0-9]+')->name('permissions.show');
+    //     Route::get('/{id}/edit',[UserPermissions::class,'edit'])->where('id', '[0-9]+')->name('permissions.edit');
+    //     Route::put('/{id}',[UserPermissions::class,'update'])->where('id', '[0-9]+')->name('permissions.update');
+    //     Route::delete('/{id}',[UserPermissions::class,'destroy'])->where('id', '[0-9]+')->name('permissions.destroy');
+    // });
+    // Route::prefix('bairros')->group(function(){
+    //     Route::get('/',[BairroController::class,'index'])->name('bairros.index');
+    //     Route::get('/create',[BairroController::class,'create'])->name('bairros.create');
+    //     Route::post('/',[BairroController::class,'store'])->name('bairros.store');
+    //     Route::get('/{id}/show',[BairroController::class,'show'])->name('bairros.show');
+    //     Route::get('/{id}/edit',[BairroController::class,'edit'])->name('bairros.edit');
+    //     Route::put('/{id}',[BairroController::class,'update'])->where('id', '[0-9]+')->name('bairros.update');
+    //     Route::delete('/{id}',[BairroController::class,'destroy'])->where('id', '[0-9]+')->name('bairros.destroy');
+    //     Route::get('export/all', [BairroController::class, 'exportAll'])->name('bairros.export_all');
+    //     Route::get('export/filter', [BairroController::class, 'exportFilter'])->name('bairros.export_filter');
+    // });
 
-    Route::prefix('escolaridades')->group(function(){
-        Route::get('/',[EscolaridadeController::class,'index'])->name('escolaridades.index');
-        Route::get('/create',[EscolaridadeController::class,'create'])->name('escolaridades.create');
-        Route::post('/',[EscolaridadeController::class,'store'])->name('escolaridades.store');
-        Route::get('/{id}/show',[EscolaridadeController::class,'show'])->name('escolaridades.show');
-        Route::get('/{id}/edit',[EscolaridadeController::class,'edit'])->name('escolaridades.edit');
-        Route::put('/{id}',[EscolaridadeController::class,'update'])->where('id', '[0-9]+')->name('escolaridades.update');
-        Route::post('/{id}',[EscolaridadeController::class,'update'])->where('id', '[0-9]+')->name('escolaridades.update-ajax');
-        Route::delete('/{id}',[EscolaridadeController::class,'destroy'])->where('id', '[0-9]+')->name('escolaridades.destroy');
-    });
+    // Route::prefix('escolaridades')->group(function(){
+    //     Route::get('/',[EscolaridadeController::class,'index'])->name('escolaridades.index');
+    //     Route::get('/create',[EscolaridadeController::class,'create'])->name('escolaridades.create');
+    //     Route::post('/',[EscolaridadeController::class,'store'])->name('escolaridades.store');
+    //     Route::get('/{id}/show',[EscolaridadeController::class,'show'])->name('escolaridades.show');
+    //     Route::get('/{id}/edit',[EscolaridadeController::class,'edit'])->name('escolaridades.edit');
+    //     Route::put('/{id}',[EscolaridadeController::class,'update'])->where('id', '[0-9]+')->name('escolaridades.update');
+    //     Route::post('/{id}',[EscolaridadeController::class,'update'])->where('id', '[0-9]+')->name('escolaridades.update-ajax');
+    //     Route::delete('/{id}',[EscolaridadeController::class,'destroy'])->where('id', '[0-9]+')->name('escolaridades.destroy');
+    // });
     Route::prefix('estado-civil')->group(function(){
         Route::get('/',[EstadocivilController::class,'index'])->name('estado-civil.index');
         Route::get('/create',[EstadocivilController::class,'create'])->name('estado-civil.create');
@@ -192,6 +191,7 @@ Route::resource('/users_site','\App\Http\Controllers\UserController',['parameter
     'users_site' => 'id'
 ]]);
 Route::get('/leiloes/get-data-contrato/{token}', [App\Http\Controllers\LeilaoController::class, 'view_data_contrato'])->name('data.contrato');
+Route::get('/leiloes/list-contratos/{id}', [App\Http\Controllers\LeilaoController::class, 'view_list_contrato'])->name('list.contrato');
 
 Route::get('/test-email',[EmailController::class,'sendEmailTest']);
 Route::get('/suspenso',[UserController::class,'suspenso'])->name('cobranca.suspenso');
