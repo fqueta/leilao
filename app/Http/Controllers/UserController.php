@@ -922,7 +922,7 @@ class UserController extends Controller
             if(Qlib::isAdmin(3)){
                 return $this->get_users_site();
             }else{
-                return redirect('/meu-cadastro');
+                return redirect()->to('/meu-cadastro');
             }
         }elseif($seg2=='create'){
             //Criar usuario

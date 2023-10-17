@@ -639,6 +639,10 @@ class LeilaoController extends Controller
                 }
                 if($data['exibe_btn_comprar']){
                     $link_btn_comprar = route('login').'?r='.Qlib::UrlAtual();
+                    if(Auth::check()){
+                        $link_btn_comprar = $lc->get_link_pagamento($leilao_id,'02');
+                        //type=2 para gerar um pagamento mediagem pagameno por valor de compra
+                    }
                     $data['link_btn_comprar'] = $link_btn_comprar;
                 }
             }

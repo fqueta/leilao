@@ -129,6 +129,7 @@ class PaymentController extends Controller
             $leilao_id = Qlib::buscaValorDb0('posts','token',$tk[0],'ID');
             //se $tk[1]==01 é para pagar leilao se $tk[1]==02 é para pagar o compreja
             $lc = new LeilaoController; //LeilaoController
+            $type = $tk[1];
             if($leilao_id && $tk[1]=='01'){
                 //dados do ultimo lance
                 $ul = $lc->get_lance_vencedor($leilao_id,false,'ultimo_lance');
@@ -171,6 +172,7 @@ class PaymentController extends Controller
                             'dt'=>$dt,
                             'ul'=>$ul, //dados do ultimo lance.
                             'dl'=>$dl, //dados do ultimo lance.
+                            'type'=>$type, //dados do ultimo lance.
                         ]); //dados do terminio
                     }else{
                         $ret['status'] = 500; //bloqueia o formulario mais exibe uma mensagem de erro
@@ -180,6 +182,59 @@ class PaymentController extends Controller
                 }else{
 
                 }
+            }elseif($leilao_id && $tk[1]=='02'){
+                $ul = $lc->get_lance_vencedor($leilao_id,false,'ultimo_lance');
+                // dd($ul);
+                $ret['type'] = $tk[1];
+                $ret['type_pagamento'] = 'leilao';
+                if($ul==false){
+                    $ul = [];
+                }
+                $ret['ul'] = $ul;
+                //verificar se quem está tentando pagar é o ganhador do leilao
+                $user = Auth::user();
+                if(isset($user['id'])){
+                    //verifica se verificou o cadastro
+                    $iv=(new UserController)->is_verified();
+                    if(!$iv){
+                        return redirect()->route('verification.notice');
+                    }
+                    $ret['status'] = 200; //libera o formularo
+                    $ret['mens'] = false;
+                    $dl = Post::FindOrFail($leilao_id); //Dados do leilao
+                    $dc = false; //dados do contrato
+                    $dt = false; //dados do termino ou informações do termino
+                    if($dl->count()){
+                        $dl = $dl->toArray();
+                        $dl['thumbnail'] = Qlib::get_thumbnail_link($dl['ID']);
+                        $dt = $lc->info_termino($leilao_id,$dl);
+                        if(isset($dl['config']['contrato']) && !empty($dl['config']['contrato'])){
+                            $dc0 = Post::where('token',$dl['config']['contrato'])->get()->toArray();
+                            if(isset($dc0[0])){
+                                $dc = $dc0[0];
+                            }
+                        }
+                        if(isset($dl['config']['valor_venda']) && !empty($dl['config']['valor_venda'])){
+                            $valor = Qlib::precoBanco($dl['config']['valor_venda']);
+                            $ul['valor_lance'] = $valor;
+                            $ret['valor'] = $valor;
+                        }
+                    }
+                    $ret['dl'] = $dl; //dados do leilao
+                    $ret['dc'] = $dc; //dados do contrato
+                    $ret['dt'] = $dt; //dados do terminio
+                    $ret['form_credit_cart'] = $this->frmCredCardV2([
+                        'dt'=>$dt,
+                        'ul'=>$ul, //dados do ultimo lance.
+                        'dl'=>$dl, //dados do ultimo lance.
+                        'type'=>$type, //dados do ultimo lance.
+                    ]); //dados do terminio
+                }//else{
+                    //     $ret['status'] = 500; //bloqueia o formulario mais exibe uma mensagem de erro
+                    //     $ret['mens'] = Qlib::formatMensagemInfo('Você está tentado pagar uma leilão arrematado pro outro usuário, esta ação não é permitida','danger');
+                    // }
+                    // dd($ret);
+                return view('site.leiloes.payment.form',$ret);
             }else{
                 return view('site.meio404');
             }

@@ -409,7 +409,7 @@ class PostController extends Controller
         if($ac!='cad'){
             $link = $lc->get_link_front($post_id);
             $script = '<p><b>Ver no site: </b><a style="text-decoration:underline" href="'.$link.'" target="_blank">'.@$data['post_title'].'</a></p>';
-            // dd($data);
+            $script = false;
             if(isset($data['config']['itens'][0]) && !empty($data['config']['itens'][0])){
                 $ctt = false;
                 $nome_contrato = Qlib::buscaValorDb0('posts','token',$data['config']['itens'][0],'post_title');

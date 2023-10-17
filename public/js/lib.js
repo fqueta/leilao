@@ -2494,36 +2494,39 @@ function ecomerce_initPayment(){
 		$(sel).show();
 		var c_cred_card = document.getElementById('c-cred_card').querySelectorAll('.c-cred_card'),c_cred_card1 = document.getElementById('c-cred_card').querySelectorAll('select');
 		var c_pix = document.getElementById('c-pix').querySelectorAll('input'),c_pix1 = document.getElementById('c-pix').querySelectorAll('select');
-		if(val=='pix'){
-			// console.log(c_cred_card);
-			c_cred_card.forEach(el => {
-				el.setAttribute('disabled','disabled');
-			});
-			$('[f-sub="eco_submitCompra"]').show();
-			document.querySelector('.total-boleto').disabled=true;
-			document.querySelector('.total-pix').disabled=false;
-            $('.met-pay label').removeClass('active');
-            $('#lb-pix').addClass('active');
-		}else if(val == 'boleto'){
-			c_cred_card.forEach(el => {
-				el.setAttribute('disabled','disabled');
-			});
-			$('[f-sub="eco_submitCompra"]').show();
-			document.querySelector('.total-boleto').disabled=false;
-			document.querySelector('.total-pix').disabled=true;
-            $('.met-pay label').removeClass('active');
-            $('#lb-boleto').addClass('active');
-		}else if(val == 'cred_card'){
-			c_cred_card.forEach(el => {
-				el.removeAttribute('disabled');
-			});
-			$('[f-sub="eco_submitCompra"]').show();
-            $('.met-pay label').removeClass('active');
-            $('#lb-card').addClass('active');
-		}else if(val =='conta'){
-			$('[f-sub="eco_submitCompra"]').hide();
-		}
-		// console.log(val+' sel= '+sel);
+        try {
+            if(val=='pix'){
+                // console.log(c_cred_card);
+                c_cred_card.forEach(el => {
+                    el.setAttribute('disabled','disabled');
+                });
+                $('[f-sub="eco_submitCompra"]').show();
+                // document.querySelector('.total-boleto').disabled=true;
+                document.querySelector('.total-pix').disabled=false;
+                $('.met-pay label').removeClass('active');
+                $('#lb-pix').addClass('active');
+            }else if(val == 'boleto'){
+                c_cred_card.forEach(el => {
+                    el.setAttribute('disabled','disabled');
+                });
+                $('[f-sub="eco_submitCompra"]').show();
+                document.querySelector('.total-boleto').disabled=false;
+                document.querySelector('.total-pix').disabled=true;
+                $('.met-pay label').removeClass('active');
+                $('#lb-boleto').addClass('active');
+            }else if(val == 'cred_card'){
+                c_cred_card.forEach(el => {
+                    el.removeAttribute('disabled');
+                });
+                $('[f-sub="eco_submitCompra"]').show();
+                $('.met-pay label').removeClass('active');
+                $('#lb-card').addClass('active');
+            }else if(val =='conta'){
+                $('[f-sub="eco_submitCompra"]').hide();
+            }
+        } catch (e) {
+            console.log(e);
+        }
 	});
 	$('[f-sub="eco_submitCompra"]').on('click', function(){
 		eco_submitCompra();
