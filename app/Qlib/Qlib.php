@@ -826,7 +826,8 @@ class Qlib
         }
         $id_permission = auth()->user()->id_permission;
         $dPermission = Permission::FindOrFail($id_permission);
-        $ret = isset($dPermission['redirect_login']) ? $dPermission['redirect_login']:'/';
+        $ret = Auth::user()->getRedirectRoute() ? Auth::user()->getRedirectRoute() : @$dPermission['redirect_login'];
+        // $ret = isset($dPermission['redirect_login']) ? $dPermission['redirect_login']: Auth::user()->getRedirectRoute();;
         return $ret;
     }
     static function redirect($url,$time=10){

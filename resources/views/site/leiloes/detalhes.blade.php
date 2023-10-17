@@ -105,8 +105,8 @@
                                     {{$dados['config']['valor_venda']}}
                                 </p>
                             </div>
-                            <div class="col-6">
-                                <form action="" method="post">
+                            <div class="col-6 text-end">
+                                {{-- <form action="" method="post">
                                     <div class="row">
                                         <div class="col-12">
                                             <input type="hidden" name="leilao_id" value="{{$dados['ID']}}">
@@ -115,7 +115,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                </form>
+                                </form> --}}
+                                <a href="{{$dados['link_btn_comprar']}}" class="btn btn-success"><i class="fas fa-cart-plus"></i>  {{__('Comprar')}}</a>
                             </div>
                         </div>
                     </div>

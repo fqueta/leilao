@@ -594,6 +594,7 @@ class LeilaoController extends Controller
         $data['termino']            = $lc->info_termino($leilao_id);
         $data['proximo_lance']      = $lac->proximo_lance($leilao_id,$data);
         $data['exibe_btn_comprar']  = false;
+        $data['link_btn_comprar']  = false;
         //Solicitação para exibição de desconto sobre o preço atual
 
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_atual']) && !empty($data['config']['valor_atual'])){
@@ -635,6 +636,10 @@ class LeilaoController extends Controller
                     //Se proximo lance for menor que o valor de venda aparece o botão aparece de forma randomica
                     $value = rand(0,1) == 1;
                     $data['exibe_btn_comprar'] = $value;
+                }
+                if($data['exibe_btn_comprar']){
+                    $link_btn_comprar = route('login').'?r='.Qlib::UrlAtual();
+                    $data['link_btn_comprar'] = $link_btn_comprar;
                 }
             }
         }

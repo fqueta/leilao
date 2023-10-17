@@ -59,4 +59,23 @@ class User extends Authenticatable implements MustVerifyEmail
         'config' => 'array',
         'preferencias' => 'array',
     ];
+    public function getRedirectRoute()
+    {
+        if($this->id_permission>=5){
+            //Clientes
+            $routa = url('/').'/' . Qlib::get_slug_post_by_id(37);
+        }else{
+            $routa = url('/').'/admin';
+            //Admins
+        }
+        if(isset($_REQUEST['r']) && !empty($_REQUEST['r'])){
+            $routa = $_REQUEST['r'];
+        }
+        return $routa;
+        // return match((int)$this->role_id) {
+        //     1 => 'student.dashboard',
+        //     2 => 'teacher.dashboard',
+        //     // ...
+        // };
+    }
 }
