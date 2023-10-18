@@ -391,7 +391,7 @@ class PostController extends Controller
                     $link = $lc->get_link_front($post_id);
                     $script = '<p><b>Ver no site: </b><a style="text-decoration:underline" href="'.$link.'" target="_blank">'.$data['post_title'].'</a></p>';
                     $script .= '<p><b>Responsável:</b><span> '.$d_user['name'].'</span><input type="hidden" name="post_author" value="'.$d_user['id'].'"></p>';
-                    $script .= '<p><b>Email:</b> '.$d_user['email'].' <b>Celular:</b> '.$d_user['config']['celular'].'</p>';
+                    $script .= '<p><b>Email:</b> '.$d_user['email'].' <b>Celular:</b> '.@$d_user['config']['celular'].'</p>';
                     $script .= '<p><b>CPF:</b> '.$d_user['cpf'].'</p>';
                     $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'html_script','exibe_busca'=>'d-block','script'=>$script,'script_show'=>$script,'tam'=>'12'];
                     // dd($ret);
@@ -1000,6 +1000,7 @@ class PostController extends Controller
     public function update(StorePostRequest $request, $id)
     {
         $dados = $request->all();
+        $lc = new LeilaoController;
         if(Qlib::is_backend()){
             $this->authorize('update', $this->routa);
         }else{
@@ -1010,7 +1011,22 @@ class PostController extends Controller
                 $this->authorize('update', $this->routa);
             }
         }
-
+        if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm' && ($id=$dados['ID'])){
+            //Impedir altualização em leilões que ja foram pagos
+            $pago = $lc->is_paid($id);
+            if($pago){
+                //
+                $mens = 'Não é permitido editar um leilão que já foi pago';
+                $ret = [
+                    'exec'=>true,
+                    'id'=>$id,
+                    'mens'=>$mens,
+                    'mensa'=>$mens,
+                    'color'=>'danger',
+                ];
+                return response()->json($ret);
+            }
+        }
         $data = [];
         $mens=false;
         $color=false;

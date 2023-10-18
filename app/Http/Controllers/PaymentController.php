@@ -768,10 +768,6 @@ class PaymentController extends Controller
             $pago = Qlib::get_postmeta($leilao_id,$this->meta_status_pagamento,true);
             // $json_info = Qlib::get_postmeta($leilao_id,$this->meta_resumo_pagamento,true);
             $arr_info = $this->get_customer_leilao($leilao_id);
-            // dd($arr_info);
-            // if($json_info){
-            //     $arr_info = $this->scheme_info_pagamento($json_info);
-            // }
             $nome_cliente = false;
             if(isset($ul['nome'])){
                 $nome_cliente   = isset($ul['nome'])?$ul['nome']:false;

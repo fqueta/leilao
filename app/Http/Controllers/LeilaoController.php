@@ -67,7 +67,7 @@ class LeilaoController extends Controller
             'view'=>'site.leiloes',
             'file_submit'=>'site.leiloes.js_submit',
             'arquivos'=>'jpeg,jpg,png',
-            'redirect'=>url('/').'/'.Qlib::get_slug_post_by_id(18),
+            'redirect'=>url('/'.Qlib::get_slug_post_by_id(18)),
             'title'=>$title,
             'titulo'=>$titulo,
         ];
@@ -423,6 +423,8 @@ class LeilaoController extends Controller
             //checar se a conta destá verifcadada
             $iv=(new UserController)->is_verified();
             if(!$iv){
+                // dd(url('/email/verify'));
+                // return redirect()->to(url('/email/verify'));
                 return redirect()->route('verification.notice');
             }
         }
@@ -510,24 +512,29 @@ class LeilaoController extends Controller
             if(isset($queryPost['post']) && $queryPost['post']->count()>0 && is_object($queryPost['post'])){
                 $arrPost = $queryPost['post']->toArray();
                 // dd($arrPost['data']);
+                $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
                 foreach ($arrPost['data'] as $kp => $vp) {
-                    if(isset($vp['config']['itens']) && is_array($vp['config']['itens']) && count($vp['config']['itens'])>0){
-                        $dados[$kp] = $vp;
-                        $src = Qlib::get_thumbnail_link($vp['ID']);
-                        $dados[$kp]['src'] = $src;
-                        $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
-                        $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
-                    }elseif(isset($vp['config']['contrato']) && !empty($vp['config']['contrato'])){
-                        $dados[$kp] = $vp;
-                        $src = Qlib::get_thumbnail_link($vp['ID']);
-                        // Qlib::lib_print($src);
-                        if(empty($src) && $vp['config']['contrato']){
-                            $id_contrato = Qlib::buscaValorDb0('posts','token',$vp['config']['contrato'],'ID');
-                            $src = Qlib::get_thumbnail_link($id_contrato);
+                    $pago = Qlib::get_postmeta(@$vp['ID'],$meta_pago,true);
+                    if($pago!='s'){
+                        //Listar no site apenas leiloes não pagos
+                        if(isset($vp['config']['itens']) && is_array($vp['config']['itens']) && count($vp['config']['itens'])>0){
+                            $dados[$kp] = $vp;
+                            $src = Qlib::get_thumbnail_link($vp['ID']);
+                            $dados[$kp]['src'] = $src;
+                            $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
+                            $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
+                        }elseif(isset($vp['config']['contrato']) && !empty($vp['config']['contrato'])){
+                            $dados[$kp] = $vp;
+                            $src = Qlib::get_thumbnail_link($vp['ID']);
+                            // Qlib::lib_print($src);
+                            if(empty($src) && $vp['config']['contrato']){
+                                $id_contrato = Qlib::buscaValorDb0('posts','token',$vp['config']['contrato'],'ID');
+                                $src = Qlib::get_thumbnail_link($id_contrato);
+                            }
+                            $dados[$kp]['src'] = $src;
+                            $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
+                            $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
                         }
-                        $dados[$kp]['src'] = $src;
-                        $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
-                        $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
                     }
                 }
             }
@@ -1099,5 +1106,19 @@ class LeilaoController extends Controller
         }
         //se for lista todos do contrario somento os dele
         return response()->json($ret);
+    }
+    /**
+     * Metodo para verificar se um leilao ja está pago
+     * @param $leilao_id
+     * @return boolean true || false
+     */
+    public function is_paid($leilao_id) {
+        $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
+        $st = Qlib::get_postmeta($leilao_id,$meta_pago,true);
+        $ret = false;
+        if($st == 's'){
+            $ret = true;
+        }
+        return $ret;
     }
 }

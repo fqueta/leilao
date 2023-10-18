@@ -170,22 +170,22 @@ class UserController extends Controller
         }
         $ret = [
             'id'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
-            'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Informe os dados').'</h4><hr>','script_show'=>''],
-            'name'=>['label'=>'Nome completo','active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
+            'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Informe os dados').'</h6><hr class="mt-0">','script_show'=>''],
+            'name'=>['label'=>'Nome completo','active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'12'],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
-            'config[celular]'=>['label'=>'Telefone celular','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
-            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'6'],
+            'config[celular]'=>['label'=>'Telefone celular','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
+            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'6'],
             'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
-            'sep0'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Documentos').'</h4><hr>','script_show'=>''],
+            'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Documentos').'</h6><hr class="mt-0">','script_show'=>''],
             'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3'],
-            'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Configurações').'</h4><hr>','script_show'=>''],
+            'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3','cp_busca'=>'config][cep'],
-            'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'7','cp_busca'=>'config][endereco'],
+            'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'6','cp_busca'=>'config][endereco'],
             'config[numero]'=>['label'=>'Numero','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'numero=cep','tam'=>'2','cp_busca'=>'config][numero'],
             'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'4','cp_busca'=>'config][complemento'],
-            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'6','cp_busca'=>'config][cidade'],
+            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'4','cp_busca'=>'config][cidade'],
             'config[uf]'=>['label'=>'UF','active'=>false,'js'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','cp_busca'=>'config][uf'],
-            'sep2'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Configurações').'</h4><hr>','script_show'=>''],
+            'sep2c'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'id_permission'=>[
                 'label'=>'Permissão*',
                 'active'=>true,
@@ -203,15 +203,72 @@ class UserController extends Controller
                 'tam'=>'12',
             ],'ativo'=>['label'=>'Liberar acesso','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
             'config[origem]'=>['label'=>'origem','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][origem','value'=>$origem],
-            //'email'=>['label'=>'Observação','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
         ];
         if(!$logado){
             unset($ret['id_permission']);
         }
+        if($origem=='admin'){
+            $ret['sep3']=[
+                'label'=>'Termos',
+                'active'=>false,
+                'type'=>'html_script',
+                'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script_show'=>'<h6 class="text-left pt-2">'.__('Termos').'</h6><hr class="mt-0">',
+                'script_'=>''
+            ];
+            if($termo=$this->aceito_termo(@$dados['id'],'html')){
+                $ret['ttermo']=[
+                    'label'=>'Termos',
+                    'active'=>false,
+                    'type'=>'html_script',
+                    'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script_'=>'<p class="pt-2 mb-3">'.$termo.'</p>','script_show'=>'<p class="mb-3">'.$termo.'</p>'
+                ];
+                unset($ret['meta[termo]']);
+            }else{
+                $ret['ttermo']=[
+                    'label'=>'Termos',
+                    'active'=>false,
+                    'type'=>'html_script',
+                    'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script_'=>'<p class="pt-2 mb-3 text-muted">Temos não aceitos</p>',
+                    'script_show'=>'<p class="pt-2 mb-3 text-muted">Temos não aceitos</p>'
+                ];
+            }
+        }
         if(Qlib::is_frontend()){
-            unset($ret['sep2'],$ret['ativo'],$ret['id_permission']);
-            //Desablitar a edição de email no frontend
+            unset($ret['sep2c'],$ret['ativo'],$ret['id_permission']);
+            $ret['sep3']=[
+                'label'=>'Termos',
+                'active'=>false,
+                'type'=>'html_script',
+                'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Termos').'</h6><hr class="mt-0">',
+                'script_show'=>''
+            ];
+            $ret['meta[termo]']=[
+                'label'=>'Concordo com os termos do site',
+                'active'=>false,
+                'type'=>'checkbox',
+                'exibe_busca'=>'d-block',
+                'name'=>'meta[termos_site]',
+                'event'=>'required',
+                'value'=>'s',
+                'tam'=>'12'
+            ];
             if($logado){
+                if($termo=$this->aceito_termo($user->id,'html')){
+                    $ret['ttermo']=[
+                        'label'=>'Termos',
+                        'active'=>false,
+                        'type'=>'html_script',
+                        'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<p class="pt-2 mb-3">'.$termo.'</p>',
+                        'script_show'=>''
+                    ];
+                    unset($ret['meta[termo]']);
+                }
+            }else{
+
+            }
+
+            if($logado){
+                //Desablitar a edição de email no frontend
                 $ret['email']['event'] = 'disabled';
             }
         }
@@ -267,7 +324,7 @@ class UserController extends Controller
             //     'value'=>$sec,
             //     'class'=>'btn btn-outline-secondary',
             // ],
-            'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Informe os dados').'</h4><hr>','script_show'=>''],
+            'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Informe os dados').'</h4><hr class="mt-0">','script_show'=>''],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'id_permission'=>[
                 'label'=>'Permissão*',
@@ -342,7 +399,7 @@ class UserController extends Controller
                 'class'=>'select2',
                 'cp_busca'=>'config][tipo_pj','class_div'=>'div-pj '.$displayPj,
             ],
-            'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-center">'.__('Endereço').'</h4><hr>','script_show'=>'<h4 class="text-center">'.__('Endereço').'</h4><hr>'],
+            'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-center">'.__('Endereço').'</h4><hr class="mt-0">','script_show'=>'<h4 class="text-center">'.__('Endereço').'</h4><hr class="mt-0">'],
             'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3'],
             'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'7','cp_busca'=>'config][endereco'],
             'config[numero]'=>['label'=>'Numero','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'numero=cep','tam'=>'2','cp_busca'=>'config][numero'],
@@ -350,7 +407,7 @@ class UserController extends Controller
             'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'6','cp_busca'=>'config][cidade'],
             'config[uf]'=>['label'=>'UF','active'=>false,'js'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','cp_busca'=>'config][uf'],
             //'foto_perfil'=>['label'=>'Foto','active'=>false,'js'=>false,'placeholder'=>'','type'=>'file','exibe_busca'=>'d-none','event'=>'','tam'=>'12'],
-            'sep2'=>['label'=>'Preferencias','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Preferências').'</h4><hr>','script_show'=>'<h4 class="text-left">'.__('Preferências').'</h4><hr>'],
+            'sep2'=>['label'=>'Preferencias','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h4 class="text-left">'.__('Preferências').'</h4><hr class="mt-0">','script_show'=>'<h4 class="text-left">'.__('Preferências').'</h4><hr class="mt-0">'],
             'ativo'=>['label'=>'Liberado para uso','active'=>true,'type'=>'chave_checkbox','value'=>'s','checked'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
             'preferencias[newslatter]'=>['label'=>'Deseja receber e-mails com as novidades','active'=>false,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-none','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não'],'cp_busca'=>'preferencias][newslatter'],
 
@@ -454,14 +511,20 @@ class UserController extends Controller
         }
         $salvar = User::create($dados);
         $dados['id'] = $salvar->id;
+        //Atualização de meta dados
+        if(is_array($dados['meta'])){
+            $s_me = $this->save_meta($salvar->id,$dados['meta']);
+        }
         $route = $this->routa.'.index';
         $ret = [
             'mens'=>$this->label.' cadastrada com sucesso!',
             'color'=>'success',
+            's_me'=>$s_me,
             'idCad'=>$salvar->id,
             'exec'=>true,
             'dados'=>$dados
         ];
+        // dd($ret);
         if($ajax=='s'){
             //REGISTRAR EVENTOS
            if($origem=='admin'){
@@ -641,6 +704,8 @@ class UserController extends Controller
 
         $data = [];
         $dados = $request->all();
+        $meta = isset($dados['meta']) ? $dados['meta']:false;
+        unset($dados['meta']);
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
         if(!$dados['password'] || empty($dados['password'])){
             unset($dados['password']);
@@ -675,15 +740,21 @@ class UserController extends Controller
         if(empty($data['passaword'])){
             unset($data['passaword']);
         }
+        $s_me = [];
         if(!empty($data)){
            $atualizar=User::where('id',$id)->update($data);
             $route = $this->routa.'.index';
+            //Atualização de meta dados
+            if(is_array($meta)){
+                $s_me = $this->save_meta($id,$meta);
+            }
             $ret = [
                 'exec'=>$atualizar,
                 'id'=>$id,
                 'mens'=>'Salvo com sucesso!',
                 'color'=>'success',
                 'idCad'=>$id,
+                's_me'=>$s_me,
                 'return'=>$route,
             ];
             if($atualizar){
@@ -736,7 +807,52 @@ class UserController extends Controller
         }
         return $ret;
     }
-
+    /**
+     * Metodo para salvar campos meta do usuario
+     * @param integer user_id, Array metadata=dados meta do usuario
+     *
+     */
+    public function save_meta($user_id,$metadata)
+    {
+        $ret = [];
+        if($user_id && is_array($metadata)){
+            // dd($metadata,$user_id);
+            foreach ($metadata as $k => $v) {
+                if($k == 'termo' && $v=='s'){
+                    //aceitação dos termos
+                    $v = Qlib::lib_array_json([
+                        'aceito_termo' => 's',
+                        'data' => Qlib::dataLocal(),
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                    ]);
+                }
+                $ret[$k] = Qlib::update_usermeta($user_id,$k,$v);
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para verifica se usuario aceito os termos
+     * @param int $user_id,$type=tipo de retorno se for html resultado será um html
+     */
+    public function aceito_termo($user_id,$type='')
+    {
+        $termo = Qlib::get_usermeta($user_id,'termo',true);
+        $ret = false;
+        if($termo){
+            $arr_t = Qlib::lib_json_array($termo);
+            if(@$arr_t['aceito_termo']=='s'){
+                if($type=='html'){
+                    $ret = '<span class="text-danger">Termos aceitos pelo usuário em {data} :: {ip}</span>';
+                    $ret = str_replace('{data}',$arr_t['data'],$ret);
+                    $ret = str_replace('{ip}',$arr_t['ip'],$ret);
+                }else{
+                    $ret = true;
+                }
+            }
+        }
+        return $ret;
+    }
     public function exec($token_conta = null)
     {
         $cont = false;

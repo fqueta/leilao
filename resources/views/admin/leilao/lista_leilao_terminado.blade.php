@@ -1,3 +1,6 @@
+@php
+    $redirect = '?redirect='.url('/admin');
+@endphp
 <div class="col-md-12">
     <div class="card">
         <div class="card-header">
@@ -23,7 +26,7 @@
                         <tr>
                             @if(isset($v['link_leilao_front']) && $v['link_leilao_front'])
                             <td>
-                                <a href="{{$v['link_leilao_front']}}" target="_blank" rel="">
+                                <a href="{{$v['link_leilao_front'].$redirect}}" class="underline" rel="">
                                     {{$v['post_title']}}
                                 </a>
                             </td>
@@ -32,7 +35,13 @@
                                     {{$v['post_title']}}
                                 </td>
                             @endif
-                            <td>{{@$v['venc']['nome']}}</td>
+                            <td>
+                                @if (isset($v['venc']['author']) && !empty($v['venc']['author']))
+                                    <a class="underline" href="{{route('users.show',['id'=>$v['venc']['author']]).$redirect}}" rel="">
+                                        {{@$v['venc']['nome']}}
+                                    </a>
+                                @endif
+                            </td>
                             <td>{{@$v['term']['html']}}</td>
                             <td>{{App\Qlib\Qlib::valor_moeda(@$v['venc']['valor_lance'])}}</td>
                             <td>

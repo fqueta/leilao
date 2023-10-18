@@ -138,6 +138,24 @@
                 {!!$dados['post_content']!!}
                 @endif
             </div>
+            @can('is_admin2')
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-6">
+                            @isset($_GET['redirect'])
+                            <a href="{{$_GET['redirect']}}" class="btn btn-outline-secondary"> <i class="fa fa-chevron-left" aria-hidden="true"></i> {{__('Voltar')}}</a>
+                            @endisset
+                        </div>
+                        <div class="col-6 text-end">
+                            @isset($dados['ID'])
+                                <a href="{{route('leiloes_adm.edit',['id'=>$dados['ID']]).'?redirect='.App\Qlib\Qlib::UrlAtual()}}" class="btn btn-outline-primary">
+                                    {{__('Editar')}} <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                </a>
+                            @endisset
+                        </div>
+                    </div>
+                </div>
+            @endcan
         </div>
     </div>
     @else
