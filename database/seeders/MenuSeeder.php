@@ -26,7 +26,7 @@ class MenuSeeder extends Seeder
             ],
             [
                 'categoria'=>'CADASTROS',
-                'description'=>'Produtos',
+                'description'=>'Contratos',
                 'icon'=>'fas fa-box',
                 'actived'=>true,
                 'url'=>'cad-produtos',
@@ -35,7 +35,7 @@ class MenuSeeder extends Seeder
             ],
             [
                 'categoria'=>'',
-                'description'=>'Novo produto',
+                'description'=>'Novo contrato',
                 'icon'=>'fas fa-plus',
                 'actived'=>true,
                 'url'=>'create',
@@ -44,7 +44,7 @@ class MenuSeeder extends Seeder
             ],
             [
                 'categoria'=>'',
-                'description'=>'Todos produto',
+                'description'=>'Todos contratos',
                 'icon'=>'fas fa-list',
                 'actived'=>true,
                 'url'=>'produtos',

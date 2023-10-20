@@ -99,7 +99,7 @@
             <div class="form-group col-{{$config['col']}}-{{$config['tam']}}">
             <label for="{{$config['campo']}}">
                 <input type="checkbox" class="{{$config['class']}}" @if(isset($config['checked']) && $config['checked'] == $config['value']) checked @endif  value="{{$config['value']}}"  name="{{$config['campo']}}" id="{{$config['campo']}}" {{@$config['event']}}>
-                    {{$config['label']}}
+                    {!!$config['label']!!}
             </label>
             @error($config['campo'])
             <div class="alert alert-danger">{{ $message }}</div>

@@ -24,15 +24,15 @@
             @endcan
             <li class="dropdown"><a href="#"> <span>Gerenciar leilões</span> <i class="bi bi-chevron-right"></i> </a>
                 <ul>
-                <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(2)}}">{{__('Cadastrar leilão')}}</a></li>
-                <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(18)}}">{{__('Meus leilões')}}</a></li>
-                <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(3)}}">{{__('Meus lances')}}</a></li>
+                <li><a href="{{url('/leilao-create')}}">{{__('Cadastrar leilão')}}</a></li>
+                <li><a href="{{url('/leilao-list')}}">{{__('Meus leilões')}}</a></li>
+                <li><a href="{{url('/lances-list')}}">{{__('Meus lances')}}</a></li>
                 {{-- <li><a href="#">Deep Drop Down 3</a></li>
                 <li><a href="#">Deep Drop Down 4</a></li>
                 <li><a href="#">Deep Drop Down 5</a></li> --}}
                 </ul>
             </li>
-            <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(34)}}">Meu Cadastro</a></li>
+            <li><a href="{{url('/meu-cadastro')}}">Meu Cadastro</a></li>
             <li><a href="#">Meus pacotes</a></li>
             {{-- <li><a href="#">Drop Down 3</a></li>
             <li><a href="#">Drop Down 4</a></li> --}}
@@ -61,7 +61,7 @@
 
           @else
             <li><a class="btn btn-default btn-flat float-right" href="{{route('login')}}"><i class="fas fa-user"></i>&nbsp;Login</a></li>
-            <li><a class="btn btn-default btn-flat float-right" href="{{url('/')}}/user/create"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li>
+            <li><a class="btn btn-default btn-flat float-right" href="{{url('/user/create')}}"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li>
           @endcan
           <li><a class="btn btn-default btn-flat float-right" href="#"><i class="fas fa-search"></i></a></li>
         </ul>

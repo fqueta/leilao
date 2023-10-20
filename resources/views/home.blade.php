@@ -1,6 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Data Brasil - Painel')
+@section('title')
+{{config('app.name')}} {{config('app.version')}} - Painel
+@stop
+@section('footer')
+    @include('footer')
+@stop
 
 @section('content_header')
 

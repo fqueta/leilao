@@ -29,7 +29,7 @@
   <link href="{{url('/')}}/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   @yield('css')
   <!-- Template Main CSS File -->
-  <link href="{{url('/')}}/assets/css/style.css" rel="stylesheet">
+  <link href="{{url('/')}}/assets/css/style.css?ver={{config('app.version')}}" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: L.ACJF - v4.11.0

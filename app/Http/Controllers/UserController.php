@@ -243,7 +243,7 @@ class UserController extends Controller
                 'script_show'=>''
             ];
             $ret['meta[termo]']=[
-                'label'=>'Concordo com os termos do site',
+                'label'=>'Concordo com os <a href="'.url('/termos-do-site').'" target="_blank">termos do site</a>',
                 'active'=>false,
                 'type'=>'checkbox',
                 'exibe_busca'=>'d-block',
