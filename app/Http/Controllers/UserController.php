@@ -484,16 +484,19 @@ class UserController extends Controller
     {
         $dados = $request->all();
         $origem = isset($dados['config']['origem']) ? $dados['config']['origem'] : false;
-
+        // ob_start();
         $validatedData = $request->validate([
             'name' => ['required','string',new FullName],
             'email' => ['required','string','unique:users'],
-            'cpf'   =>[new RightCpf,'required']
+            'cpf'   =>[new RightCpf,'required','unique:users']
         ],[
                 'nome.required'=>__('O nome é obrigatório'),
                 'nome.string'=>__('É necessário conter letras no nome'),
                 'email.unique'=>__('E-mail já cadastrado'),
+                'cpf.unique'=>__('CPF já cadastrado'),
         ]);
+        // $vl = ob_get_clean();
+        // dd($vl);
         // if($origem!='admin'){
         //     $ret = (new RegisterController)->init($dados);
         //     $ret['login'] = new llController($request);
@@ -512,7 +515,8 @@ class UserController extends Controller
         $salvar = User::create($dados);
         $dados['id'] = $salvar->id;
         //Atualização de meta dados
-        if(is_array($dados['meta'])){
+        $s_me=false;
+        if(isset($dados['meta']) && is_array($dados['meta'])){
             $s_me = $this->save_meta($salvar->id,$dados['meta']);
         }
         $route = $this->routa.'.index';
