@@ -207,12 +207,19 @@ class PostController extends Controller
     }
     public function campos_leilao($post_id=false,$post_type=false,$data=false){
         $hidden_editor = '';
+        $seg1 = request()->segment(1);
         $seg3 = request()->segment(3);
         if($seg3=='create'){
             $ac = 'cad';
         }else{
             $ac = 'alt';
         }
+        if(Qlib::is_frontend()){
+            if($seg1=='leilao-create'){
+                $ac = 'cad';
+            }
+        }
+
         if(Qlib::qoption('editor_padrao')=='laraberg'){
             $hidden_editor = 'hidden';
         }
@@ -272,7 +279,6 @@ class PostController extends Controller
             if(isset($user->id))
                 $arr_itens = $lc->array_contratos($user->id);
         }
-
         $ret = [
             'sep1'=>['label'=>'Dados do Leilão','active'=>false,'tam'=>'12','script'=>'<h5 class="pt-1 text-light">'.__('Dados do Leilão').'</h5>','type'=>'html_script','class_div'=>'bg-secondary'],
             'ID'=>['label'=>'Id','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
