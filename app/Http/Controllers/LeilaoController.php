@@ -16,6 +16,8 @@ use App\Models\Post;
 
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
 
 class LeilaoController extends Controller
 {
@@ -45,11 +47,13 @@ class LeilaoController extends Controller
         if($leilao_id){
             $ac = 'alt';
             $leilao_id = Qlib::buscaValorDb0('posts','token',$leilao_id,'ID');
-            // $dadosLeilao = Post::Find($leilao_id);
-            $dadosLeilao = $this->get_leilao($leilao_id);
-            // if($dadosLeilao->count() > 0){
-            //     $dadosLeilao['id'] = $dadosLeilao['ID'];
-            // }
+            $dadosLeilao = Post::Find($leilao_id);
+            // $dadosLeilao = $this->get_leilao($leilao_id);
+            if($dadosLeilao->count() > 0){
+                $dadosLeilao['id'] = $dadosLeilao['ID'];
+                $dadosLeilao = $dadosLeilao->toArray();
+            }
+            // dd($dadosLeilao);
         }else{
             $dadosLeilao = false;
             $ac = 'cad';
@@ -421,11 +425,26 @@ class LeilaoController extends Controller
         $logado = Auth::check();
         if($logado){
             //checar se a conta destá verifcadada
-            $iv=(new UserController)->is_verified();
+            $uc = new UserController;
+            $iv=$uc->is_verified();
             if(!$iv){
                 // dd(url('/email/verify'));
                 // return redirect()->to(url('/email/verify'));
-                return redirect()->route('verification.notice');
+                $route = route('verification.notice');
+                // return redirect()->route('verification.notice');
+                echo header('Location: '.$route);
+                exit;
+            }
+            $user_id = Auth::id();
+            if(!$uc->aceito_termo($user_id)){
+                $me = 'É necessário aceitar os termos para continuar';
+                // session()->put('alert-danger', $me);
+                // Session::flash('alert-danger', $me);
+                $url = url('/meu-cadastro?r='.Qlib::UrlAtual());
+                // dd(session()->all());
+                // echo header('Location: '.$url);
+                return Redirect::to($url)->with('alert-danger', $me);
+                exit;
             }
         }
         if($seg2){

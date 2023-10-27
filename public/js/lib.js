@@ -861,13 +861,31 @@ function submitFormulario(objForm,funCall,funError){
                     $('#preload').fadeOut("fast");
                     funCall(data);
                 },
-                error: function (data) {
+                error: function (err) {
                     $('#preload').fadeOut("fast");
-                    if(data.responseJSON.errors){
-                        funError(data.responseJSON.errors);
-                        console.log(data.responseJSON.errors);
-                    }else{
-                        lib_formatMensagem('.mens','Erro','danger');
+                    try {
+
+                        if(err.responseJSON.errors){
+                            funError(err.responseJSON.errors);
+                            console.log(err.responseJSON.errors);
+                        }else{
+                            lib_formatMensagem('.mens','Erro','danger');
+                        }
+                        if (err.status == 422) { // when status code is 422, it's a validation issue
+                            console.log(err.responseJSON);
+                            $('#success_message').fadeIn().html(err.responseJSON.message);
+
+                            // you can loop through the errors object and show it to the user
+                            console.warn(err.responseJSON.errors);
+                            // display errors on each form field
+                            $.each(err.responseJSON.errors, function (i, error) {
+                                var el = $(document).find('[name="'+i+'"]');
+                                $('#el-'+i).remove();
+                                el.after($('<span id="el-'+i+'" style="color: red;font-size:12px">'+error[0]+'</span>'));
+                            });
+                        }
+                    } catch (e) {
+                        console.log(e);
                     }
                 }
             });

@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container pt-3">
     <div class="mx-auto col-md-5">
         <div class="card mt-5 mb-5">
             <div class="card-header">
@@ -25,15 +25,17 @@
                       $(".alert").alert();
                     </script>
                 @else
-                <p>{{__('Antes de continuar, por favor verifique seu email com o link de confirmação. caso não tenha recebido o email,')}}</p>
-
-                <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-                    @csrf
-                    <input type="hidden" name="send-email" value="s" />
-                    <button type="submit" class="btn btn-link p-0 m-0 align-baseline">
-                        {{ __('adminlte::adminlte.verify_request_another') }}
-                    </button>.
-                </form>
+                <p>{{__('Antes de continuar, por favor verifique seu email com o link de confirmação. Clique no botão abaixo, que um link de confirmação de conta será enviado para o seu e-mail')}}</p>
+                <div class="text-center">
+                    <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
+                        @csrf
+                        <input type="hidden" name="send-email" value="s" />
+                        <button type="submit" class="btn btn-primary">
+                            {{-- {{ __('adminlte::adminlte.verify_request_another') }} --}}
+                            {{(__('Solicitar um link'))}}
+                        </button>.
+                    </form>
+                </div>
                 @endif
 
             </div>

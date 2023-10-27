@@ -8,6 +8,7 @@
     }
     $route_store = isset($config['route_store']) ? $config['route_store'] : $config['route'].'.store';
     $route_update = isset($config['route_update']) ? $config['route_update'] : $config['route'].'.update';
+    // dd($config);
 @endphp
 
 <form id="{{$config['frm_id']}}" class="" action="@if($config['ac']=='cad'){{ route($route_store) }}@elseif($config['ac']=='alt'){{ route($route_update,['id'=>$config['id']]) }}@endif" method="post">

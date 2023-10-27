@@ -269,7 +269,7 @@ class UserController extends Controller
 
             if($logado){
                 //Desablitar a edição de email no frontend
-                $ret['email']['event'] = 'disabled';
+                // $ret['email']['event'] = 'disabled';
             }
         }
         return $ret;
@@ -484,17 +484,29 @@ class UserController extends Controller
     {
         $dados = $request->all();
         $origem = isset($dados['config']['origem']) ? $dados['config']['origem'] : false;
-        // ob_start();
-        $validatedData = $request->validate([
-            'name' => ['required','string',new FullName],
-            'email' => ['required','string','unique:users'],
-            'cpf'   =>[new RightCpf,'required','unique:users']
-        ],[
-                'nome.required'=>__('O nome é obrigatório'),
-                'nome.string'=>__('É necessário conter letras no nome'),
-                'email.unique'=>__('E-mail já cadastrado'),
-                'cpf.unique'=>__('CPF já cadastrado'),
-        ]);
+        if($origem=='admin'){
+            $validatedData = $request->validate([
+                'name' => ['required','string',new FullName],
+                'email' => ['required','string','unique:users'],
+                'cpf'   =>[new RightCpf,'required','unique:users']
+            ],[
+                    'nome.required'=>__('O nome é obrigatório'),
+                    'nome.string'=>__('É necessário conter letras no nome'),
+                    'email.unique'=>__('E-mail já cadastrado'),
+                    'cpf.unique'=>__('CPF já cadastrado'),
+            ]);
+        }else{
+            $validatedData = $request->validate([
+                'name' => ['required','string',new FullName],
+                'email' => ['required','string','unique:users'],
+                'cpf'   =>[new RightCpf,'required','unique:users']
+            ],[
+                    'nome.required'=>__('O nome é obrigatório'),
+                    'nome.string'=>__('É necessário conter letras no nome'),
+                    'email.unique'=>__('E-mail já cadastrado'),
+                    'cpf.unique'=>__('CPF já cadastrado'),
+            ]);
+        }
         // $vl = ob_get_clean();
         // dd($vl);
         // if($origem!='admin'){
@@ -703,7 +715,8 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
             'name' => ['required',new FullName],
-            'cpf'   =>[new RightCpf]
+            'email'   =>['required','string','unique:users,email,'.$id],
+            'cpf'   =>[new RightCpf,'unique:users,cpf,'.$id],
         ]);
 
         $data = [];
@@ -1095,6 +1108,28 @@ class UserController extends Controller
         }
         return $ret;
 
+    }
+    /**
+     * Metodo para verifica usuaior unico basedo em cpf ou email
+     * @param string $campo = o campo a ser verificado,strin $value=valor a ser verificado, integer $id opcional se for informado ele ignora o usuario com esse $id
+     * @return boolean
+     */
+    public function is_user_exist($campo,$value,$id=false){
+        $ret = false;
+        if($campo && $value){
+            if($id){
+                $ver = User::where($campo,$value)->where('id','!=',$id)->where('excluido','n')->where('deletdo','n')->get();
+                if($ver->count()){
+                    $ret = $ver->count();
+                }
+            }else{
+                $ver = User::where($campo,$value)->where('excluido','n')->where('deletdo','n')->get();
+                if($ver->count()){
+                    $ret = $ver->count();
+                }
+            }
+        }
+        return $ret;
     }
     public function get_users_site(){
 
