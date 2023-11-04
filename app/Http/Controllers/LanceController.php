@@ -281,11 +281,29 @@ class LanceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-
+    /**
+     * Metodo para gravar e gerenciar todos os lances.
+     * @param array $d, boolean $autolance, array $ul
+     */
     public function gravar_lance($d=false,$autolance=true){
         $ret['exec'] = false;
         if($d){
             $d['token'] = isset($d['token']) ? $d['token'] :uniqid();
+            //antes de gravar um lance verifica se ja existe um lance naquele valor
+            $verifica = Lance::where('valor_lance','=',$d['valor_lance'])
+                ->where('leilao_id','=',$d['leilao_id'])
+                ->where('excluido','=','n')
+                ->where('type','=',$d['type'])
+                ->count();
+            if($verifica>0){
+                $ret['exec'] = false;
+                $ret['code_mens'] = 'enc';
+                $ret['redirect'] = 'self';
+                // $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> Valor de lance, <b>'.Qlib::valor_moeda($d['valor_lance']).'</b> já foi superado tente novamente com um valor mais alto','warning');
+                $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> Lance já foi superado tente com um valor mais alto','warning');
+                return $ret;
+            }
+            //salvar o lance
             $s = lance::create($d);
             if($s->id && isset($d['leilao_id']) && ($leilao_id = $d['leilao_id'])){
                 $ret['exec'] = true;
@@ -299,6 +317,9 @@ class LanceController extends Controller
         }
         return $ret;
     }
+    /**
+     * Metodo para gravar o lance
+     */
     public function store(Request $request)
     {
         $d = $request->all();
@@ -342,18 +363,18 @@ class LanceController extends Controller
             $ret['mens'] = Qlib::formatMensagemInfo(@$al['mens'],'danger');
             return $ret;
         }
-        //verificar se o lance é igual a algum lance ja dado
+        //antes de gravar um lance verifica se ja existe um lance naquele valor
         $verifica = Lance::where('valor_lance','=',$d['valor_lance'])
-                    ->where('leilao_id','=',$d['leilao_id'])
-                    ->where('excluido','=','n')
-                    ->where('type','=',$d['type'])
-                    ->count();
+            ->where('leilao_id','=',$d['leilao_id'])
+            ->where('excluido','=','n')
+            ->where('type','=',$d['type'])
+            ->count();
         if($verifica>0){
+            $ret['exec'] = false;
             $ret['code_mens'] = 'enc';
             $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> Valor de lance, <b>'.Qlib::valor_moeda($d['valor_lance']).'</b> já foi encontrado tente novamente com outro valor','danger');
             return $ret;
         }
-
         if($origem=='front'){
             //Verificar
             $v_reserva = $this->salvar_reserva($d,$d['leilao_id']);
@@ -366,9 +387,22 @@ class LanceController extends Controller
             $d_ultimo_lance = $this->ultimo_lance($leilao_id,true);//dados do ultimo lance
             if(isset($d_ultimo_lance['author']) && ($dono_ultimo_l = $d_ultimo_lance['author'])){
                 if($dono_ultimo_l==$d['author']){
-                    $ret['code_mens'] = 'dulance';
-                    $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
-                    return $ret;
+                    if(isset($v_reserva['exec'])){
+                        if($v_reserva['exec']){
+                            $ds = isset($v_reserva['ds']['valor_lance'])?$v_reserva['ds']['valor_lance']:0;
+                            $ret['code_mens'] = 'dulance';
+                            $ret['mens'] = Qlib::formatMensagemInfo('<b>Sucesso</b> Como você é o autor do último lance, o valor de '.Qlib::valor_moeda($ds,'R$').' é aceito como reserva para os próximos lances e serão feitos de forma automatica.','success');
+                            return $ret;
+                        }else{
+                            $ret['code_mens'] = 'dulance';
+                            $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
+                            return $ret;
+                        }
+                    }else{
+                        $ret['code_mens'] = 'dulance';
+                        $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
+                        return $ret;
+                    }
                 }
             }
             $ret = $this->gravar_lance($d);
@@ -543,10 +577,10 @@ class LanceController extends Controller
     }
     /**
      * Metodo para retornar o proximo lance
-     * @param integer $leilao_id
+     * @param integer $leilao_id,array $dl=dados do leilao, int $mult_incremento = se precisar saber de lances futuros
      * @return integer $ret
      */
-    public function proximo_lance($leilao_id=false,$dl=false){
+    public function proximo_lance($leilao_id=false,$dl=false,$mult_incremento=1){
         $ret = 0;
         $lance_atual = $this->ultimo_lance($leilao_id);
         // $dl = Post::Find($leilao_id);
@@ -560,7 +594,9 @@ class LanceController extends Controller
             }
             $inc = Qlib::precoBanco($inc);
             if($inc>0){
-                $ret = $lance_atual+$inc;
+                if($mult_incremento>0){
+                    $ret = $lance_atual+($mult_incremento*$inc);
+                }
             }
         }
         return $ret;
@@ -574,8 +610,11 @@ class LanceController extends Controller
         $ret['exec'] = false;
         $ret['proximo_lance'] = 0;
         if(isset($dadosForm['valor_lance']) && ($vl=$dadosForm['valor_lance']) && $leilao_id){
-            $proximo_lance = $this->proximo_lance($leilao_id);
-            if($vl>$proximo_lance){
+            // $dl = (new LeilaoController)->get_leilao($leilao_id);
+            $vl = (double)$vl;
+            $proximo_lance = $this->proximo_lance($leilao_id,false,1);
+            if($vl>=$proximo_lance){
+                // dd($vl,$proximo_lance);
                 //nesse momento o sistema entede que precisa gravar o este lance tbm como reserva
                 $ret['proximo_lance'] = $proximo_lance;
                 $dadosForm['type'] = 'reserva';
@@ -592,6 +631,7 @@ class LanceController extends Controller
                         $salvar = lance::where('id',$id)->update($dadosForm);
                         if($salvar){
                             $ret['exec'] = true;
+                            $ret['ds'] = $dadosForm;
                         }
                     }
                 }else{
@@ -619,12 +659,12 @@ class LanceController extends Controller
         if($leilao_id){
             $proximo_lance = $this->proximo_lance($leilao_id);
             $reservas = lance::where('leilao_id',$leilao_id)
-            ->where('type','reserva')
-            ->where('excluido','n')
-            ->where('valor_lance','>=',$proximo_lance)
-            ->orderBy('id','ASC')
-            ->get()
-            ->toArray();
+                ->where('type','reserva')
+                ->where('excluido','n')
+                ->where('valor_lance','>=',$proximo_lance)
+                ->orderBy('id','ASC')
+                ->get()
+                ->toArray();
             $ret['proximo_lance'] = $proximo_lance;
             $ret['reservas'] = count($reservas);
             $d_ultimo_lance = $this->ultimo_lance($leilao_id,true);//dados do ultimo lance
@@ -636,11 +676,12 @@ class LanceController extends Controller
                         $v['type'] = 'lance';
                         $r = $v['valor_lance'];
                         $proximo_lance1 = $this->proximo_lance($leilao_id);
-                        if((double)$proximo_lance1 <= (double)$r){
+                        if((double)$proximo_lance1 < (double)$r){
                             // $v['valor_lance'] = $this->proximo_lance($leilao_id);
                             $v['valor_lance'] = $proximo_lance1;
                             $v['config'] = Qlib::lib_array_json(['type' => 'auto','token_reserva'=>@$reservas[$k]['token']]); //Marca que é um lance automatico
                             // Qlib::lib_print($reservas);
+                            // dd($v);
                             $salv[$k] = $this->gravar_lance($v,$autolance=false);
                             $v['count'] = count($reservas);
                             $v['reserva'] = $r;
@@ -648,7 +689,13 @@ class LanceController extends Controller
                             $debug = $v;
                             // Qlib::lib_print($debug);
                             $d_ultimo_lance = $this->ultimo_lance($leilao_id,true);//dados do ultimo lance
-                        }elseif((string)$proximo_lance1==(string)$r){
+                        }elseif((double)$proximo_lance1==(double)$r){
+                            if((double)$r==$reservas[0]['valor_lance']){
+                                //Se o lance for igual a reserva verificar se a reserva do atual é igual a reserva do primeiro cliente e prevalece a reserva do primeiro notifica que ele precisa reservar um valor maior para cobrir o lance
+                                $v = $reservas[0];
+                                $v['type'] = 'lance';
+                                // $r = $v['valor_lance'];
+                            }
                             $v['valor_lance'] = $proximo_lance1;
                             $v['config'] = Qlib::lib_array_json(['type' => 'auto']); //Marca que é um lance automatico
                             $salv[$k] = $this->gravar_lance($v,$autolance=false);
@@ -660,7 +707,7 @@ class LanceController extends Controller
                             $d_ultimo_lance = $this->ultimo_lance($leilao_id,true);//dados do ultimo lance
                         }else{
                             $v['valor_lance'] = $proximo_lance1;
-                            $salv[$k] = $this->gravar_lance($v,$autolance=false);
+                            // $salv[$k] = $this->gravar_lance($v,$autolance=false);
                             $v['count'] = count($reservas);
                             $v['reserva'] = $r;
                             $v['proximo_lance1'] = $proximo_lance1;

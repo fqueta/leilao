@@ -17,7 +17,10 @@
                         @foreach ($campos_tabela as $kbu=>$vbu)
                             @if (isset($vbu['active']) && $vbu['active'])
                                 @php
-                                    if($vbu['type']!='text' && $kbu=='id'){
+                                    if($vbu['type']!='text' && ($kbu=='id' || $kbu=='ID')){
+                                        $vbu['type'] = 'text';
+                                    }
+                                    if($vbu['type']=='hidden_text'){
                                         $vbu['type'] = 'text';
                                     }
                                     if($kbu!='obs')
@@ -33,7 +36,7 @@
                                     'value'=>@$_GET['filter'][$kbu],
                                     'tam'=>isset($vbu['tam'])?$vbu['tam']:'3',
                                     'class_div'=>$vbu['exibe_busca'],
-                                    'event'=>isset($vbu['event'])?$vbu['event']:'',
+                                    'event'=>isset($vbu['event_busca'])?$vbu['event_busca']:'',
                                     'arr_opc'=>isset($vbu['arr_opc'])?$vbu['arr_opc']:'',
                                     'label_option_select'=>'Todas',
                                 ])}}

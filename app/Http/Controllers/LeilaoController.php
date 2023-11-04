@@ -273,6 +273,7 @@ class LeilaoController extends Controller
                                     $valor_r = Qlib::precoBanco($post['config']['valor_r']);
                                     $valor_atual = Qlib::precoBanco(@$post['config']['valor_atual']);
                                     $incremento = Qlib::precoBanco(@$post['config']['incremento']);
+                                    $ret['horas'] += $post['config']['horas'];
                                     $ret['valor_r'] += $valor_r;
                                     $ret['total_horas'] += $total_horas;
                                     $ret['description'] = $post['post_content'];
@@ -294,6 +295,7 @@ class LeilaoController extends Controller
                         $ret['config'] = $post['config'];
                         $ret['id'] = $id;
                         $ret['exec']=true;
+                        $ret['post_title']=@$post['post_title'];
                         $ret['post_content']=$post['post_content'];
                     }
                 }
@@ -436,7 +438,8 @@ class LeilaoController extends Controller
                 exit;
             }
             $user_id = Auth::id();
-            if(!$uc->aceito_termo($user_id)){
+            //Se usuario não aceitou os termmos e não for um administrador
+            if(!$uc->aceito_termo($user_id) && !Qlib::isAdmin()){
                 $me = 'É necessário aceitar os termos para continuar';
                 // session()->put('alert-danger', $me);
                 // Session::flash('alert-danger', $me);
@@ -534,8 +537,9 @@ class LeilaoController extends Controller
                 $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
                 foreach ($arrPost['data'] as $kp => $vp) {
                     $pago = Qlib::get_postmeta(@$vp['ID'],$meta_pago,true);
-                    if($pago!='s'){
-                        //Listar no site apenas leiloes não pagos
+                    $tmno = $this->info_termino($vp['ID']);
+                    if($pago!='s' && !@$tmno['termino']){
+                        //Listar no site apenas leiloes não pagos e que não foram terminados
                         if(isset($vp['config']['itens']) && is_array($vp['config']['itens']) && count($vp['config']['itens'])>0){
                             $dados[$kp] = $vp;
                             $src = Qlib::get_thumbnail_link($vp['ID']);
@@ -621,9 +625,12 @@ class LeilaoController extends Controller
         $data['proximo_lance']      = $lac->proximo_lance($leilao_id,$data);
         $data['exibe_btn_comprar']  = false;
         $data['link_btn_comprar']  = false;
-        //Solicitação para exibição de desconto sobre o preço atual
-
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_atual']) && !empty($data['config']['valor_atual'])){
+            //Exibição do preço da hora no proximo lance.
+            if(isset($data['config']['total_horas']) && !empty($data['config']['total_horas'])){
+                $data['total_horas_lance'] = round($data['proximo_lance']/$data['config']['total_horas']);
+            }
+            //Solicitação para exibição de desconto sobre o preço atual
             $va = Qlib::precoBanco($data['config']['valor_atual']);
             $data['valor_atual'] = Qlib::valor_moeda($va,'R$');
             if($pl<$va){

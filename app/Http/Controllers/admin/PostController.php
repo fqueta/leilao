@@ -64,6 +64,7 @@ class PostController extends Controller
             'order'=>isset($get['order']) ? $get['order']: 'desc',
         ];
         $post_type = $post_type?$post_type:$this->post_type;
+        // dd($post_type,$get);
         if($post_type){
             if(Qlib::is_frontend()){
                 $seg1 = request()->segment(1); //link da página em questão
@@ -94,7 +95,11 @@ class PostController extends Controller
                 if(isset($get['filter']['post_status'])){
                     $get['filter']['post_status'] = 'publish';
                 }else{
-                    $get['filter']['post_status'] = 'pending';
+                    if(isset($get['origem'])=='site'){
+                        $get['filter']['post_status'] = 'publish';
+                    }else{
+                        $get['filter']['post_status'] = 'pending';
+                    }
                 }
                 foreach ($get['filter'] as $key => $value) {
                     if(!empty($value)){
@@ -194,7 +199,7 @@ class PostController extends Controller
             // 'config[valor_h]'=>['label'=>'Valor Hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_h','title'=>'Valor do hora no contrato'],
             // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
             // 'config[lance_total]'=>['label'=>'Lance total','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][lance_total','title'=>'Valor unitário do Lançe mutiplicado pela quantidade de horas'],
-            'config[valor_venda]'=>['label'=>'Compre já','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            'config[valor_venda]'=>['label'=>'Compre já','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onchange=verific_cvalor_venda(this.value)','tam'=>'6','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
             'config[valor_atual]'=>['label'=>'Valor Atual','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_atual','title'=>'Valor atual do pacote no Aeroclube'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
@@ -282,7 +287,7 @@ class PostController extends Controller
         $ret = [
             'sep1'=>['label'=>'Dados do Leilão','active'=>false,'tam'=>'12','script'=>'<h5 class="pt-1 text-light">'.__('Dados do Leilão').'</h5>','type'=>'html_script','class_div'=>'bg-secondary'],
             'ID'=>['label'=>'Id','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
-            'post_title'=>['label'=>'Nome','active'=>true,'placeholder'=>'Ex.: Nome do produto ','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'7','title'=>'Identificador do contrado pode ser nome ou número','value'=>@$data['post_title']],
+            'post_title'=>['label'=>'Nome do Leilão','active'=>true,'placeholder'=>'Ex.: leilão 55 ','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'7','title'=>'Identificador do contrado pode ser nome ou número','value'=>@$data['post_title']],
             'post_type'=>['label'=>'tipo de post','active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>$post_type],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','value'=>@$data['token']],
             'config[origem]'=>['label'=>'origem','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][origem','value'=>$name_route],
@@ -321,7 +326,7 @@ class PostController extends Controller
                 'event'=>'required onchange=dataContratos(this)',
                 'tam'=>'12',
                 'class'=>'',
-                'exibe_busca'=>true,
+                'exibe_busca'=>'d-none',
                 'option_select'=>true,
                 'cp_busca'=>'config][contrato',
                 'class'=>'select2',
@@ -1069,27 +1074,30 @@ class PostController extends Controller
         }
         $atualizar=false;
         if(!empty($data)){
-
-                $atualizar=Post::where('id',$id)->update($data);
-                if($atualizar){
-                    $mens = $this->label.' cadastrado com sucesso!';
-                    $color = 'success';
-                    $id = $id;
-                    //REGISTRAR EVENTOS
-                    (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-                    if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
-                        //Enviar notificação para o moderador
-                        $meta_notific = 'notifica_email_moderador';
-                        $liberar_norificacao = Qlib::update_postmeta($id,$meta_notific,'n');
-                        if($liberar_norificacao){
-                            $send_notific = (new LeilaoController)->notific_update_admin($id);
-                        }
+            $contrato = $lc->get_data_contrato(@$data['config']['contrato']);
+            if(isset($contrato['post_title'])){
+                $data['post_title'] = $contrato['post_title'];
+            }
+            $atualizar=Post::where('id',$id)->update($data);
+            if($atualizar){
+                $mens = $this->label.' cadastrado com sucesso!';
+                $color = 'success';
+                $id = $id;
+                //REGISTRAR EVENTOS
+                (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
+                if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
+                    //Enviar notificação para o moderador
+                    $meta_notific = 'notifica_email_moderador';
+                    $liberar_norificacao = Qlib::update_postmeta($id,$meta_notific,'n');
+                    if($liberar_norificacao){
+                        $send_notific = (new LeilaoController)->notific_update_admin($id);
                     }
-                }else{
-                    $mens = 'Erro ao salvar '.$this->label.'';
-                    $color = 'danger';
-                    $id = 0;
                 }
+            }else{
+                $mens = 'Erro ao salvar '.$this->label.'';
+                $color = 'danger';
+                $id = 0;
+            }
             //}
 
             $route = $this->routa.'.index';

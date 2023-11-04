@@ -26,6 +26,13 @@
             </button>
         </div>
     </div>
+    @if(isset($dados['total_horas_lance']) && $dados['total_horas_lance']>0 && @$dados['proximo_lance']>0)
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <p>{{__('Com o valor de lance ')}}<b>{{App\Qlib\Qlib::valor_moeda($dados['proximo_lance'],'R$')}} </b>{{__('O valor da hora é de ')}} <b>{{App\Qlib\Qlib::valor_moeda(@$dados['total_horas_lance'],'R$')}} </b></p>
+            </div>
+        </div>
+    @endif
     @if(isset($dados['desconto_s_atual']['valor']) && $dados['desconto_s_atual']['valor']>0)
         <div class="row mb-3">
             <div class="col-md-12">

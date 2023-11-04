@@ -2392,7 +2392,11 @@ function seguirLance(){
                 window.location=res.redirect;
             }
             if(res.code_mens=='enc'){
-                window.location=redirect;
+                if(res.redirect=='self'){
+                    var red = urlAtual();
+                    window.location=red;
+                    console.log(red);
+                }
             }
         } catch (error) {
             console.log(error);
@@ -2675,4 +2679,22 @@ function select_contrato(obj){
             console.log(error);
         }
     }
+}
+function verific_cvalor_venda(valor){
+    if(typeof valor == 'undefined'){
+        var valor = document.querySelector('[id="inp-config[valor_venda]"]').value;
+    }
+    var vr = document.querySelector('[id="inp-config[valor_r]"]').value;
+    if(vr){
+        var valor = precoBanco(valor);
+        var pvr = precoBanco(vr);
+        // console.log('valor: '+valor+' vr: ' + vr);
+        if(valor<pvr){
+            alert('O valor de COMPRE JÁ ['+valor+'], não pode ser menor que o valor da RESCISÂO ['+pvr+']');
+            document.querySelector('[id="inp-config[valor_venda]"]').value='';
+            document.querySelector('[id="inp-config[valor_venda]"]').focus();
+            return false;
+        }
+    }
+    return true;
 }

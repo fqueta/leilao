@@ -62,6 +62,8 @@ class TesteController extends Controller
         // $post_id = Qlib::get_id_by_token('64b6e7630678d');
         // dd($post_id);
         $post_id = 36;
+        $proximo_lance1 = (new LanceController)->proximo_lance(60,false,1);
+        dd($proximo_lance1);
         // $dlt = $this->get_leilao($seg2);
     $ret = (new LeilaoController)->get_leilao(58,false,[
         'desconto'=>true
