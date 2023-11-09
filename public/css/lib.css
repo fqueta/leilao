@@ -158,6 +158,13 @@ form .gray * { color: gray; }
 .underline{
     text-decoration: underline;
 }
+.total_seguidores {
+    padding: 1px 10px;
+    border: 1px solid;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: default;
+}
 @keyframes lds-dual-ring {
     0% {
       transform: rotate(0deg);

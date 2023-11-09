@@ -17,6 +17,7 @@
         <div class="card-body">
             <div class="table-responsive">
                 @if(isset($lances_vencendo) && is_array($lances_vencendo))
+                {{-- {{dd($lances_vencendo)}} --}}
                 <table class="table">
                     <thead>
                         <tr>

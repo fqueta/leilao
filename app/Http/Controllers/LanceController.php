@@ -389,19 +389,20 @@ class LanceController extends Controller
                 if($dono_ultimo_l==$d['author']){
                     if(isset($v_reserva['exec'])){
                         if($v_reserva['exec']){
-                            $ds = isset($v_reserva['ds']['valor_lance'])?$v_reserva['ds']['valor_lance']:0;
+                            $vlar = isset($v_reserva['ds']['valor_lance'])?$v_reserva['ds']['valor_lance']:0;
+                            // dd($vlar);
                             $ret['code_mens'] = 'dulance';
-                            $ret['mens'] = Qlib::formatMensagemInfo('<b>Sucesso</b> Como você é o autor do último lance, o valor de '.Qlib::valor_moeda($ds,'R$').' é aceito como reserva para os próximos lances e serão feitos de forma automatica.','success');
+                            $ret['mens'] = Qlib::formatMensagemInfo('<b>Sucesso</b> Como você é o autor do último lance, o valor de <b>'.Qlib::valor_moeda($vlar,'R$').'</b> é aceito como reserva para os próximos lances e serão feitos de forma automatica.','success');
                             return $ret;
-                        }else{
-                            $ret['code_mens'] = 'dulance';
-                            $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
-                            return $ret;
+                        // }else{
+                        //     $ret['code_mens'] = 'dulance';
+                        //     $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
+                        //     return $ret;
                         }
-                    }else{
-                        $ret['code_mens'] = 'dulance';
-                        $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
-                        return $ret;
+                    // }else{
+                    //     $ret['code_mens'] = 'dulance';
+                    //     $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
+                    //     return $ret;
                     }
                 }
             }
@@ -613,7 +614,7 @@ class LanceController extends Controller
             // $dl = (new LeilaoController)->get_leilao($leilao_id);
             $vl = (double)$vl;
             $proximo_lance = $this->proximo_lance($leilao_id,false,1);
-            if($vl>=$proximo_lance){
+            if($vl>$proximo_lance){
                 // dd($vl,$proximo_lance);
                 //nesse momento o sistema entede que precisa gravar o este lance tbm como reserva
                 $ret['proximo_lance'] = $proximo_lance;
@@ -639,6 +640,7 @@ class LanceController extends Controller
                     $salvar = lance::create($dadosForm);
                     if(isset($salvar->id) && $salvar->id){
                         $ret['exec'] = true;
+                        $ret['ds'] = $dadosForm;
                     }
                 }
                 if($ret['exec']){
@@ -755,27 +757,31 @@ class LanceController extends Controller
         // dd($ld_s);
         // if($ld_s){
             // foreach ($ld_s as $key => $value) {
-                $lances_superados = lance::select('lances.*','posts.*')->
-                                    join('posts','lances.leilao_id','=','posts.ID')->
-                                    where('lances.superado','s')->
-                                    where('lances.author',Auth::id())->
-                                    where('lances.excluido','n')->
-                                    orderBy('lances.id','desc')->
-                                    whereDate('lances.created_at','>=',$dtBanco)->
-                                    get()->toArray();
+                $lances_superados = lance::query()->select('lances.*','posts.*')->
+                    join('posts','lances.leilao_id','=','posts.ID')->
+                    where('lances.superado','s')->
+                    where('lances.author',Auth::id())->
+                    where('lances.excluido','n')->
+                    orderBy('lances.id','asc')->
+                    whereDate('lances.created_at','>=',$dtBanco)->
+                    get()->toArray();
+                    // get();
+                DB::enableQueryLog();
                 $lances_vencendo = lance::select('lances.*','posts.*')->
-                                    join('posts','lances.leilao_id','=','posts.ID')->
-                                    where('lances.superado','!=','s')->
-                                    where('lances.author',Auth::id())->
-                                    where('lances.excluido','n')->
-                                    orderBy('lances.id','desc')->
-                                    whereDate('lances.created_at','>=',$dtBanco)->
-                                    get()->toArray();
+                    join('posts','lances.leilao_id','=','posts.ID')->
+                    where('lances.superado','!=','s')->
+                    where('lances.author','=',Auth::id())->
+                    where('lances.excluido','=','n')->
+                    where('lances.type','=','lance')->
+                    orderBy('lances.id','desc')->
+                    whereDate('lances.created_at','>=',$dtBanco)->
+                    get()->toArray();
+                // dd(Auth::id(),$dtBanco,$lances_vencendo);
                 if($lances_superados){
                     foreach ($lances_superados as $k => $v) {
-                        if($k==0){
-                            $arr['lances_superados'][$k] = $v;
-                        }
+                        // if($k==0){
+                            $arr['lances_superados'][$v['leilao_id']] = $v;
+                        // }
                     }
                 }
                 if($lances_vencendo){
@@ -787,14 +793,22 @@ class LanceController extends Controller
                 }
             // }
         // }
+        if(isset($lances_vencendo)){
+            $ret['exec'] = true;
+            $ret['lances_vencendo'] = $lances_vencendo;
+        }
         if(isset($arr['lances_superados'])){
             $ret['exec'] = true;
             $ret['lances_superados'] = $arr['lances_superados'];
         }
-        if(isset($arr['lances_vencendo'])){
-            $ret['exec'] = true;
-            $ret['lances_vencendo'] = $arr['lances_vencendo'];
-        }
+        // if(isset($lances_superados)){
+        //     $ret['exec'] = true;
+        //     $ret['lances_superados'] = $lances_superados;
+        // }
+        // if(isset($arr['lances_vencendo'])){
+        //     $ret['exec'] = true;
+        //     $ret['lances_vencendo'] = $arr['lances_vencendo'];
+        // }
         return view('site.leiloes.lances.list_lances',$ret);
     }
     /**

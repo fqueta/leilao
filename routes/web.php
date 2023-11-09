@@ -216,6 +216,7 @@ Route::resource('lances','\App\Http\Controllers\LanceController',['parameters' =
 ]]);
 Route::prefix('ajax')->group(function(){
     Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
+    Route::post('/ger-seguidores',[App\Http\Controllers\LeilaoController::class,'ger_seguidores']);
 });
 
 //inicio Rotas de verificação

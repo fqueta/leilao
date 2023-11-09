@@ -448,20 +448,6 @@ function alerta2(msg,id,title,tam,fechar,time,fecha){
         time = 2000;
     if(fechar)
         fechar = '<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div>';
-    // var modalHtml = '<div class="modal fade" id="'+id+'" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">'+
-    //         '<div class="modal-dialog '+tam+'" role="document">'+
-    //             '<div class="modal-content">'+
-    //                 '<div class="modal-header">'+
-    //                     '<h5 class="modal-title">'+title+'</h5>'+
-    //                         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-    //                             '<span aria-hidden="true">&times;</span>'+
-    //                         '</button>'+
-    //                 '</div>'+
-    //                 '<div class="modal-body">'+msg+
-    //                 '</div>'+fechar+
-    //             '</div>'+
-    //         '</div>'+
-    //     '</div>';
     var modalHtml = '<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">'+
     '<div class="modal-dialog">'+
         '<div class="modal-content">'+
@@ -482,15 +468,54 @@ function alerta2(msg,id,title,tam,fechar,time,fecha){
         $('#'+id).remove();
         var bodys = $(document.body).append(modalHtml);
         var myModal = document.getElementById(id)
-        // var myInput = document.getElementById('myInput')
-
-        // myModal.addEventListener('shown.bs.modal', function () {
-        //     console.log('foi');
-        //     // myInput.focus()
-        // })
         myModal.modal({backdrop: 'static'});
     if(fecha == true)
 	setTimeout(function(){$("#"+id).modal("hide")}, time);
+}
+function alerta5(msg,id,title,tam,fechar,time,fecha){
+    if(typeof(fechar) == 'undefined')
+        fechar = true;
+    if(typeof(title) == 'undefined')
+    title = 'Janela modal';
+    if(typeof(fecha) != 'undefined')
+        fecha = fecha;
+    else
+        fecha = '';
+	if(typeof(id) == 'undefined')
+    id = 'meuModal';
+	if(typeof(tam) == 'undefined')
+    tam = '';
+	if(typeof(time) == 'undefined')
+        time = 2000;
+    if(fechar)
+        fechar = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>';
+    var html = '<div class="modal fade" id="'+id+'" tabindex="-1" data-bs-backdrop="static">'+
+    '<div class="modal-dialog">'+
+      '<div class="modal-content">'+
+        '<div class="modal-header">'+
+          '<h5 class="modal-title">'+title+'</h5>'+
+          '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>'+
+        '</div>'+
+        '<div class="modal-body">'+
+          msg+
+        '</div>'+
+        '<div class="modal-footer">'+
+          fechar+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+  // var myInput = document.getElementById('myInput')
+  $('#'+id).remove();
+  $(html).insertAfter('header');
+//   var myModal = new bootstrap.Modal(document.getElementById(id), {});
+//     document.onreadystatechange = function () {
+//         myModal.show();
+//     };
+    let modal = bootstrap.Modal.getOrCreateInstance(document.getElementById(id)) // Returns a Bootstrap modal instance
+    // Show or hide:
+    modal.show();
+    modal.hide()
 }
 function editarAssistencia(obj){
     var sele = obj.attr('sele');
@@ -2697,4 +2722,33 @@ function verific_cvalor_venda(valor){
         }
     }
     return true;
+}
+function seguir_leilao(leilao_id,user_id,ac){
+    if(leilao_id && user_id){
+        getAjax({
+            url:'/ajax/ger-seguidores',
+            type: 'POST',
+            dataType: 'json',
+            csrf: true,
+            data:{
+                leilao_id: leilao_id,
+                user_id: user_id,
+                ac: ac,
+            }
+        },function(res){
+            $('#preload').fadeOut("fast");
+            $('.mens').html(res.mens);
+            if(res.exec){
+                window.location.reload();
+            }
+        },function(err){
+            $('#preload').fadeOut("fast");
+            console.log(err);
+        });
+    }
+}
+function alerta_modal_login_seguir(id){
+    var msg='<div class="row"><div class="col-12 text-center">É necessário estar logado para executar essa operação</div><div class="col-12 mt-3 text-center"><a class="btn btn-primary  w-100" href="/login?r='+urlAtual()+'?like=s">Entrar</a></div></div>';
+    alerta5(msg,'modal-login','Login necessário','','','','');
+
 }

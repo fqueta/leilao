@@ -13,7 +13,10 @@
           <li><a href="https://aeroclubejf.com.br/">Home</a></li>
           {{-- <li><a href="about.html">Sobre nós</a></li> --}}
           <li><a class="active " href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">Leilões</a></li>
-          {{-- <li><a href="portfolio.html">Produtos</a></li> --}}
+          @can('is_logado')
+            <li><a href="{{url('/seguindo')}}">{{__('Seguindo')}}</a></li>
+            <li><a href="{{url('/lances-list')}}">{{__('Meus lances')}}</a></li>
+          @endcan
           <li><a href="https://aeroclubejf.com.br/contato/">Contato</a></li>
           @can('is_logado')
           @if (Gate::allows('is_admin2') || Gate::allows('is_customer_logado'))

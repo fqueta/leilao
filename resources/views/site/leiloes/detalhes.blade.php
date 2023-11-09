@@ -73,7 +73,35 @@
 
                 });
             </script>
-            <!-- Foramas de pagamento -->
+
+            {{-- <!-- Acompanhamento --> --}}
+            <div class="col-12 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title">
+                            {{__('Acompanhamento')}}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {{-- <div class="col-12 mens">
+                            </div> --}}
+                            <div class="col-6">
+
+                            </div>
+                            @if(isset($dados['link_seguir']) && $dados['link_seguir'])
+                                <div class="col-6 text-end">
+                                    @if(isset($dados['total_seguidores']))
+                                        <span class="total_seguidores" title="{{__('Total de pessoas seguindo esse leilão')}}">{{$dados['total_seguidores']}}</span>
+                                    @endif
+                                    <a href="{!!$dados['link_seguir']!!}" class="btn btn-outline-{!!@$dados['link_seguir_color']!!}" title="{!!@$dados['link_seguir_title']!!}">{{@$dados['link_seguir_label']}}</a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{-- <!-- Foramas de pagamento --> --}}
             <div class="col-12 mb-3">
                 <div class="card">
                     <div class="card-header">

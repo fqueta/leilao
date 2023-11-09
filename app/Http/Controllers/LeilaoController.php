@@ -18,6 +18,7 @@ use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use JeroenNoten\LaravelAdminLte\Components\Tool\Modal;
 
 class LeilaoController extends Controller
 {
@@ -451,6 +452,19 @@ class LeilaoController extends Controller
             }
         }
         if($seg2){
+            if($logado && $user_id){
+                if(isset($_GET['like']) && $_GET['like'] == 's'){
+                    //Seguir este leilão
+                    $seguir = $this->seguidor_update($seg2,$user_id,true);
+                    if(isset($seguir['exec']) && $seguir['exec']){
+                        $route = Qlib::UrlAtual();
+                        $route = str_replace('?like=s','',$route);
+                        // return redirect()->route('verification.notice');
+                        echo header('Location: '.$route);
+                        exit;
+                    }
+                }
+            }
             $_GET['filter']['ID'] = $seg2;
             $_GET['filter']['post_status'] = 'publish';
             // echo $seg2;
@@ -505,6 +519,7 @@ class LeilaoController extends Controller
                 $dl[0]['arr_lances'] = $this->arr_lances($dl[0]['ID'],$dl[0]);
                 $dl[0]['nome_contrato'] = Qlib::buscaValorDb0('posts','token',@$c_l['contrato'],'post_title');
                 $dl[0]['nome_responsavel'] = Qlib::buscaValorDb0('users','id',$dl[0]['post_author'],'name');
+
                 $ret = [
                     'dados'=>$dl[0],
                     'config'=>[
@@ -607,6 +622,7 @@ class LeilaoController extends Controller
         }
         $lc = new LeilaoController;
         $lac = new LanceController;
+        $user_id = Auth::id();
         if($data && isset($data['config']['contrato'])){
             $contrato = $lc->get_data_contrato($data['config']['contrato']);
             if(isset($contrato['post_content']) && !empty($contrato['post_content'])){
@@ -647,6 +663,27 @@ class LeilaoController extends Controller
                 }
             }
         }
+        //Exibir um botão para seguir este leilão
+        if(Auth::check()){
+            //link add
+            if($lc->is_liked($data['ID'],$user_id)){
+                $data['link_seguir'] = 'javascript:seguir_leilao(\''.$data['ID'].'\',\''.$user_id.'\',\'remove\');';
+                $data['link_seguir_color'] = 'danger';
+                $data['link_seguir_title'] = __('Parar de seguir este leilão');
+                $data['link_seguir_label'] = __('Seguindo');
+            }else{
+                $data['link_seguir'] = 'javascript:seguir_leilao(\''.$data['ID'].'\',\''.$user_id.'\',\'add\');';
+                $data['link_seguir_color'] = 'primary';
+                $data['link_seguir_title'] = __('Começar a seguir este leilao');
+                $data['link_seguir_label'] = __('Seguir');
+            }
+        }else{
+            $data['link_seguir'] = 'javascript:alerta_modal_login_seguir(\''.$data['ID'].'\');';
+            $data['link_seguir_color'] = 'primary';
+            $data['link_seguir_title'] = __('Começar a seguir este leilao');
+            $data['link_seguir_label'] = __('Seguir');
+        }
+        $data['total_seguidores'] = $lc->total_seguidores($data['ID']);
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_venda']) && !empty($data['config']['valor_venda'])){
             //Exibir botão comprar
             $vv = Qlib::precoBanco($data['config']['valor_venda']);
@@ -1144,6 +1181,122 @@ class LeilaoController extends Controller
         $ret = false;
         if($st == 's'){
             $ret = true;
+        }
+        return $ret;
+    }
+    /**
+     * Metodo que responde a routa para adicionar ou remover usuarios como seguidores de um leilao via ajax
+     * @param integer $leilao_id,$user_id, boolern $type true para adicionar false para remover
+     * @return array $ret
+     */
+    public function ger_seguidores(Request $request){
+        $d = $request->all();
+        $ret['exec'] = false;
+        if(isset($d['ac']) && isset($d['leilao_id']) && isset($d['user_id'])){
+            if($d['ac']=='add'){
+                $ret = (new LeilaoController)->seguidor_update($d['leilao_id'],$d['user_id'],true);
+            }
+            if($d['ac']=='remove'){
+                $ret = (new LeilaoController)->seguidor_update($d['leilao_id'],$d['user_id'],false);
+            }
+        }
+        return response()->json($ret);
+    }
+    /**
+     * Metodo para adicionar ou remover usuarios como seguidores de um leilao
+     * @param integer $leilao_id,$user_id, boolern $type true para adicionar false para remover
+     * @return array $ret
+     */
+    public function seguidor_update($leilao_id,$user_id,$type=true){
+        $ret['exec'] = false;
+        $ret['mens'] = false;
+        if($leilao_id && $user_id){
+            //verifica o type de interação
+            $nome_campo = 'seguidor';
+            $mens = false;
+            if($type){
+                //adiciona
+                //uso: $ret = (new LeilaoController)->seguidor_update(60,1,true);
+                $seguidores = Qlib::get_postmeta($leilao_id,$nome_campo,true);
+                if($seguidores){
+                    $seguidores = Qlib::lib_json_array($seguidores);
+                    if(is_array($seguidores)){
+                        if(!isset($seguidores[$user_id])){
+                            $seguidores[$user_id] = ['seguidor'=>$user_id,'data'=>Qlib::dataLocal()];
+                            $ret['exec'] = Qlib::update_postmeta($leilao_id,$nome_campo,Qlib::lib_array_json($seguidores));
+                        }
+                    }
+                }else{
+                    $ret['exec'] = Qlib::update_postmeta($leilao_id,$nome_campo,Qlib::lib_array_json([
+                        $user_id=>['seguidor'=>$user_id,'data'=>Qlib::dataLocal()]
+                    ]));
+                }
+                if($ret['exec']){
+                    $mens = 'Seguidor <b>adicionado</b> com sucesso!!';
+                }
+            }else{
+                //remove
+                //uso: $ret = (new LeilaoController)->seguidor_update(60,1,false);
+                $seguidores = Qlib::get_postmeta($leilao_id,$nome_campo,true);
+                if($seguidores){
+                    $seguidores = Qlib::lib_json_array($seguidores);
+                    // $seguidores[$user_id] = ['seguidor'=>$user_id,'data'=>Qlib::dataLocal()];
+                    if(is_array($seguidores)){
+                        unset($seguidores[$user_id]);
+                        $ret['exec'] = Qlib::update_postmeta($leilao_id,$nome_campo,Qlib::lib_array_json($seguidores));
+                    }
+                }
+                if($ret['exec']){
+                    $mens = 'Seguidor <b>removido</b> com sucesso!!';
+                }
+            }
+            $seguidores = Qlib::get_postmeta($leilao_id,$nome_campo,true);
+            $arr = Qlib::lib_json_array($seguidores);
+            if($ret['exec'] && $mens){
+                $ret['mens'] = Qlib::formatMensagemInfo($mens,'success');
+            }
+            if(Qlib::isAdmin()){
+                $ret['seguidores'] = $arr;
+            }
+
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para verificar se um usuario está seguindo um leilao
+     * @param int $leilao_id, $user_id
+     * @return boolean true|false
+     */
+    public function is_liked($leilao_id,$user_id){
+        $nome_campo = 'seguidor';
+        $ret = false;
+        if($leilao_id && $user_id){
+            $seguidores = Qlib::get_postmeta($leilao_id,$nome_campo,true);
+            if($seguidores){
+                $seguidores = Qlib::lib_json_array($seguidores);
+                if(is_array($seguidores)){
+                    if(isset($seguidores[$user_id])){
+                        $ret = true;
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para contar os seguidores de um leilão
+     * @param int $leilao_id
+     * @return int
+     */
+    public function total_seguidores($leilao_id){
+        $nome_campo = 'seguidor';
+        $ret = 0;
+        $seguidores = Qlib::get_postmeta($leilao_id,$nome_campo,true);
+        if($seguidores){
+            $seguidores = Qlib::lib_json_array($seguidores);
+            if(is_array($seguidores)){
+                $ret = count($seguidores);
+            }
         }
         return $ret;
     }
