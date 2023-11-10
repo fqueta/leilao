@@ -1,6 +1,5 @@
 @php
     global $post,$menus;
-    // dd($post,$menus);
 @endphp
 <!-- ======= Header ======= -->
 <header id="header" class="fixed-top d-flex align-items-center header-transparent">
@@ -17,7 +16,7 @@
             @if(is_array($menus))
                 @foreach ($menus as $km=>$vm )
                     @php
-                        $sl = $post->post_name;
+                        $sl = @$post->post_name;
                         $active = false;
                         if($sl==$vm['url']){
                             $active = 'active';

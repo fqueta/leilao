@@ -5,7 +5,7 @@
     $seg2 = request()->segment(2); //link da página em questão
     $slug = isset($dados['post_name']) ? $dados['post_name'] : $seg1;
     $slug2 = isset($dados['slug2']) ? $dados['slug2'] : $seg2;
-    $title = isset($dados['post_title']) ? $dados['post_namtitle'] : false;
+    $title = isset($dados['post_title']) ? $dados['post_title'] : false;
     $main = (new App\Http\Controllers\siteController)->get_main_post($post_id);
 @endphp
 @extends('site.layout.app')

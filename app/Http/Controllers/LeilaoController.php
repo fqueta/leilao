@@ -1321,7 +1321,10 @@ class LeilaoController extends Controller
         $this->middleware('auth');
         $user_id = Auth::id();
         $seguindo = $this->list_seguindo($user_id);
-        $dados_pg = Post::where('ID','=',$user_id)->get()->toArray();
+        global $post;
+        // dd($post);
+        $dados_pg = $post;
+        // $dados_pg = Post::where('ID','=',$user_id)->get()->toArray();
         return view('site.leiloes.list_seguindo',['seguindo' => $seguindo,'dados_pg'=>$dados_pg]);
     }
 }

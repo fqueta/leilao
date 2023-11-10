@@ -25,13 +25,13 @@ class siteController extends Controller
         $slug2 = $this->sec2 ? $this->sec2 : false;
         $ret['exec']=false;
         $ret['dados']=false;
+        global $post,$menus;
         if($slug1){
             if($slug1 == 'home'){
                 $url = url('/').'/'.Qlib::get_slug_post_by_id(37);
                 return redirect()->to($url);
             }
             $ds = Post::where('post_name', $slug1)->where('post_status', 'publish')->get();
-            global $post,$menus;
             if(Auth::check()){
                 $menus = menu_site::where('actived','1')->get()->toArray();
             }else{
