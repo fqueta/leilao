@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\menu_site;
 
 class siteController extends Controller
 {
@@ -30,8 +31,15 @@ class siteController extends Controller
                 return redirect()->to($url);
             }
             $ds = Post::where('post_name', $slug1)->where('post_status', 'publish')->get();
+            global $post,$menus;
+            if(Auth::check()){
+                $menus = menu_site::where('actived','1')->get()->toArray();
+            }else{
+                $menus = menu_site::where('permission','=','public')->where('actived','1')->get()->toArray();
+            }
             if($ds->count()){
                 $dados=$ds[0];
+                $post = $dados;
                 if(isset($dados['config']['permission']) && $arr_perm = $dados['config']['permission']){
                     if(is_array($dados['config']['permission'])){
                         if(Auth::check()){
@@ -72,6 +80,9 @@ class siteController extends Controller
                 if($this->sec1==Qlib::get_slug_post_by_id(5)){
                     //obrigado-pela-compra
                     $arr_shortC['agradecimento'] = $pa->agradecimento($mensagem_agradecimento);
+                }elseif($this->sec1=='seguindo'){
+                    //leiloes-publicos
+                    $arr_shortC['leilao_list_seguindo'] = $lc->leilao_list_seguindo($post_id,$dados);
                 }elseif($this->sec1==Qlib::get_slug_post_by_id(37)){
                     //leiloes-publicos
                     $arr_shortC['leiloes_publicos'] = $lc->leiloes_publicos($post_id,$dados);

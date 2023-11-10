@@ -1,3 +1,7 @@
+@php
+    global $post,$menus;
+    // dd($post,$menus);
+@endphp
 <!-- ======= Header ======= -->
 <header id="header" class="fixed-top d-flex align-items-center header-transparent">
     <div class="container d-flex justify-content-between align-items-center">
@@ -10,14 +14,25 @@
 
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a href="https://aeroclubejf.com.br/">Home</a></li>
+            @if(is_array($menus))
+                @foreach ($menus as $km=>$vm )
+                    @php
+                        $sl = $post->post_name;
+                        $active = false;
+                        if($sl==$vm['url']){
+                            $active = 'active';
+                        }
+                    @endphp
+                    <li><a class="{{$active}}" href="{{$vm['url']}}">{{$vm['description']}}</a></li>
+                @endforeach
+          @endif
           {{-- <li><a href="about.html">Sobre nós</a></li> --}}
-          <li><a class="active " href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">Leilões</a></li>
-          @can('is_logado')
+          {{-- <li><a class="active " href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">Leilões</a></li> --}}
+          {{-- @can('is_logado')
             <li><a href="{{url('/seguindo')}}">{{__('Seguindo')}}</a></li>
             <li><a href="{{url('/lances-list')}}">{{__('Meus lances')}}</a></li>
-          @endcan
-          <li><a href="https://aeroclubejf.com.br/contato/">Contato</a></li>
+          @endcan --}}
+          {{-- <li><a href="https://aeroclubejf.com.br/contato/">Contato</a></li> --}}
           @can('is_logado')
           @if (Gate::allows('is_admin2') || Gate::allows('is_customer_logado'))
           <li class="dropdown dropdown-menu-right"><a href="#"><span><i class="fas fa-user-circle fa-2x   "></i></span> <i class="bi bi-chevron-down"></i></a>

@@ -1300,4 +1300,28 @@ class LeilaoController extends Controller
         }
         return $ret;
     }
+    /**
+     * Metodo para listar todos os leilão sendo seguigos pelo usurio
+     */
+    public function list_seguindo($user_id=false){
+        $this->middleware('auth');
+        $user_id = $user_id ? $user_id : Auth::id();
+        $seguindo = Post::select('posts.*')->join('postmeta','posts.id','=','postmeta.post_id')->
+            where('posts.post_type','=','leiloes_adm')->
+            where('postmeta.meta_key','=','seguidor')->
+            where('postmeta.meta_value','LIKE','%"'.$user_id.'"%')->
+            orderBy('posts.ID','Asc')->
+            get()->toArray();
+        return $seguindo;
+    }
+     /**
+     * Metodo para eviar para view todos os leilão sendo seguigos pelo usurio
+     */
+    public function leilao_list_seguindo($post_id_pagina){
+        $this->middleware('auth');
+        $user_id = Auth::id();
+        $seguindo = $this->list_seguindo($user_id);
+        $dados_pg = Post::where('ID','=',$user_id)->get()->toArray();
+        return view('site.leiloes.list_seguindo',['seguindo' => $seguindo,'dados_pg'=>$dados_pg]);
+    }
 }
