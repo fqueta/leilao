@@ -18,11 +18,15 @@
                     @php
                         $sl = @$post->post_name;
                         $active = false;
+                        $comple_url = '/';
                         if($sl==$vm['url']){
                             $active = 'active';
                         }
+                        if($vm['description']=='Home' || $vm['description']=='Contato'){
+                            $comple_url = '';
+                        }
                     @endphp
-                    <li><a class="{{$active}}" href="{{$vm['url']}}">{{$vm['description']}}</a></li>
+                    <li><a class="{{$active}}" href="{{$comple_url.$vm['url']}}">{{$vm['description']}}</a></li>
                 @endforeach
           @endif
           {{-- <li><a href="about.html">Sobre nós</a></li> --}}

@@ -684,6 +684,9 @@ class LeilaoController extends Controller
             $data['link_seguir_label'] = __('Seguir');
         }
         $data['total_seguidores'] = $lc->total_seguidores($data['ID']);
+        $data['link_thumbnail'] = Qlib::get_thumbnail_link($data['ID']);
+        $data['link_leilao'] = $lc->get_link_front($data['ID']);
+
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_venda']) && !empty($data['config']['valor_venda'])){
             //Exibir botão comprar
             $vv = Qlib::precoBanco($data['config']['valor_venda']);
@@ -1311,7 +1314,15 @@ class LeilaoController extends Controller
             where('postmeta.meta_key','=','seguidor')->
             where('postmeta.meta_value','LIKE','%"'.$user_id.'"%')->
             orderBy('posts.ID','Asc')->
-            get()->toArray();
+            get();
+        if($seguindo->count() > 0){
+            $seguindo = $seguindo->toArray();
+            if(is_array($seguindo)){
+                foreach ($seguindo as $ks => $vs) {
+                    $seguindo[$ks] = $this->get_leilao($vs['ID']);
+                }
+            }
+        }
         return $seguindo;
     }
      /**
