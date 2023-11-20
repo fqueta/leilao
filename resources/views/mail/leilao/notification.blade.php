@@ -22,6 +22,18 @@
         @component('mail::button',['url'=>@$user->link_leilao_admin])
             {{__('Editar Leilão')}}
         @endcomponent
+    @elseif ($type=='notific_lance_seguidor')
+        <h1>Olá {{ $user->name }}</h1>
+        @php
+            $msg = App\Qlib\Qlib::qoption('notific_lance_seguidor');
+            $msg = str_replace('{nome_leilao}',$user->nome_leilao,$msg);
+            $msg = str_replace('{link_leilao}',$user->link_leilao,$msg);
+        @endphp
+        <p>{{$msg}}</p>
+        @component('mail::button',['url'=>$user->link_leilao])
+        Acompanhar
+        @endcomponent
+        <small>Lembrando que para dar um lance é necessário estar logado!</small>
 
     @endif
 @endif

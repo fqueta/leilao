@@ -1,7 +1,20 @@
 @php
-    global $post,$menus;
+    global $post,$menus,$notification;
 @endphp
 <!-- ======= Header ======= -->
+<style>
+    .dropdown-menu-end1{
+        left: auto !important;
+        right: 0px;
+    }
+    .cx-notification{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .w-10{
+        width: 10%;
+    }
+</style>
 <header id="header" class="fixed-top d-flex align-items-center header-transparent">
     <div class="container d-flex justify-content-between align-items-center">
 
@@ -39,7 +52,7 @@
           @can('is_logado')
           @if (Gate::allows('is_admin2') || Gate::allows('is_customer_logado'))
           <li class="dropdown dropdown-menu-right"><a href="#"><span><i class="fas fa-user-circle fa-2x   "></i></span> <i class="bi bi-chevron-down"></i></a>
-            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right show">
+            <ul class="dropdown-menu dropdown-menu-left">
             @can('is_admin2')
                 <li><a href="/admin">Painel Admin</a></li>
             @endcan
@@ -78,13 +91,45 @@
             </form>
           </li>
           @endif
-            <li><a href="/cart"><i class="fas fa-cart-arrow-down"></i></a></li>
+            {{-- <li><a href="/cart"><i class="fas fa-cart-arrow-down"></i></a></li> --}}
 
           @else
             <li><a class="btn btn-default btn-flat float-right" href="{{route('login')}}"><i class="fas fa-user"></i>&nbsp;Login</a></li>
             <li><a class="btn btn-default btn-flat float-right" href="{{url('/user/create')}}"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li>
           @endcan
           <li><a class="btn btn-default btn-flat float-right" href="#"><i class="fas fa-search"></i></a></li>
+          @can('is_logado')
+            <li class="nav-item me-3 me-lg-0">
+                <div class="dropdown">
+                    <a class="me-3 dropdown-toggle hidden-arrow" href="#" id="notification"
+                    role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell text-white"></i>
+                        <span class="badge rounded-pill badge-notification bg-danger">1</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end1" style="width: 350px" aria-labelledby="notification">
+                        <li class="w-100 cx-notification">
+                            @include('site.layout.top_notification')
+                        </li>
+                        {{-- <li>
+                            <a class="dropdown-item" href="#">Another news</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </li> --}}
+                    </ul>
+                </div>
+            </li>
+            {{-- <li class="nav-item">
+                <a href="#" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Right-aligned menu example
+                </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" type="a">Action</a></li>
+                    <li><a class="dropdown-item" type="a">Another action</a></li>
+                    <li><a class="dropdown-item" type="a">Something else here</a></li>
+                  </ul>
+            </li> --}}
+          @endcan
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->

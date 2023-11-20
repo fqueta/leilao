@@ -939,11 +939,11 @@ class LeilaoController extends Controller
                     return $ret;
                 }
                 $link_pagamento = isset($config['link_pagamento']) ? $config['link_pagamento'] : $this->get_link_pagamento($lance_id);
-                $dl = lance::Find($lance_id); //dados do lance.
+                $dl = isset($config['dados_lance'])?$config['dados_lance']: lance::Find($lance_id); //dados do lance.
                 if($dl){
                     $leilao_id = isset($dl['leilao_id']) ? $dl['leilao_id'] : false;
                     $id_user = isset($dl['author']) ? $dl['author'] : false;
-                    $nome_leilao = isset($config['nome_lei$nome_leilao']) ? $config['nome_lei$nome_leilao'] : Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+                    $nome_leilao = isset($config['nome_leilao']) ? $config['nome_leilao'] : Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
                     $type = isset($config['type']) ? $config['type'] : false;
                     $d_user = isset($config['d_user']) ? $config['d_user'] : User::Find($id_user);
                     if(isset($d_user['email']) && !empty($d_user['email'])){
@@ -1304,6 +1304,27 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
+     * Metodo para listar todos os seguidores de um leilao
+     */
+    public function get_seguidores($leilao_id){
+        //uso $seguidores = (new LeilaoController()->get_seguidores($leilao_id);
+        $nome_campo = 'seguidor';
+        $ret = [];
+        $seguidores = Qlib::get_postmeta($leilao_id,$nome_campo,true);
+        if($seguidores){
+            $seguidores = Qlib::lib_json_array($seguidores);
+            if(is_array($seguidores)){
+                foreach ($seguidores as $ks => $vs) {
+                    $ret[$ks] = User::Find($ks);
+                    if($ret[$ks]){
+                        $ret[$ks]['seguindo_desde'] = $vs['data'];
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
+     /**
      * Metodo para listar todos os leilão sendo seguigos pelo usurio
      */
     public function list_seguindo($user_id=false){
@@ -1337,5 +1358,11 @@ class LeilaoController extends Controller
         $dados_pg = $post;
         // $dados_pg = Post::where('ID','=',$user_id)->get()->toArray();
         return view('site.leiloes.list_seguindo',['seguindo' => $seguindo,'dados_pg'=>$dados_pg]);
+    }
+    /**
+     * Metodo mostrar o nome de um leilao apartir de um id
+     */
+    public function nome_leilao($leilao_id){
+        return Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
     }
 }

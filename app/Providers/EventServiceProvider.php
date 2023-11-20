@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\lanceLeilao;
+use App\Events\LanceLeilaoEvent;
+use App\Listeners\EnviarEmailSeguidores;
+use App\Listeners\NotificSuperados;
+use App\Listeners\notificUserAdd;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -18,10 +23,15 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            notificUserAdd::class,
         ],
         Verified::class => [
             LogVerifiedUser::class,
         ],
+        LanceLeilaoEvent::class =>[
+            NotificSuperados::class,
+            EnviarEmailSeguidores::class,
+        ]
     ];
 
 

@@ -69,7 +69,8 @@ class TesteController extends Controller
     //     'desconto'=>true
     // ]);
         // $ret = (new LeilaoController)->seguidor_update(60,1,true);
-        $ret = (new LeilaoController)->is_liked(60,1);
+        // $ret = (new LeilaoController())->get_seguidores(66);
+        $ret = (new LeilaoController())->nome_leilao(66);
         // $ret = Qlib::get_postmeta($post_id,'pago');
         // $ret = (new PaymentController) -> get_info_pagamento($post_id);
         return $ret;

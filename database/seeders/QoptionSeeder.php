@@ -86,6 +86,11 @@ class QoptionSeeder extends Seeder
                     'estado'=>'MG',
                 ]),
             ],
+            [
+                'nome'=>'Notificação de lance para seguidor',
+                'url'=>'notific_lance_seguidor',
+                'valor'=>'O leilão <b>{nome_leilao}</b> recebeu um lance ',
+            ],
         ]);
     }
 }

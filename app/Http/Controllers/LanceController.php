@@ -308,7 +308,7 @@ class LanceController extends Controller
             if($s->id && isset($d['leilao_id']) && ($leilao_id = $d['leilao_id'])){
                 $ret['exec'] = true;
                 $ret['id'] = $s->id;
-                $marca_lance_superado = $this->marca_lance_superado($leilao_id);
+                // $marca_lance_superado = $this->marca_lance_superado($leilao_id);
                 //ativa os lances automaticos
                 if($autolance)
                     $ret['auto_lance'] = $this->lance_automatico($leilao_id);

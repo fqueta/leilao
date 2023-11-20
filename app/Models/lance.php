@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\lanceLeilao;
+use App\Events\LanceLeilaoEvent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,5 +26,8 @@ class lance extends Model
         'reg_excluido',
         'deletado',
         'reg_deletado',
+    ];
+    protected $dispatchesEvents = [
+        'created' => LanceLeilaoEvent::class
     ];
 }

@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use App\Notifications\notificaNewUser;
+use Illuminate\Support\Facades\Notification;
 
 class UserController extends Controller
 {
@@ -542,6 +544,11 @@ class UserController extends Controller
         ];
         // dd($ret);
         if($ajax=='s'){
+            //Envia notificação de cadastro
+            if(isset($salvar->id)){
+                $user_cad = User::Find($salvar->id);
+                Notification::send($user_cad,new notificaNewUser($user_cad));
+            }
             //REGISTRAR EVENTOS
            if($origem=='admin'){
                 //requisição realizada no painel de administrador
@@ -560,6 +567,7 @@ class UserController extends Controller
                     }
                     // $ret['return'] = route($route).'?idCad='.$salvar->id;
                     // $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+
                 }else{
 
                 }

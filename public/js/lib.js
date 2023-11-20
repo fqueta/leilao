@@ -2741,6 +2741,9 @@ function seguir_leilao(leilao_id,user_id,ac){
             if(res.exec){
                 window.location.reload();
             }
+            if(res.code_mens=='enc'){
+                window.location.reload();
+            }
         },function(err){
             $('#preload').fadeOut("fast");
             console.log(err);
