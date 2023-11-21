@@ -370,6 +370,25 @@ class Qlib
         $ret = DB::select("SELECT DISTINCT $campo As vl  FROM $tab $order");
         return $ret;
     }
+    static function formatMensagem0($mess='',$cssMes='',$event=false,$time=4000){
+        if(self::is_frontend()){
+            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable fade show\" role=\"alert\">
+                <button class=\"btn-close\" style=\"float:right\" type=\"button\" data-bs-dismiss=\"alert\" $event aria-hidden=\"true\"></button>
+                <i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)."
+            </div>";
+		}else{
+            $mensagem = "<div class=\"alert alert-$cssMes alert-dismissable\" role=\"alert\">
+            <button style=\"float:right\" class=\"close\" type=\"button\" data-dismiss=\"alert\" $event aria-hidden=\"true\">×</button>
+            <i class=\"fa fa-info-circle\"></i>&nbsp;".__($mess)."
+            </div>";
+        }
+        $mensagem .= "<script>
+                        setTimeout(function(){
+                            $('.alert').hide('slow');
+                        }, \"".$time."\");
+                    </script>";
+        return $mensagem;
+	}
     static function formatMensagem($config=false){
         if($config){
             $config['mens'] = isset($config['mens']) ? $config['mens'] : false;

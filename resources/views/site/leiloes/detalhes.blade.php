@@ -87,7 +87,10 @@
                             {{-- <div class="col-12 mens">
                             </div> --}}
                             <div class="col-6">
-
+                                <i title="{{__('Visualizações')}}" style="position: relative;top: 0px" class="fa fa-eye"></i>
+                                @if (isset($dados['total_views']))
+                                    <span class="tot-count tot-count-view">{{$dados['total_views']}}</span>
+                                @endif
                             </div>
                             @if(isset($dados['link_seguir']) && $dados['link_seguir'])
                                 <div class="col-6 text-end">

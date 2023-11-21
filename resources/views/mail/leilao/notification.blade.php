@@ -29,7 +29,7 @@
             $msg = str_replace('{nome_leilao}',$user->nome_leilao,$msg);
             $msg = str_replace('{link_leilao}',$user->link_leilao,$msg);
         @endphp
-        <p>{{$msg}}</p>
+        <p>{!!$msg!!}</p>
         @component('mail::button',['url'=>$user->link_leilao])
         Acompanhar
         @endcomponent

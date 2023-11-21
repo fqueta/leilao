@@ -165,6 +165,11 @@ form .gray * { color: gray; }
     border-radius: 5px;
     cursor: default;
 }
+.tot-count-view {
+    border: 1px solid #a0c7ff;
+    padding: 0 5px;
+    border-radius: 3px;
+}
 @keyframes lds-dual-ring {
     0% {
       transform: rotate(0deg);

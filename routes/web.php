@@ -216,7 +216,11 @@ Route::resource('lances','\App\Http\Controllers\LanceController',['parameters' =
 ]]);
 Route::prefix('ajax')->group(function(){
     Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
-    Route::post('/ger-seguidores',[App\Http\Controllers\LeilaoController::class,'ger_seguidores']);
+    Route::post('/notification',[App\Http\Controllers\NotificationController::class,'receive_ajax']);
+});
+Route::prefix('notification')->group(function(){
+    Route::get('/index',[App\Http\Controllers\NotificationController::class,'index'])->name('notification.index');
+    // Route::post('/notification',[App\Http\Controllers\NotificationController::class,'receive_ajax']);
 });
 
 //inicio Rotas de verificação

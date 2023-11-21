@@ -104,9 +104,13 @@
                     <a class="me-3 dropdown-toggle hidden-arrow" href="#" id="notification"
                     role="button" data-mdb-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-bell text-white"></i>
-                        <span class="badge rounded-pill badge-notification bg-danger">1</span>
+                        @if(isset($notification['total']) && $notification['total']>0)
+                            <span class="badge rounded-pill badge-notification bg-danger" id="total-notifications">
+                                {{$notification['total']}}
+                            </span>
+                        @endif
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end1" style="width: 350px" aria-labelledby="notification">
+                    <ul class="dropdown-menu dropdown-menu-end1" style="width: 450px" aria-labelledby="notification">
                         <li class="w-100 cx-notification">
                             @include('site.layout.top_notification')
                         </li>

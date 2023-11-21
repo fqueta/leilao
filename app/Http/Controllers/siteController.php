@@ -7,6 +7,7 @@ use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\menu_site;
+use App\Models\User;
 
 class siteController extends Controller
 {
@@ -25,7 +26,22 @@ class siteController extends Controller
         $slug2 = $this->sec2 ? $this->sec2 : false;
         $ret['exec']=false;
         $ret['dados']=false;
-        global $post,$menus;
+        global $post,$menus,$notification;
+        if(Auth::check()){
+            $user = User::find(Auth::id());
+            $notification['all'] = $user->notifications;
+            $notification['unread'] = $user->unreadNotifications;
+            $notification['total'] = $notification['unread']->count();
+            // $arr_notice = [];
+            // $json_notice = @$notification['unread']['data'];
+            // if($json_notice){
+            //     $arr_notice=Qlib::lib_json_array($json_notice);
+            // }
+            // $notification['arr_notice'] = $arr_notice;
+            // if($notification->count()){
+            //     $notification->toArray();
+            // }
+        }
         if($slug1){
             if($slug1 == 'home'){
                 $url = url('/').'/'.Qlib::get_slug_post_by_id(37);

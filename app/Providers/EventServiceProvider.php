@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\lanceLeilao;
 use App\Events\LanceLeilaoEvent;
 use App\Listeners\EnviarEmailSeguidores;
+use App\Listeners\NotificSeguidoresListener;
 use App\Listeners\NotificSuperados;
 use App\Listeners\notificUserAdd;
 use Illuminate\Auth\Events\Registered;
@@ -30,7 +31,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         LanceLeilaoEvent::class =>[
             NotificSuperados::class,
-            EnviarEmailSeguidores::class,
+            NotificSeguidoresListener::class,
         ]
     ];
 

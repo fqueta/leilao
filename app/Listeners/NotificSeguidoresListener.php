@@ -6,14 +6,27 @@ use App\Events\LanceLeilaoEvent;
 use App\Http\Controllers\LeilaoController;
 use App\Models\User;
 use App\Notifications\NotificaLance;
+use App\Qlib\Qlib;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class EnviarEmailSeguidores implements ShouldQueue
+class NotificSeguidoresListener implements ShouldQueue
 {
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
     public function __construct()
     {
         //
     }
+
+    /**
+     * Handle the event.
+     *
+     * @param  object  $event
+     * @return void
+     */
     public function handle(LanceLeilaoEvent $lance)
     {
         $ret = false;
@@ -40,14 +53,13 @@ class EnviarEmailSeguidores implements ShouldQueue
                         if($user!=null){
                             $lance->lance['link'] = $lco->get_link_front($leilao_id);
                             $lance->lance['nome_leilao'] = $lco->nome_leilao($leilao_id);
+                            $lance->lance['link_thumbnail'] = Qlib::get_thumbnail_link($leilao_id);
                             $user->notify(new NotificaLance($user,$lance->lance));
                         }
                     }
                 }
             }
-            //return $lc->marca_lance_superado($leilao_id);
         }
-        // dd($ret);
         return $ret;
     }
 }

@@ -2755,3 +2755,31 @@ function alerta_modal_login_seguir(id){
     alerta5(msg,'modal-login','Login necessário','','','','');
 
 }
+function markAsRead(id){
+    if(id){
+        getAjax({
+            url:'/ajax/notification',
+            type: 'POST',
+            dataType: 'json',
+            csrf: true,
+            data:{
+                id: id,
+                ac: 'markAsRead',
+            }
+        },function(res){
+            $('#preload').fadeOut("fast");
+            try {
+                if(res.exec){
+                    $('#tr-'+id).remove();
+                    $('#total-notifications').html(res.total);
+                }
+                $('.mes').html(res.mens);
+            } catch (error) {
+                console.log(error);
+            }
+        },function(err){
+            $('#preload').fadeOut("fast");
+            console.log(err);
+        });
+    }
+}

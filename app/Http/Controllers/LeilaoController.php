@@ -467,12 +467,9 @@ class LeilaoController extends Controller
             }
             $_GET['filter']['ID'] = $seg2;
             $_GET['filter']['post_status'] = 'publish';
-            // echo $seg2;
-            // $dl = Post::where('ID','=',$seg2)->where('post_status', '=', 'publish')->get();
             $dlt = $this->get_leilao($seg2);
             if(isset($dlt['post_status']) && $dlt['post_status']=='publish'){
                 $dl[0] = $dlt;
-                // dd($dl);
                 //Verificar se estão devidamente publicados
                 if(!isset($dl[0]['config']['status'])){
                     $title = __('Página não encontrada');
@@ -519,16 +516,20 @@ class LeilaoController extends Controller
                 $dl[0]['arr_lances'] = $this->arr_lances($dl[0]['ID'],$dl[0]);
                 $dl[0]['nome_contrato'] = Qlib::buscaValorDb0('posts','token',@$c_l['contrato'],'post_title');
                 $dl[0]['nome_responsavel'] = Qlib::buscaValorDb0('users','id',$dl[0]['post_author'],'name');
+                //Marcar visualização
+                $views = $this->update_views($dl[0]['ID']);
 
                 $ret = [
                     'dados'=>$dl[0],
                     'config'=>[
                         'title'=>$title,
                         'titulo'=>$titulo,
+                        'views'=>$views,
                         'exec'=>true,
                         'mens'=>false,
                     ],
                 ];
+
             }else{
                 $title = __('Página não encontrada');
                 $titulo = $title;
@@ -686,7 +687,7 @@ class LeilaoController extends Controller
         $data['total_seguidores'] = $lc->total_seguidores($data['ID']);
         $data['link_thumbnail'] = Qlib::get_thumbnail_link($data['ID']);
         $data['link_leilao'] = $lc->get_link_front($data['ID']);
-
+        $data['total_views'] = $lc->get_total_views($data['ID']);
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_venda']) && !empty($data['config']['valor_venda'])){
             //Exibir botão comprar
             $vv = Qlib::precoBanco($data['config']['valor_venda']);
@@ -1364,5 +1365,21 @@ class LeilaoController extends Controller
      */
     public function nome_leilao($leilao_id){
         return Qlib::buscaValorDb0('posts','id',$leilao_id,'post_title');
+    }
+    /**
+     * Metodo para totalizar visualizações
+     */
+    public function get_total_views($leilao_id){
+        return Qlib::get_postmeta($leilao_id,'views',true)?Qlib::get_postmeta($leilao_id,'views',true):0;
+    }
+    /**
+     * Metodo para atualizar visualizações
+     */
+    public function update_views($leilao_id){
+        $total_views = $this->get_total_views($leilao_id);
+        $total_views = $total_views?$total_views:0;
+        $total_views++;
+        $ret = Qlib::update_postmeta($leilao_id,'views',$total_views);
+        return $ret;
     }
 }
