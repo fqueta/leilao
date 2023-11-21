@@ -219,6 +219,7 @@ class PostController extends Controller
         }else{
             $ac = 'alt';
         }
+        // dd($post_id,$data);
         if(Qlib::is_frontend()){
             if($seg1=='leilao-create'){
                 $ac = 'cad';
@@ -229,9 +230,10 @@ class PostController extends Controller
             $hidden_editor = 'hidden';
         }
         $user = Auth::user();
-        if($post_id && !$data){
-            // $data = Post::Find($post_id);
-            $data = Post::where('ID','=',$post_id)->get()->toArray();// Post::Find($leilao_id);
+        $lc = new LeilaoController;
+        if($post_id){
+            // $data = Post::where('ID','=',$post_id)->get()->toArray();// Post::Find($leilao_id);
+            $data = $lc->get_leilao($post_id);// Post::Find($leilao_id);
             if(isset($data[0])){
                 $data = $data[0];
             }
@@ -251,7 +253,6 @@ class PostController extends Controller
             'edicao' => 'Em edição',
             'publicado' => 'Publicado',
         ];
-        $lc = new LeilaoController;
         $event_status = 'required';
         $arr_itens=[];
         if($ac=='cad'){
@@ -387,7 +388,6 @@ class PostController extends Controller
             ],
             // 'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..')],
-            // 'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
         ];
         if(Qlib::is_backend()){
             $ret['ID']['active'] = true;
@@ -439,6 +439,7 @@ class PostController extends Controller
                 $script .= '<b class="pt-1">'.__('Contrato escolhido').':</b> <span id="tk-contrato">'.$nome_contrato.'</span><br><button type="button" id="btn-remove-contrato" class="btn btn-outline-danger" onclick="remove_contrato_leilao();">'.__('Remover Contrato').'</button> '.$btn_edit_contrato;
                 $ret['callback_contrato'] = ['label'=>'calback_leilao','active'=>false,'tam'=>'12','script'=>$script,'type'=>'html_script','class_div'=>'mt-2 mb-2'];
                 $ret['config[contrato]'] = ['label'=>'token_contrato','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][contrato','value'=>$ctt];
+                $ret['resumo'] = ['label'=>'Resumo','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','script'=>view('admin.leilao.resumo',['d'=>$data]),'script_show'=>view('admin.leilao.resumo',['d'=>$data]),'tam'=>'12'];
 
             }
             // if(isset($data['config']['itens']) && !empty($data['config']['itens'])){

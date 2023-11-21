@@ -1375,7 +1375,9 @@ class LeilaoController extends Controller
     /**
      * Metodo para atualizar visualizações
      */
-    public function update_views($leilao_id){
+    public function update_views($leilao_id,$dl=false){
+
+        // dd($dl);
         $total_views = $this->get_total_views($leilao_id);
         $total_views = $total_views?$total_views:0;
         $total_views++;
