@@ -490,7 +490,7 @@ function alerta5(msg,id,title,tam,fechar,time,fecha){
     if(fechar)
         fechar = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>';
     var html = '<div class="modal fade" id="'+id+'" tabindex="-1" data-bs-backdrop="static">'+
-    '<div class="modal-dialog">'+
+    '<div class="modal-dialog '+tam+'">'+
       '<div class="modal-content">'+
         '<div class="modal-header">'+
           '<h5 class="modal-title">'+title+'</h5>'+

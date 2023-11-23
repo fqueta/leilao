@@ -130,7 +130,7 @@ class LeilaoController extends Controller
             'routa'=>$route,
             'view'=>$view,
             'i'=>0,
-            'ganhos'=>self::lista_leilao_terminado(Auth::id()),
+            'ganhos'=>$this->lista_leilao_terminado(Auth::id()),
             // 'ganhos'=>self::list_winner(Auth::id()),
         ];
         // dd($ret);
@@ -1011,6 +1011,7 @@ class LeilaoController extends Controller
                             $cal['finalizado'][$key]['id_leilao'] = $value['ID'];
                             // $cal['finalizado'][$key]['ultimo'] = $value['ID'];
                             // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
+                            $cal['finalizado'][$key]['pago'] = Qlib::get_postmeta($value['ID'],'pago',true);
                             $cal['finalizado'][$key]['ul'] = $ultimo_lance;
                             $cal['finalizado'][$key]['exec'] = true;
                             $cal['finalizado'][$key]['df'] = $df;
@@ -1069,10 +1070,10 @@ class LeilaoController extends Controller
     }
     /**
      * Metodo para listar todos os leilãos finalizados
-     * @param integer $user_id se for verdadeiro e estiver no front lista todos os leiloes ganhos do usuario
+     * @param integer $user_id se for verdadeiro e estiver no front lista todos os leiloes ganhos do usuario,$status_pago=filtar os que tem status pago
      * @return array $ret
      */
-    public function lista_leilao_terminado($user_id=false){
+    public function lista_leilao_terminado($user_id=false,$status_pago=false){
         $ret = false;
         $cal = false;
         $meta_status_pagamento = Qlib::qoption('meta_status_pagamento')?Qlib::qoption('meta_status_pagamento'):'pago';
@@ -1087,49 +1088,94 @@ class LeilaoController extends Controller
             $arr_l = $list->toArray();
             foreach ($arr_l as $key => $value) {
                 $df = $this->info_termino($value['ID'],$value);
+                $leilao_id = $value['ID'];
                 if(isset($df['termino']) && $df['termino']){
                     $venc = $this->get_lance_vencedor($value['ID'],false,'ultimo_lance');
                     $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:false;
+                    $sp = $this->is_paid($leilao_id,'string');
+                    if($status_pago){
+                        // dd($sp,$status_pago);
+                        if($status_pago==$sp){
+                            if($user_id){
+                                if(isset($venc['author']) && $venc['author']==$user_id){
+                                    // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
+                                    $ret[$key] = $value;
+                                    $ret[$key]['venc'] = $venc;
+                                    $ret[$key]['term'] = $df;
+                                    $link_leilao_front = $this->get_link_front($leilao_id);
+                                    // if($sp=='s'){
+                                    //     $situacao_pagamento = '<span class="text-success">Pago</span>';
+                                    // }elseif($sp=='a'){
+                                    //     $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
+                                    // }else{
+                                    //     $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
+                                    // }
+                                    $situacao_pagamento = $pc->get_status_payment($leilao_id);
+                                    $ret[$key]['status_pago'] = $sp;
+                                    $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
+                                    $ret[$key]['link_leilao_front'] = $link_leilao_front;
+                                    $ret[$key]['pago'] = $this->is_paid($leilao_id);
+                                    $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
+                                }
+                            }else{
+                                // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
+                                $leilao_id = $value['ID'];
+                                $ret[$key] = $value;
+                                $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:$venc;
+                                $ret[$key]['venc'] = $venc;
+                                $ret[$key]['term'] = $df;
 
-                    if($user_id){
-                        if(isset($venc['author']) && $venc['author']==$user_id){
+                                $link_leilao_front = $this->get_link_front($leilao_id);
+                                $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
+                                $situacao_pagamento = $pc->get_status_payment($leilao_id);
+                                $ret[$key]['status_pago'] = $sp;
+                                $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
+                                $ret[$key]['link_leilao_front'] = $link_leilao_front;
+                                $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
+                                // dd($ret);
+                            }
+                        }
+                    }else{
+                        if($user_id){
+                            if(isset($venc['author']) && $venc['author']==$user_id){
+                                // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
+                                $ret[$key] = $value;
+                                $ret[$key]['venc'] = $venc;
+                                $ret[$key]['term'] = $df;
+                                $link_leilao_front = $this->get_link_front($leilao_id);
+                                // if($sp=='s'){
+                                //     $situacao_pagamento = '<span class="text-success">Pago</span>';
+                                // }elseif($sp=='a'){
+                                //     $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
+                                // }else{
+                                //     $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
+                                // }
+                                $situacao_pagamento = $pc->get_status_payment($leilao_id);
+                                $ret[$key]['status_pago'] = $sp;
+                                $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
+                                $ret[$key]['link_leilao_front'] = $link_leilao_front;
+                                $ret[$key]['pago'] = $this->is_paid($leilao_id);
+                                $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
+                            }
+                        }else{
                             // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
                             $leilao_id = $value['ID'];
                             $ret[$key] = $value;
+                            $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:$venc;
                             $ret[$key]['venc'] = $venc;
                             $ret[$key]['term'] = $df;
-                            $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
+
                             $link_leilao_front = $this->get_link_front($leilao_id);
-                            // if($sp=='s'){
-                            //     $situacao_pagamento = '<span class="text-success">Pago</span>';
-                            // }elseif($sp=='a'){
-                            //     $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
-                            // }else{
-                            //     $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
-                            // }
+                            $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
                             $situacao_pagamento = $pc->get_status_payment($leilao_id);
                             $ret[$key]['status_pago'] = $sp;
                             $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
                             $ret[$key]['link_leilao_front'] = $link_leilao_front;
                             $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
+                            // dd($ret);
                         }
-                    }else{
-                        // $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
-                        $leilao_id = $value['ID'];
-                        $ret[$key] = $value;
-                        $venc = isset($venc['ultimo_lance'])?$venc['ultimo_lance']:$venc;
-                        $ret[$key]['venc'] = $venc;
-                        $ret[$key]['term'] = $df;
-
-                        $link_leilao_front = $this->get_link_front($leilao_id);
-                        $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
-                        $situacao_pagamento = $pc->get_status_payment($leilao_id);
-                        $ret[$key]['status_pago'] = $sp;
-                        $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
-                        $ret[$key]['link_leilao_front'] = $link_leilao_front;
-                        $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
-                        // dd($ret);
                     }
+
 
                 }
             }
@@ -1179,12 +1225,19 @@ class LeilaoController extends Controller
      * @param $leilao_id
      * @return boolean true || false
      */
-    public function is_paid($leilao_id) {
+    public function is_paid($leilao_id,$type='boolean') {
         $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
         $st = Qlib::get_postmeta($leilao_id,$meta_pago,true);
         $ret = false;
-        if($st == 's'){
-            $ret = true;
+        if($type=='string'){
+            if(!$st){
+                $st='n';
+            }
+            return $st;
+        }else{
+            if($st == 's'){
+                $ret = true;
+            }
         }
         return $ret;
     }

@@ -218,6 +218,7 @@ Route::prefix('ajax')->group(function(){
     Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
     Route::post('/ger-seguidores',[App\Http\Controllers\LeilaoController::class,'ger_seguidores']);
     Route::post('/notification',[App\Http\Controllers\NotificationController::class,'receive_ajax']);
+    Route::post('/session',[App\Http\Controllers\admin\sessionController::class,'sessionManagerAction']);
 });
 Route::prefix('notification')->group(function(){
     Route::get('/index',[App\Http\Controllers\NotificationController::class,'index'])->name('notification.index');

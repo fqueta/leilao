@@ -70,9 +70,12 @@ class TesteController extends Controller
     // ]);
         // $ret = (new LeilaoController)->seguidor_update(60,1,true);
         // $ret = (new LeilaoController())->get_seguidores(66);
-        $ret = (new LeilaoController())->nome_leilao(66);
+        // $ret = (new LeilaoController())->list_winner(Auth::id());
+        $ret = (new LeilaoController())->lista_leilao_terminado(Auth::id());
         // $ret = Qlib::get_postmeta($post_id,'pago');
         // $ret = (new PaymentController) -> get_info_pagamento($post_id);
+        session()->forget('ganhador');
+        dd(session()->get('ganhador'));
         return $ret;
         // dd(Auth::user());
         // $ret = env('APP_NAME');

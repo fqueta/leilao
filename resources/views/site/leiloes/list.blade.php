@@ -24,7 +24,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                             <button id="btn-pesq-jogo" class="btn btn-search" type="submit"><i class="fa fa-search"></i></button>
                         </span>
                     </div>
-                    <div class="" id="div-pesquisa-multi" style="display: none;">
+                    {{-- <div class="" id="div-pesquisa-multi" style="display: none;">
                         <div class="row" id="row-mais-filtros">
                             <div class="col-12 col-md-2">
                                 <label class="">de</label>
@@ -97,7 +97,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                                 <button type="submit" class="btn btn-primary btn-labeled btn-block fa fa-refresh">Atualizar</button>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <div>
                         {{-- <a href="#" class="btn pesquisa-multi mar-top" data-target-on-focus="div-pesquisa-multi">Ver Filtros</a>
                         <a href="{{url('/leilao-create')}}" class="btn mar-top" data-target-on-focus="div-pesquisa-multi">Ver Todos</a> --}}
@@ -120,56 +120,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                 echo $ret;
             @endphp
         @else
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5>{{__('Leilões Ganhos')}}</h5>
-                </div>
-                <div class="card-body">
-                    @if(isset($ganhos) && is_array($ganhos))
-                        <table class="table table-striped">
-                            <head>
-                                <tr>
-                                    <th>{{__('Leilão')}}</th>
-                                    <th>{{__('Termino')}}</th>
-                                    <th>{{__('Valor')}}</th>
-                                    <th class="text-center">{{__('Status')}}</th>
-                                    <th class="text-end">{{__('Ação')}}</th>
-                                </tr>
-                            </head>
-                            <tbody>
-                                @foreach ( $ganhos as $k=>$v)
-
-                                    <tr>
-                                        <td>{{$v['post_title']}}</td>
-                                        <td>{{@$v['term']['html']}}</td>
-                                        <td>{{App\Qlib\Qlib::valor_moeda(@$v['venc']['valor_lance'])}}</td>
-                                        <td class="text-center">
-                                            @php echo @$v['situacao_pagamento'] @endphp
-                                        </td>
-                                        @if (isset($v['status_pago']) && ($v['status_pago']=='s' || $v['status_pago']=='a'))
-                                            <td class="">
-                                                @php
-                                                    echo (new App\Http\Controllers\PaymentController) -> get_info_pagamento($v['ID'])
-                                                @endphp
-                                            </td>
-                                        @else
-                                            <td class="text-end">
-                                                    @php
-                                                    $acao = '<a href="'.@$v['link_pagamento'].'" class="btn btn-success">'.__('Pagar').'</a>';
-                                                    echo $acao;
-                                                    @endphp
-                                            </td>
-                                        @endif
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @endif
-                </div>
-                {{-- <div class="card-footer text-muted">
-                    Footer
-                </div> --}}
-            </div>
+            @include('site.leiloes.list_leiloes_ganhos')
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">

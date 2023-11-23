@@ -47,7 +47,6 @@ class PaymentController extends Controller
 		// dd($config);
 		// if(isset($config['_token']) && $config['_token']!=session_id()){return false;}
 		// $r = (new integraAsaas)->schemaCustomerAsaas(91);
-		// dd(lib_json_array($r));
 		$ret['exec'] = false;
         $logado = Auth::check();
         if(isset($config['compra']['token']) && !empty($config['compra']['token'])){
@@ -56,7 +55,7 @@ class PaymentController extends Controller
             //o token da compra é importante para associar o resultado do pagamento ao token do leilao
 			//fazer o pagamento e integrar ao gateway
 			$ret = (new AsaasController)->integraCompraAsaas($config);
-		}else{
+        }else{
 			$siga = false;
 			//Verifica se ja está logado
 			if($logado){

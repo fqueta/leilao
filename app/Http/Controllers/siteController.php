@@ -26,9 +26,11 @@ class siteController extends Controller
         $slug2 = $this->sec2 ? $this->sec2 : false;
         $ret['exec']=false;
         $ret['dados']=false;
-        global $post,$menus,$notification;
+        global $post,$menus,$notification,$ganhador;
         if(Auth::check()){
             $user = User::find(Auth::id());
+            $ganhador = (new LeilaoController())->lista_leilao_terminado(Auth::id(),'n');
+            // dd($ganhador);
             $notification['all'] = $user->notifications;
             $notification['unread'] = $user->unreadNotifications;
             $notification['total'] = $notification['unread']->count();
@@ -102,6 +104,10 @@ class siteController extends Controller
                 }elseif($this->sec1==Qlib::get_slug_post_by_id(37)){
                     //leiloes-publicos
                     $arr_shortC['leiloes_publicos'] = $lc->leiloes_publicos($post_id,$dados);
+                }elseif($this->sec1=='payment'){
+                    //leiloes-publicos
+                    $arr_shortC['payment'] = $pa->form($post_id,$dados);
+
                 }else{
                     $arr_shortC = [
                         'form_leilao' => $lc->form_leilao($post_id,$dados),
@@ -111,7 +117,6 @@ class siteController extends Controller
                         // 'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),
                         'form_meu_cadastro' => $uc->form_meu_cadastro($post_id,$dados),
                         'ger_user' => $uc->ger_user($post_id,$dados), //Metodo para gerenciar usuarios no site
-                        'payment' => $pa->form($post_id,$dados),
                         'teste' => 'teste de conteudo do formulario para gadastr',
                     ];
                 }

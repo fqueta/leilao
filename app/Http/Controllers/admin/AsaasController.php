@@ -314,7 +314,11 @@ class AsaasController extends Controller
                         $id_asaas = $dadosCliCad['cad_asaas']['id'];
                     }
                 }
-                // dd($dadosCliCad);
+                if(isset($dadosCliCad['cad_asaas']['errors'][0]['description']) && ($mes=$dadosCliCad['cad_asaas']['errors'][0]['description'])){
+                    $ret['mens'] = Qlib::formatMensagemInfo($mes,'danger');
+                    $ret['cad_asaas']=$dadosCliCad['cad_asaas'];
+                    return $ret;
+                }
                 if($forma_pagamento=='cred_card' && $id_asaas){
                     if(isset($dadosCliCad['exec'])){
                         $confiv['customer'] = isset($confi['customer']) ? $confi['customer'] : $id_asaas; //formato: uniqid
