@@ -854,6 +854,7 @@ class Qlib
     }
     static function verificaCobranca(){
         //$f = new CobrancaController;
+        return false; //desativar por enquanto
         $user = Auth::user();
         $f = new UserController($user);
         $ret = $f->exec();
