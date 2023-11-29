@@ -750,7 +750,7 @@ class LeilaoController extends Controller
         if(!$post && $post_id){
             $post = post::Find($post_id);
         }
-        $ret = url('/').'/admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
+        $ret = config('app.dominio').'admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
         return $ret;
     }
     /**
@@ -759,7 +759,7 @@ class LeilaoController extends Controller
      * @return string $ret
      */
     public function get_link_front($post_id){
-        $ret = asset('/').'leiloes-publicos/'.$post_id;
+        $ret = config('app.dominio').'leiloes-publicos/'.$post_id;
         return $ret;
     }
     /**
@@ -768,7 +768,7 @@ class LeilaoController extends Controller
      * @return string $ret
      */
     public function get_link_admin($post_id){
-        $ret = asset('/').'admin/leiloes_adm/'.$post_id.'/edit';
+        $ret = config('app.dominio').'admin/leiloes_adm/'.$post_id.'/edit';
         return $ret;
     }
     /**
@@ -777,7 +777,7 @@ class LeilaoController extends Controller
      * @return string $ret
      */
     public function get_link($post_id){
-        $ret = asset('/').'leiloes-publicos/'.$post_id;
+        $ret = config('app.dominio').'leiloes-publicos/'.$post_id;
         return $ret;
     }
     /**
@@ -787,7 +787,7 @@ class LeilaoController extends Controller
     public function get_link_pagamento($post_id,$type='01'){
         $type = '-'.$type;
         $token = Qlib::buscaValorDb0('posts','id',$post_id,'token');
-        $ret = asset('/').'payment/'.$token.$type;
+        $ret = config('app.dominio').'payment/'.$token.$type;
         return $ret;
     }
     /**

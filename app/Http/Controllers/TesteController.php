@@ -78,8 +78,9 @@ class TesteController extends Controller
         // session(['user'=>'s']);
         // $request->session()->put('close_popup','s');
         // $request->session()->keep('close_popup');
-        $value = $request->session()->all();
-        dd($value);
+        // $value = $request->session()->all();
+        // dd($value);
+        echo (new LeilaoController)->get_link_edit_admin(71);
         // $ret = Qlib::get_postmeta($post_id,'pago');
         // $ret = (new PaymentController) -> get_info_pagamento($post_id);
         // session()->forget('ganhador');
@@ -94,6 +95,7 @@ class TesteController extends Controller
         //     'mensagem' => 'Ola mensagem',
         //     // 'link_pagamento' => $link_pagamento,
         // ]);
+        $ret = false;
         return $ret;
         // $up = Qlib::update_postmeta(45,'notifica_termino_leilao','n');
         // $me = Qlib::get_postmeta(36,'notifica_termino_leilao',true);
