@@ -308,7 +308,12 @@ class LanceController extends Controller
             if($s->id && isset($d['leilao_id']) && ($leilao_id = $d['leilao_id'])){
                 $ret['exec'] = true;
                 $ret['id'] = $s->id;
+                $lc = new LeilaoController;
                 // $marca_lance_superado = $this->marca_lance_superado($leilao_id);
+                if(!$lc->is_liked($leilao_id,Auth::id())){
+                    //Se não é seguidor deste leilão incluir ele como seguidor
+                    $ret['add_seguidor'] = $lc->seguidor_update($leilao_id,Auth::id(),true);
+                }
                 //ativa os lances automaticos
                 if($autolance)
                     $ret['auto_lance'] = $this->lance_automatico($leilao_id);
@@ -394,15 +399,7 @@ class LanceController extends Controller
                             $ret['code_mens'] = 'dulance';
                             $ret['mens'] = Qlib::formatMensagemInfo('<b>Sucesso</b> Como você é o autor do último lance, o valor de <b>'.Qlib::valor_moeda($vlar,'R$').'</b> é aceito como reserva para os próximos lances e serão feitos de forma automatica.','success');
                             return $ret;
-                        // }else{
-                        //     $ret['code_mens'] = 'dulance';
-                        //     $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
-                        //     return $ret;
                         }
-                    // }else{
-                    //     $ret['code_mens'] = 'dulance';
-                    //     $ret['mens'] = Qlib::formatMensagemInfo('<b>Erro</b> O seu lance precisa ser vencido antes de dar o próximo lance','danger');
-                    //     return $ret;
                     }
                 }
             }

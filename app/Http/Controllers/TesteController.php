@@ -10,10 +10,12 @@ use App\Models\Familia;
 use App\Models\Post;
 use App\Models\User;
 use App\Qlib\Qlib;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use stdClass;
 
 class TesteController extends Controller
@@ -24,7 +26,7 @@ class TesteController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function index()
+    public function index(Request $request)
     {
 
         // echo (int)(Post::max('menu_order'))+1;
@@ -72,12 +74,17 @@ class TesteController extends Controller
         // $ret = (new LeilaoController())->get_seguidores(66);
         // $ret = (new LeilaoController())->list_winner(Auth::id());
         // $ret = (new LeilaoController())->lista_leilao_terminado(Auth::id());
-        $ret = (new LeilaoController())->list_alert_winners();
+        // $ret = (new LeilaoController())->list_alert_winners();
+        // session(['user'=>'s']);
+        // $request->session()->put('close_popup','s');
+        // $request->session()->keep('close_popup');
+        $value = $request->session()->all();
+        dd($value);
         // $ret = Qlib::get_postmeta($post_id,'pago');
         // $ret = (new PaymentController) -> get_info_pagamento($post_id);
         // session()->forget('ganhador');
         // dd(session()->get('ganhador'));
-        return $ret;
+        // return $ret;
         // dd(Auth::user());
         // $ret = env('APP_NAME');
         // $ret = (new LeilaoController)->enviar_email([

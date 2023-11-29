@@ -2783,3 +2783,26 @@ function markAsRead(id){
         });
     }
 }
+function close_popup(){
+    sessionStorage.setItem("close_popup", "s");
+    // getAjax({
+    //     url:'/ajax/session-m',
+    //     type: 'POST',
+    //     dataType: 'json',
+    //     csrf: true,
+    //     data:{
+    //         ac: 'put',
+    //         key: 'close_popup',
+    //         value: 's',
+    //     }
+    // },function(res){
+    //     $('#preload').fadeOut("fast");
+    //     $('.mes').html(res.mens);
+    //     if(res.exec){
+    //         $('#info-reserva').remove();
+    //     }
+    // },function(err){
+    //     $('#preload').fadeOut("fast");
+    //     console.log(err);
+    // });
+}
