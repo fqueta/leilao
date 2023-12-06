@@ -149,10 +149,11 @@ class PostController extends Controller
             }
         }
         $post_totais->todos = $fm->count();
-        // dd($post);
         $post_totais->esteMes = $fm->whereYear('post_date', '=', $ano)->whereMonth('post_date','=',$mes)->count();
         $post_totais->ativos = $fm->where('post_status','=','publish')->count();
         $post_totais->inativos = $fm->where('post_status','!=','publish')->count();
+        // dd($post);
+
         $ret['post'] = $post;
         $ret['post_totais'] = $post_totais;
         $ret['arr_titulo'] = $arr_titulo;

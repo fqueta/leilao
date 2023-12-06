@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Permission;
 use App\Models\Post;
 use App\Models\Qoption;
+use Illuminate\Support\Str;
 use DateTime;
 
 class Qlib
@@ -1001,11 +1002,12 @@ class Qlib
     }
     public static function createSlug($str, $delimiter = '-'){
 
-        $unwanted_array = ['ś'=>'s', 'ą' => 'a', 'ã' => 'a', 'ć' => 'c', 'ç' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'õ' => 'o', 'ó' => 'o', 'ź' => 'z', 'ż' => 'z',
-            'Ś'=>'s', 'Ą' => 'a', 'Ć' => 'c', 'Ç' => 'c', 'Ę' => 'e', 'Ł' => 'l', 'Ń' => 'n', 'Ó' => 'o', 'Ź' => 'z', 'Ż' => 'z']; // Polish letters for example
-        $str = strtr( $str, $unwanted_array );
+        // $unwanted_array = ['ś'=>'s', 'ą' => 'a', 'ã' => 'a', 'ć' => 'c', 'ç' => 'c', 'ę' => 'e', 'ł' => 'l', 'ń' => 'n', 'õ' => 'o', 'ó' => 'o', 'ź' => 'z', 'ż' => 'z',
+        //     'Ś'=>'s', 'Ą' => 'a', 'Ć' => 'c', 'Ç' => 'c', 'Ę' => 'e', 'Ł' => 'l', 'Ń' => 'n', 'Ó' => 'o', 'Ź' => 'z', 'Ż' => 'z']; // Polish letters for example
+        // $str = strtr( $str, $unwanted_array );
 
-        $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
+        // $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
+        $slug = Str::slug($str);
         return $slug;
     }
     static function diffDate($d1, $d2, $type='H', $sep='-')

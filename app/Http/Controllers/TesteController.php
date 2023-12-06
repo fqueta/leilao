@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\AsaasController;
 use App\Http\Controllers\admin\CobrancaController;
+use App\Http\Controllers\admin\ContratosController;
 use App\Http\Controllers\admin\PostController;
 use App\Mail\leilao\lancesNotific;
 use App\Models\Familia;
@@ -80,7 +81,7 @@ class TesteController extends Controller
         // $request->session()->keep('close_popup');
         // $value = $request->session()->all();
         // dd($value);
-        echo (new LeilaoController)->get_link_edit_admin(71);
+        // echo (new LeilaoController)->get_link_edit_admin(71);
         // $ret = Qlib::get_postmeta($post_id,'pago');
         // $ret = (new PaymentController) -> get_info_pagamento($post_id);
         // session()->forget('ganhador');
@@ -95,7 +96,11 @@ class TesteController extends Controller
         //     'mensagem' => 'Ola mensagem',
         //     // 'link_pagamento' => $link_pagamento,
         // ]);
-        $ret = false;
+        // $ret['salv'] = (new ContratosController)->update_tokenCRM(5550,[
+        //     'token_externo' => '54233',
+        // ]);
+        // $ret['list'] = (new ContratosController)->get_contratos_crm();
+        $ret = Qlib::createSlug('Fernando Teste programador aatiça ação 200,.52');
         return $ret;
         // $up = Qlib::update_postmeta(45,'notifica_termino_leilao','n');
         // $me = Qlib::get_postmeta(36,'notifica_termino_leilao',true);

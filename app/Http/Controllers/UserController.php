@@ -184,8 +184,9 @@ class UserController extends Controller
             'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3','cp_busca'=>'config][cep'],
             'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'6','cp_busca'=>'config][endereco'],
             'config[numero]'=>['label'=>'Numero','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'numero=cep','tam'=>'2','cp_busca'=>'config][numero'],
-            'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'4','cp_busca'=>'config][complemento'],
-            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'4','cp_busca'=>'config][cidade'],
+            'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'5','cp_busca'=>'config][complemento'],
+            'config[bairro]'=>['label'=>'Bairro','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'bairro=cep','tam'=>'5','cp_busca'=>'config][bairro'],
+            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'10','cp_busca'=>'config][cidade'],
             'config[uf]'=>['label'=>'UF','active'=>false,'js'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','cp_busca'=>'config][uf'],
             'sep2c'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'id_permission'=>[
@@ -486,6 +487,7 @@ class UserController extends Controller
     {
         $dados = $request->all();
         $origem = isset($dados['config']['origem']) ? $dados['config']['origem'] : false;
+        $tag_origem = $origem;
         if($origem=='admin'){
             $validatedData = $request->validate([
                 'name' => ['required','string',new FullName],
@@ -531,6 +533,7 @@ class UserController extends Controller
         //Atualização de meta dados
         $s_me=false;
         if(isset($dados['meta']) && is_array($dados['meta'])){
+            $dados['meta']['tag_origem'] = $tag_origem;
             $s_me = $this->save_meta($salvar->id,$dados['meta']);
         }
         $route = $this->routa.'.index';
