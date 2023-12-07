@@ -7,6 +7,11 @@
         $mensLog = false;
     }
 @endphp
+<style>
+    .custom-select {
+       background: #85b2ff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='black' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px !important;
+    }
+</style>
 <form id="frm-lance" method="post" action="{{route('lances.store')}}">
     @csrf
     <input type="hidden" name="leilao_id" value="{{$dados['ID']}}" />
@@ -15,7 +20,7 @@
     <div class="row mb-3">
         <div class="col-12 mens mb-3"></div>
         <div class="col-6">
-            <select name="valor_lance" class="form-control" id="valor_lance">
+            <select name="valor_lance" class="form-control custom-select" id="valor_lance">
                 @foreach ($dados['arr_lances'] as $kl=>$vl)
                 <option value="{{$vl['valor']}}">{{Number_format($vl['valor'],2,',','.')}}</option>
                 @endforeach

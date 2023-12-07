@@ -97,7 +97,7 @@ class ContratosController extends Controller
 		$ret['exec'] = false;
 		@header("Content-Type: application/json");
 		$json = file_get_contents('php://input');
-    	if(!empty($json)){
+        if(!empty($json)){
         //    $ret = AddContratosJob::dispatch($json);
             $ret =  $this->add_cad($json);
         }
@@ -187,6 +187,7 @@ class ContratosController extends Controller
         $ret['mens'] = 'Erro ao adicionar contrato';
         $id = false;
         $idCad = false;
+        // dd($user_id);
         if($user_id && isset($dados['numero'])){
             // $ret['dc67'] = Post::Find(67);
             $idn = explode('.',$dados['numero']);
@@ -200,7 +201,7 @@ class ContratosController extends Controller
             $dsal = [
                 'post_author' =>0,
                 'post_title' =>$post_title,
-                'post_status' =>'pending',
+                'post_status' =>'publish',//'pending',
                 'post_name' =>$post_name,
                 'post_type' =>'produtos',
                 'post_content' =>isset($dados['descricao'])?$dados['descricao']:'Contrato adicionado pelo CRM ',

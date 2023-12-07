@@ -323,15 +323,19 @@ class LeilaoController extends Controller
     }
     /**
      * Metodo para verificar vinculo de contrato com um leilão
-     * @param string $token
+     * @param string $token //token do contrato
      * @return boolean $ret
      */
-    public function is_linked_leilao($token=false){
+    public function is_linked_leilao($token=false,$exibe_tudo=false){
         $ret = false;
         if($token){
             $d = Post::where('config','LIKE', '%"'.$token.'"%')->where('post_type','=',$this->post_type)->where('post_status','!=','trash')->get()->toArray();
             if($d){
-                $ret = $d[0]['post_title'];
+                if($exibe_tudo){
+                    $ret = $d[0];
+                }else{
+                    $ret = $d[0]['post_title'];
+                }
             }
         }
         return $ret;
@@ -486,6 +490,18 @@ class LeilaoController extends Controller
                     return view('site.leiloes.list',$ret);
                 }
                 if((isset($dl[0]['config']['status']) && isset($dl[0]['post_status'])) && ($dl[0]['config']['status']!='publicado' || $dl[0]['post_status']!='publish')){
+                    $title = __('Página aguardando publicação ou não encontrada');
+                    $titulo = $title;
+                    $ret = [
+                        'dados'=>[],
+                        'config'=>[
+                            'title'=>$title,
+                            'titulo'=>$titulo,
+                            'exec'=>false,
+                            'mens'=>Qlib::formatMensagemInfo('Página em edição ou não encontrada!','danger')
+                        ],
+                    ];
+                    return view('site.leiloes.list',$ret);
 
                 }
                 $title = $dl[0]['post_title'];

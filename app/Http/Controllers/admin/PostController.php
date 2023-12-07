@@ -170,10 +170,20 @@ class PostController extends Controller
         return $ret;
     }
 
-    public function campos_produtos($sec=false){
+    public function campos_produtos($post_id=false){
         $hidden_editor = '';
         if(Qlib::qoption('editor_padrao')=='laraberg'){
             $hidden_editor = 'hidden';
+        }
+        if($post_id){
+            $data = Post::Find($post_id);
+            if($data->count()){
+                $data = $data->toArray();
+                if(isset($data['token'])){
+                    $data['leilao'] = (new LeilaoController)->is_linked_leilao($data['token'],true);
+                    // dd($data);
+                }
+            }
         }
         // $event_divide = 'onkeyup=divideHoras(this)';
         $event_divide = '';
@@ -209,6 +219,16 @@ class PostController extends Controller
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor.' required','tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
             'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
         ];
+        if(isset($data['post_status']) && $data['post_status']=='publish'){
+            $ret['add_leilao'] = [
+                'label'=>__('sessao para adicionar leilão'),
+                'type'=>'html',
+                'active'=>false,
+                'script'=>'admin.leilao.contratos.add_leilao',
+                'script_show'=>'admin.leilao.contratos.add_leilao',
+                'dados'=>$data,
+            ];
+        }
         return $ret;
     }
     public function campos_leilao($post_id=false,$post_type=false,$data=false){
