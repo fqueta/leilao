@@ -54,7 +54,7 @@
                 @endif
             @endif
 
-            <div class="col-12 mb-3">
+            <div class="col-12 mb-3" style="text-align: justify">
                 <small>* {{__('Valores acima do valor mínimo de lance entrarão como valor de reserva para lances automáticos.')}} </small>
             </div>
 
