@@ -217,7 +217,6 @@ class ContratosController extends Controller
             $verf_cad = Post::where('post_name', '=',$post_name)->get();
             if($verf_cad->count() > 0){
                 $verf_cad = $verf_cad->toArray();
-                $ret['user_cad'] = $verf_cad;
                 $idCad = $verf_cad[0]['ID'];
                 $ret['exec'] = Post::where('id',$verf_cad[0]['ID'])->update($dsal);
                 if($ret['exec']){

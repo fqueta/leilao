@@ -274,7 +274,7 @@ class LeilaoController extends Controller
                                     $valor_r = Qlib::precoBanco($post['config']['valor_r']);
                                     $valor_atual = Qlib::precoBanco(@$post['config']['valor_atual']);
                                     $incremento = Qlib::precoBanco(@$post['config']['incremento']);
-                                    $ret['horas'] += $post['config']['horas'];
+                                    @$ret['horas'] += @$post['config']['horas'];
                                     $ret['valor_r'] += $valor_r;
                                     $ret['total_horas'] += $total_horas;
                                     $ret['description'] = $post['post_content'];
