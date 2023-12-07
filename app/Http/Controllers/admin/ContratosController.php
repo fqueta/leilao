@@ -186,6 +186,7 @@ class ContratosController extends Controller
         $ret['exec'] = false;
         $ret['mens'] = 'Erro ao adicionar contrato';
         $id = false;
+        $idCad = false;
         if($user_id && isset($dados['numero'])){
             // $ret['dc67'] = Post::Find(67);
             $idn = explode('.',$dados['numero']);
@@ -202,7 +203,7 @@ class ContratosController extends Controller
                 'post_status' =>'pending',
                 'post_name' =>$post_name,
                 'post_type' =>'produtos',
-                'post_content' =>'Contrato adicionado pelo CRM ',
+                'post_content' =>isset($dados['descricao'])?$dados['descricao']:'Contrato adicionado pelo CRM ',
                 'config' =>[
                     'cliente'=>$user_id,
                     'total_horas'=>$dados['horas'],
@@ -216,6 +217,7 @@ class ContratosController extends Controller
             $verf_cad = Post::where('post_name', '=',$post_name)->get();
             if($verf_cad->count() > 0){
                 $verf_cad = $verf_cad->toArray();
+                $idCad = $verf_cad[0]['id'];
                 $ret['exec'] = Post::where('id',$verf_cad[0]['ID'])->update($dsal);
                 if($ret['exec']){
                     $ret['mens'] = 'Atualizado com sucesso!!';
@@ -223,13 +225,15 @@ class ContratosController extends Controller
             }else{
                 $salvo = Post::create($dsal);
                 if($salvo->id){
+                    $idCad = $salvo->id;
                     $ret['exec'] = true;
                     $ret['mens'] = 'Salvo com sucesso';
                 }
             }
             if($ret['exec'] && isset($dsal['token']) && $id){
+                $idCad = $idCad?$idCad:$dsal['token'];
                 $ret['salv'] = $this->update_tokenCRM($id,[
-                    'token_externo' => $dsal['token'],
+                    'token_externo' => $idCad,
                 ]);
                 // $ret['mens'] = 'Salvo com sucesso';
             }
