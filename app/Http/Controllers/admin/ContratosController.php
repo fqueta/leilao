@@ -98,8 +98,8 @@ class ContratosController extends Controller
 		@header("Content-Type: application/json");
 		$json = file_get_contents('php://input');
     	if(!empty($json)){
-           $ret = AddContratosJob::dispatch($json);
-            // $ret =  $this->add_cad($json);
+        //    $ret = AddContratosJob::dispatch($json);
+            $ret =  $this->add_cad($json);
         }
 		return response()->json($ret);
 	}
