@@ -1230,5 +1230,4 @@ class PostController extends Controller
         }
         return $ret;
     }
-
 }

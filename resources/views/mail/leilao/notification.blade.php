@@ -1,5 +1,5 @@
 @component('mail::message')
-
+{{-- {{dd($user)}} --}}
 @if (isset($type))
     @if($type=='notifica_superado')
         <h1>Olá {{ $user->name }}</h1>

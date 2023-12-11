@@ -99,9 +99,20 @@ class TesteController extends Controller
         // $ret['salv'] = (new ContratosController)->update_tokenCRM(5550,[
         //     'token_externo' => '54233',
         // ]);
+        $dl = (new LeilaoController)->get_leilao(67);
+        $ret = (new LeilaoController)->enviar_email([
+            'type' => 'notifica_finalizado',
+            'leilao_id' => $dl['ID'],
+            'dados_leilao' => $dl,
+            'subject' => 'Leilão aguardando publicação',
+            'mensagem' => 'Ola Agora mais uma vez teste',
+        ]);
+        // $notific = (new LanceController)->notifica_superado($leilao_id,$id_a);
+
+        dd($ret);
         // $ret['list'] = (new ContratosController)->get_contratos_crm();
-        $ret = Qlib::createSlug('Fernando Teste programador aatiça ação 200,.52');
-        return $ret;
+        // $ret = Qlib::createSlug('Fernando Teste programador aatiça ação 200,.52');
+        // return $ret;
         // $up = Qlib::update_postmeta(45,'notifica_termino_leilao','n');
         // $me = Qlib::get_postmeta(36,'notifica_termino_leilao',true);
         // dd($me);
