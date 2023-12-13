@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 use App\Models\Post;
+use App\Notifications\EmailDonoLeilaoNotification;
 use App\Notifications\ganhadorPainelNotification;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
@@ -816,8 +817,24 @@ class LeilaoController extends Controller
             // $dl = Post::Find($post_id) ; //dados do leilao
             $dl = $this->get_leilao($post_id) ; //dados do leilao
         }
-        if($dl && $tipo_responsavel=='ganhador'){
-            $meta_notific = 'notifica_email_termino_leilao';
+        if($dl){
+            $greeting = false;
+            if($tipo_responsavel=='ganhador'){
+                $meta_notific = 'notifica_email_termino_leilao';
+                $mensagem = '
+                <h1>Parabéns {nome} </h1>
+                <p>Seu lance de <b>{valor_lance}</b> para o <b>{nome_leilao}</b> foi vencedor</p>
+                <p>para efetuar o pagamento use o botão abaixo!</p>
+                ';
+            }
+            $meta_notific = 'notifica_termino_leilao_'.$tipo_responsavel;
+            $status_leilao = false;
+            if($tipo_responsavel=='responsavel'){
+                $greeting = 'Olá {nome}';
+                $mensagem = '
+                <p>Seu leilao <b>{nome_leilao}</b> está finalizado.<br>{status_leilao}
+                ';
+            }
             $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
             //Verifica quem é o ganhador
             $dg = $this->get_lance_vencedor($post_id,$dl,'ultimo_lance');//dados do ganhador
@@ -834,11 +851,6 @@ class LeilaoController extends Controller
             }
             if(isset($dg['ultimo_lance']['id']) && ($id_lance=$dg['ultimo_lance']['id']) && $verifica_notific!='s'){
                 $ul = $dg['ultimo_lance'];
-                $mensagem = '
-                <h1>Parabéns {nome} </h1>
-                <p>Seu lance de <b>{valor_lance}</b> para o <b>{nome_leilao}</b> foi vencedor</p>
-                <p>para efetuar o pagamento use o botão abaixo!</p>
-                ';
                 $user_id = $ul['author'];
                 $no = explode(' ',Qlib::buscaValorDb0('users','id',$user_id,'name'));
                 $nome = @$no[0];
@@ -846,11 +858,19 @@ class LeilaoController extends Controller
                 $nome_leilao = $dl['post_title'];//Qlib::buscaValorDb0('posts','id',$ul['leilao_id'],'post_title');
                 $link_pagamento = $this->get_link_pagamento($leilao_id);
                 $valor_lance = $ul['valor_lance'];
+                if($tipo_responsavel=='responsavel'){
+                    $status_leilao = '<p>O contrato foi arrematado por <b>{cliente}</b>, no valor de <b>{valor_lance}</b> estamos aguardando o pagamento</p>';
+                    $status_leilao = str_replace('{cliente}',$nome,$status_leilao);
+                    $status_leilao = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$status_leilao);
+
+                }
+                // $greeting = str_replace('{nome}',$nome,$greeting);
                 $mensagem = str_replace('{nome}',$nome,$mensagem);
                 $mensagem = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$mensagem);
                 $mensagem = str_replace('{nome_leilao}',$nome_leilao,$mensagem);
                 $mensagem = str_replace('{link_pagamento}',$link_pagamento,$mensagem);
-                // dd($mensagem);
+                $mensagem = str_replace('{status_leilao}',$status_leilao,$mensagem);
+
                 $arr_notification = [
                     'type' => 'notifica_finalizado',
                     'lance_id' => $id_lance,
@@ -858,13 +878,24 @@ class LeilaoController extends Controller
                     'link_pagamento' => $link_pagamento,
                     'mensagem' => $mensagem,
                     'dleilao' => $dl,
+                    'tipo_responsavel' => $tipo_responsavel,
+                    'link_leilao' => $dl['link_leilao'],
                 ];
+                if($tipo_responsavel=='responsavel'){
+                    $user_id = isset($dl['config']['cliente'])?$dl['config']['cliente']:false;
+                }
+                if(!$user_id){
+                    $ret['mens'] = 'ID de usuário não inválido';
+                    return $ret;
+                }
                 $user = User::find($user_id);
                 if($user){
-                    $user->notify(new ganhadorPainelNotification($arr_notification));
+                    $ret['notifica_painel'] = $user->notify(new ganhadorPainelNotification($arr_notification));
+                    // $ret['email'] = $user->notify(new EmailDonoLeilaoNotification($arr_notification));
                 }
-                $ret = (new LeilaoController)->enviar_email($arr_notification);
-
+                if($tipo_responsavel=='ganhador'){
+                    $ret = (new LeilaoController)->enviar_email($arr_notification);
+                }
                 // return $ret;
                 if($ret['exec']){
                     $ret['save'] = Qlib::update_postmeta($post_id,$meta_notific,'s');
@@ -1086,13 +1117,13 @@ class LeilaoController extends Controller
                 }
             }
         }
-        if($ret == 'true'){
-            $arquivo = fopen(dirname(__FILE__).'/teste_notific.txt','a');
-            $json = Qlib::lib_array_json($cal);
-			fwrite($arquivo, $json.',');
-        	//Fechamos o arquivo após escrever nele
-    		fclose($arquivo);
-        }
+        // if($ret == 'true'){
+        //     $arquivo = fopen(dirname(__FILE__).'/teste_notific.txt','a');
+        //     $json = Qlib::lib_array_json($cal);
+		// 	fwrite($arquivo, $json.',');
+        // 	//Fechamos o arquivo após escrever nele
+    	// 	fclose($arquivo);
+        // }
         return $ret;
     }
     /**

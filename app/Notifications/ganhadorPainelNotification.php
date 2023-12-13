@@ -31,6 +31,7 @@ class ganhadorPainelNotification extends Notification implements ShouldQueue
     public function via($notifiable)
     {
         return ['database'];
+
     }
 
     /**
@@ -41,23 +42,35 @@ class ganhadorPainelNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+        // dd($this->config);
+        // if(isset($this->config['mensagem'])){
+        //     $message=$this->config['mensagem'];
+        //     return (new MailMessage)
+        //     ->line($message)
+        //     // ->action('Ver leilão', url('/'))
+        //     ->action('Ver leilão', @$this->config['link_leilao'])
+        //     ->line(__('Obrigado por usar nossa plataforma').'!');
+        // }else{
+
+            // return (new MailMessage)
+            // ->line('The introduction to the notification.')
+            // ->action('Ver leilão', url('/'))
+            // ->line('Obrigado por usar nossa plataforma!');
+        // }
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
     public function toArray($notifiable)
     {
         $mens = isset($this->config['mensagem']) ? $this->config['mensagem'] : false;
+
         if($mens && isset($this->config['link_pagamento'])){
-            $mens .= '<div class="text-center"><a href="'.$this->config['link_pagamento'].'" class="btn btn-success text-light d-block mb-1">Pagar agora</a></div>';
+            // if($this->config['tipo_responsavel']=='ganhador'){
+            //     $mens .= '<div class="text-center"><a href="'.$this->config['link_pagamento'].'" class="btn btn-success text-light d-block mb-1">Pagar agora</a></div>';
+            // }else{
+            //     if(isset($this->config['link_leilao'])){
+                    $mens .= '<div class="text-center"><a href="'.$this->config['link_leilao'].'" class="btn btn-secondary text-light d-block mb-1">Ver leilão</a></div>';
+            //     }
+            // }
             $mens = str_replace('h1', 'h5', $mens);
         }
         return [
