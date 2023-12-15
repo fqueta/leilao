@@ -1,13 +1,16 @@
 @php
 $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
-
+$mes = isset($config['mes']) ? $config['mes'] : false;
 @endphp
 <div class="flash-message">
     @foreach (['danger', 'warning', 'success', 'info'] as $msg)
-      @if(Session::has('alert-' . $msg))
-      <p class="alert alert-{{ $msg }}">{{ Session::get('alert-' . $msg) }}</p>
-      @endif
+        @if(Session::has('alert-' . $msg))
+            <p class="alert alert-{{ $msg }}">{{ Session::get('alert-' . $msg) }}</p>
+        @endif
     @endforeach
+    @if ($mes)
+      <p class="alert alert-info">{{ $mes }}</p>
+    @endif
 </div>
 @if (isset($config['title']))
     @section('title')

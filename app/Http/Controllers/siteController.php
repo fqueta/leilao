@@ -28,21 +28,18 @@ class siteController extends Controller
         $ret['dados']=false;
         global $post,$menus,$notification,$ganhador;
         if(Auth::check()){
-            $user = User::find(Auth::id());
+            $user_id = Auth::id();
+            $user = User::find($user_id);
             $ganhador = (new LeilaoController())->lista_leilao_terminado(Auth::id(),'n');
             // dd($ganhador);
             $notification['all'] = $user->notifications;
             $notification['unread'] = $user->unreadNotifications;
             $notification['total'] = $notification['unread']->count();
-            // $arr_notice = [];
-            // $json_notice = @$notification['unread']['data'];
-            // if($json_notice){
-            //     $arr_notice=Qlib::lib_json_array($json_notice);
-            // }
-            // $notification['arr_notice'] = $arr_notice;
-            // if($notification->count()){
-            //     $notification->toArray();
-            // }
+            //Verifica se está no blacklist
+            if((new BlacklistController)->is_blacklist($user_id)){
+                //Suspender acesso
+                return view('site.suspense_blackList',$ret);
+            }
         }
         if($slug1){
             if($slug1 == 'home'){

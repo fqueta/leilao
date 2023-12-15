@@ -6,6 +6,7 @@ use App\Http\Controllers\admin\AsaasController;
 use App\Http\Controllers\admin\CobrancaController;
 use App\Http\Controllers\admin\ContratosController;
 use App\Http\Controllers\admin\PostController;
+use App\Http\Controllers\BacklistController;
 use App\Mail\leilao\lancesNotific;
 use App\Models\Familia;
 use App\Models\Post;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use PHPUnit\Util\Blacklist;
 use stdClass;
 
 class TesteController extends Controller
@@ -75,7 +77,14 @@ class TesteController extends Controller
         // $ret = (new LeilaoController())->get_seguidores(66);
         // $ret = (new LeilaoController())->list_winner(Auth::id());
         // $ret = (new LeilaoController())->lista_leilao_terminado(Auth::id());
-        $ret = (new LeilaoController())->list_alert_winners();
+        // $ret = (new LeilaoController())->list_alert_winners();
+        // $ret = (new BlacklistController())->add(47,[
+        //     'description' =>'Não pagamento',
+        //     'leilao_id' =>'65',
+        // ]);
+        $ret = (new BlacklistController())->remove(47);
+        // $ret = (new BlacklistController())->is_blacklist(3);
+        dd($ret);
         // session(['user'=>'s']);
         // $request->session()->put('close_popup','s');
         // $request->session()->keep('close_popup');
@@ -99,9 +108,10 @@ class TesteController extends Controller
         // $ret['salv'] = (new ContratosController)->update_tokenCRM(5550,[
         //     'token_externo' => '54233',
         // ]);
-        // $notific = (new LanceController)->notifica_superado($leilao_id,$id_a);
-        $ret = (new LeilaoController)->notifica_termino(62,'responsavel');
-        dd($ret);
+        // // $notific = (new LanceController)->notifica_superado($leilao_id,$id_a);
+        // $ret = (new LeilaoController)->notifica_termino(62,'admin');
+        // dd($ret);
+    //    echo  (new UserController)->get_first_admin();
         // $ret['list'] = (new ContratosController)->get_contratos_crm();
         // $ret = Qlib::createSlug('Fernando Teste programador aatiça ação 200,.52');
         // return $ret;

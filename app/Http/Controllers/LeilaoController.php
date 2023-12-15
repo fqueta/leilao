@@ -449,10 +449,10 @@ class LeilaoController extends Controller
                 $me = 'É necessário aceitar os termos para continuar';
                 // session()->put('alert-danger', $me);
                 // Session::flash('alert-danger', $me);
-                $url = url('/meu-cadastro?r='.Qlib::UrlAtual());
+                $url = url('/meu-cadastro?rbase='.base64_encode(Qlib::UrlAtual()).'&mbase='.base64_encode($me));
                 // dd(session()->all());
-                // echo header('Location: '.$url);
-                return Redirect::to($url)->with('alert-danger', $me);
+                echo header('Location: '.$url);
+                // return Redirect::to($url)->with('alert-danger', $me);
                 exit;
             }
         }
@@ -832,7 +832,11 @@ class LeilaoController extends Controller
             if($tipo_responsavel=='responsavel'){
                 $greeting = 'Olá {nome}';
                 $mensagem = '
-                <p>Seu leilao <b>{nome_leilao}</b> está finalizado.<br>{status_leilao}
+                <p>Seu leilão <b>{nome_leilao}</b> está finalizado.<br>{status_leilao}
+                ';
+            }elseif($tipo_responsavel='admin'){
+                $mensagem = '
+                <p>Leilão <b>{nome_leilao}</b> está finalizado.<br>{status_leilao}
                 ';
             }
             $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
@@ -858,7 +862,7 @@ class LeilaoController extends Controller
                 $nome_leilao = $dl['post_title'];//Qlib::buscaValorDb0('posts','id',$ul['leilao_id'],'post_title');
                 $link_pagamento = $this->get_link_pagamento($leilao_id);
                 $valor_lance = $ul['valor_lance'];
-                if($tipo_responsavel=='responsavel'){
+                if($tipo_responsavel=='responsavel' || $tipo_responsavel=='admin'){
                     $status_leilao = '<p>O contrato foi arrematado por <b>{cliente}</b>, no valor de <b>{valor_lance}</b> estamos aguardando o pagamento</p>';
                     $status_leilao = str_replace('{cliente}',$nome,$status_leilao);
                     $status_leilao = str_replace('{valor_lance}',Qlib::valor_moeda($valor_lance,'R$ '),$status_leilao);
@@ -875,7 +879,7 @@ class LeilaoController extends Controller
                     'type' => 'notifica_finalizado',
                     'lance_id' => $id_lance,
                     'subject' => 'Leilão Finalizado',
-                    'link_pagamento' => $link_pagamento,
+                    // 'link_pagamento' => $link_pagamento,
                     'mensagem' => $mensagem,
                     'dleilao' => $dl,
                     'tipo_responsavel' => $tipo_responsavel,
@@ -883,6 +887,8 @@ class LeilaoController extends Controller
                 ];
                 if($tipo_responsavel=='responsavel'){
                     $user_id = isset($dl['config']['cliente'])?$dl['config']['cliente']:false;
+                }elseif($tipo_responsavel=='admin'){
+                    $user_id = isset($dl['config']['admin'])?$dl['config']['admin']:1;
                 }
                 if(!$user_id){
                     $ret['mens'] = 'ID de usuário não inválido';
@@ -891,15 +897,22 @@ class LeilaoController extends Controller
                 $user = User::find($user_id);
                 if($user){
                     $ret['notifica_painel'] = $user->notify(new ganhadorPainelNotification($arr_notification));
-                    // $ret['email'] = $user->notify(new EmailDonoLeilaoNotification($arr_notification));
                 }
                 if($tipo_responsavel=='ganhador'){
                     $ret = (new LeilaoController)->enviar_email($arr_notification);
+                }elseif($tipo_responsavel=='responsavel'){
+                    $user->notify(new EmailDonoLeilaoNotification($arr_notification));
+                    $ret['exec'] = true;
+                }elseif($tipo_responsavel=='admin'){
+                    $user->notify(new EmailDonoLeilaoNotification($arr_notification));
+                    $ret['exec'] = true;
                 }
                 // return $ret;
                 if($ret['exec']){
                     $ret['save'] = Qlib::update_postmeta($post_id,$meta_notific,'s');
                 }
+            }else{
+
             }
             // if(isset($dg['ultimo_lance']['valor_lance']) && isset($dg['ultimo_lance']['author'])){
             //     $valor_lance = $dg['ultimo_lance']['valor_lance'];
@@ -1108,11 +1121,14 @@ class LeilaoController extends Controller
         get();
         //Enviar a notificação.
         if($list->count()){
+            $id_admin = (new UserController)->get_first_admin();
             $arr_l = $list->toArray();
             foreach ($arr_l as $key => $value) {
                 $df = $this->info_termino($value['ID'],$value);
                 if(isset($df['termino']) && $df['termino']){
                     $cal[$value['ID']] = $this->notifica_termino($value['ID'],'ganhador');
+                    $cal[$value['ID']] = $this->notifica_termino($value['ID'],'responsavel');
+                    $cal[$value['ID']] = $this->notifica_termino($id_admin,'admin');
                     $ret = 'true';
                 }
             }

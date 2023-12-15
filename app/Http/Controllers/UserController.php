@@ -1015,6 +1015,9 @@ class UserController extends Controller
             'title'=>$title,
             'titulo'=>$titulo,
         ];
+        if(isset($_GET['mbase'])){
+            $config['mes'] = base64_decode($_GET['mbase']);
+        }
         if(isset($dadosmeu_cadastro['id'])){
             $config['id'] = $dadosmeu_cadastro['id'];
         }
@@ -1141,6 +1144,17 @@ class UserController extends Controller
             }
         }
         return $ret;
+    }
+    /**
+     * Metodo que retorna id do primeiro administrados encontrado
+     */
+    public function get_first_admin(){
+        $id_permission_admin = Qlib::qoption('id_permission_admin')?Qlib::qoption('id_permission_admin'):1;
+        $d = User::where('id_permission','=',$id_permission_admin)->first();
+        // dd($d);
+        if($d->count()>0){
+            return $d['id'];
+        }
     }
     public function get_users_site(){
 

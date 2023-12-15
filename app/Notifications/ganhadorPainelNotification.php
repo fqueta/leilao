@@ -63,7 +63,7 @@ class ganhadorPainelNotification extends Notification implements ShouldQueue
     {
         $mens = isset($this->config['mensagem']) ? $this->config['mensagem'] : false;
 
-        if($mens && isset($this->config['link_pagamento'])){
+        if($mens && isset($this->config['link_leilao'])){
             // if($this->config['tipo_responsavel']=='ganhador'){
             //     $mens .= '<div class="text-center"><a href="'.$this->config['link_pagamento'].'" class="btn btn-success text-light d-block mb-1">Pagar agora</a></div>';
             // }else{

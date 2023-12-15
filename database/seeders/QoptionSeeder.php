@@ -22,6 +22,11 @@ class QoptionSeeder extends Seeder
                 'valor'=>'/storage',
             ],
             [
+                'nome'=>'Id da permissão do admin',
+                'url'=>'id_permission_admin',
+                'valor'=>1,
+            ],
+            [
                 'nome'=>'Emails dos gerentes',
                 'url'=>'email_gerente',
                 'valor'=>'ger.maisaqui3@gmail.com',

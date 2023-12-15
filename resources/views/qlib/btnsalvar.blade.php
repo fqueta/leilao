@@ -12,6 +12,9 @@
     $frontend = App\Qlib\Qlib::is_frontend();
     if($frontend){
         $redirect_base = isset($config['redirect'])?$config['redirect']:$redirect_base;
+        if(isset($_GET['rbase']) && !empty($_GET['rbase'])){
+            $redirect_base = base64_decode($_GET['rbase']);
+        }
         //if(isset($_REQUEST['post']['ID']) && ($_REQUEST['post']['ID']==2 || $_REQUEST['post']['ID']==18 || $_REQUEST['post']['ID']==21)){
          //   $config['route'] .= '_adm';
         //}
@@ -31,7 +34,11 @@
                 if($frontend){
                     $r_novo_cadastro = url('/').'/'.App\Qlib\Qlib::get_slug_post_by_id(2);
                     if($sec==App\Qlib\Qlib::get_slug_post_by_id(34)){
-                        $btnAlt='<button type="submit" btn="permanecer" class="btn btn-primary">'.__('Salvar').'</button>';
+                        if($redirect_base && isset($_GET['rbase'])){
+                            $btnAlt='<button type="submit" btn="sair" class="btn btn-primary">'.__('Salvar').'</button>';
+                        }else{
+                            $btnAlt='<button type="submit" btn="permanecer" class="btn btn-primary">'.__('Salvar').'</button>';
+                        }
                         echo $btnAlt;
                     }
                 }
