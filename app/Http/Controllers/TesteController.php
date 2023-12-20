@@ -7,6 +7,7 @@ use App\Http\Controllers\admin\CobrancaController;
 use App\Http\Controllers\admin\ContratosController;
 use App\Http\Controllers\admin\PostController;
 use App\Http\Controllers\BacklistController;
+use App\Jobs\NotificWinnerJob;
 use App\Mail\leilao\lancesNotific;
 use App\Models\Familia;
 use App\Models\Post;
@@ -73,7 +74,8 @@ class TesteController extends Controller
     // $ret = (new LeilaoController)->get_leilao(58,false,[
     //     'desconto'=>true
     // ]);
-        // $ret = (new LeilaoController)->seguidor_update(60,1,true);
+        // $ret = (new LeilaoController)->who_won(36);
+        // $ret = (new LeilaoController)->get_all_finalized();
         // $ret = (new LeilaoController())->get_seguidores(66);
         // $ret = (new LeilaoController())->list_winner(Auth::id());
         // $ret = (new LeilaoController())->lista_leilao_terminado(Auth::id());
@@ -82,9 +84,13 @@ class TesteController extends Controller
         //     'description' =>'Não pagamento',
         //     'leilao_id' =>'65',
         // ]);
-        $ret = (new BlacklistController())->remove(47);
-        // $ret = (new BlacklistController())->is_blacklist(3);
-        dd($ret);
+        $ret = (new LeilaoController)->list_alert_winners();
+        // $ret = (new BlacklistController())->send_to_blacklist(true);
+        // $ret = (new BlacklistController())->remove(1);
+        // // $ret = (new BlacklistController())->is_blacklist(3);
+        // $ret = (new BlacklistController())->get_blacklist();
+        // dd($ret);
+        dd(NotificWinnerJob::dispatch());
         // session(['user'=>'s']);
         // $request->session()->put('close_popup','s');
         // $request->session()->keep('close_popup');

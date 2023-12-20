@@ -2,25 +2,24 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\LeilaoController;
-use App\Jobs\NotificWinnerJob;
+use App\Jobs\SendBlacklistJob;
 use Illuminate\Console\Command;
 
-class AlertWinnerCommand extends Command
+class SendBlacklistCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'alertar:ganhador';
+    protected $signature = 'send:backlist';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Este comando alerta os ganhadores dos leilões';
+    protected $description = 'Este comando envia inadimplentes para o blacklist';
 
     /**
      * Create a new command instance.
@@ -39,8 +38,7 @@ class AlertWinnerCommand extends Command
      */
     public function handle()
     {
-        // return (new LeilaoController())->list_alert_winners();
-        NotificWinnerJob::dispatch();
-        return 'true';
+        SendBlacklistJob::dispatch();
+        return 'SendBlacklistJob::dispatch()';
     }
 }

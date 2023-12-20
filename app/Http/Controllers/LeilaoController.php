@@ -29,9 +29,16 @@ class LeilaoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public $post_type;
+    /**
+     * o metodo responsavel pro salvar a situalção leilão finalizado f é $this->info_termino();
+     */
+    public $c_meta_situacao;
+    public $c_meta_detalhes_situacao;
     public function __construct()
     {
         $this->post_type = 'leiloes_adm';
+        $this->c_meta_situacao = 'situacao_leilao'; //f=Finalizado, a=em andamento
+        $this->c_meta_detalhes_situacao = 'situacao_leilao_detalhes'; //salva um json contendo detalhes daquela situação
     }
     /**Metodo para gerar o formulario no front pode ser iniciado com o short_de [sc ac="form_leilao"] */
     public function form_leilao($post_id=false,$dados=false,$leilao_id=false){
@@ -373,6 +380,7 @@ class LeilaoController extends Controller
         $ret['exec'] = false;
         $ret['termino'] = false;
         $ret['html'] = false;
+        $ret['situacao_leilao'] = false;
         if(!$dl && $leilao_id){
             $dl = Post::Find($leilao_id);
         }
@@ -382,7 +390,18 @@ class LeilaoController extends Controller
             $sd1 = strtotime($d1);
             $sd2 = strtotime($d2);
             if($sd1<$sd2){
+                //marcar leilão como terminado caso não sena sido feito ainda
+                $situacao_leilao = Qlib::get_postmeta($leilao_id,$this->c_meta_situacao,true);
+                if($situacao_leilao!='f'){
+                    $ret['s_s'] = Qlib::update_postmeta($leilao_id,$this->c_meta_situacao,'f');
+                    $ret['s_d'] = Qlib::update_postmeta($leilao_id,$this->c_meta_detalhes_situacao,Qlib::lib_array_json([
+                        'data_situacao'=>Qlib::dataBanco(),
+                        'label'=>'Finalizado',
+                        'color'=>'danger',
+                    ]));
+                }
                 $ret['exec'] = true;
+                $ret['situacao_leilao'] = $situacao_leilao;
                 $ret['termino'] = true;
                 $ret['html'] = 'Finalizado ('.Qlib::dataExibe(@$dl['config']['termino']).' '.@$dl['config']['hora_termino'].')';
             }else{
@@ -447,8 +466,6 @@ class LeilaoController extends Controller
             //Se usuario não aceitou os termmos e não for um administrador
             if(!$uc->aceito_termo($user_id) && !Qlib::isAdmin()){
                 $me = 'É necessário aceitar os termos para continuar';
-                // session()->put('alert-danger', $me);
-                // Session::flash('alert-danger', $me);
                 $url = url('/meu-cadastro?rbase='.base64_encode(Qlib::UrlAtual()).'&mbase='.base64_encode($me));
                 // dd(session()->all());
                 echo header('Location: '.$url);
@@ -767,7 +784,7 @@ class LeilaoController extends Controller
         if(!$post && $post_id){
             $post = post::Find($post_id);
         }
-        $ret = config('app.dominio').'admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
+        $ret = config('app.url').'/admin/leiloes_adm/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
         return $ret;
     }
     /**
@@ -776,7 +793,7 @@ class LeilaoController extends Controller
      * @return string $ret
      */
     public function get_link_front($post_id){
-        $ret = config('app.dominio').'leiloes-publicos/'.$post_id;
+        $ret = config('app.url').'/leiloes-publicos/'.$post_id;
         return $ret;
     }
     /**
@@ -785,7 +802,7 @@ class LeilaoController extends Controller
      * @return string $ret
      */
     public function get_link_admin($post_id){
-        $ret = config('app.dominio').'admin/leiloes_adm/'.$post_id.'/edit';
+        $ret = config('app.url').'/admin/leiloes_adm/'.$post_id.'/edit';
         return $ret;
     }
     /**
@@ -794,7 +811,7 @@ class LeilaoController extends Controller
      * @return string $ret
      */
     public function get_link($post_id){
-        $ret = config('app.dominio').'leiloes-publicos/'.$post_id;
+        $ret = config('app.url').'/leiloes-publicos/'.$post_id;
         return $ret;
     }
     /**
@@ -804,7 +821,7 @@ class LeilaoController extends Controller
     public function get_link_pagamento($post_id,$type='01'){
         $type = '-'.$type;
         $token = Qlib::buscaValorDb0('posts','id',$post_id,'token');
-        $ret = config('app.dominio').'payment/'.$token.$type;
+        $ret = config('app.url').'/payment/'.$token.$type;
         return $ret;
     }
     /**
@@ -1177,13 +1194,6 @@ class LeilaoController extends Controller
                                     $ret[$key]['venc'] = $venc;
                                     $ret[$key]['term'] = $df;
                                     $link_leilao_front = $this->get_link_front($leilao_id);
-                                    // if($sp=='s'){
-                                    //     $situacao_pagamento = '<span class="text-success">Pago</span>';
-                                    // }elseif($sp=='a'){
-                                    //     $situacao_pagamento = '<span class="text-warning">Pix Gerado</span>';
-                                    // }else{
-                                    //     $situacao_pagamento = '<span class="text-danger">Aguardando pagamento</span>';
-                                    // }
                                     $situacao_pagamento = $pc->get_status_payment($leilao_id);
                                     $ret[$key]['status_pago'] = $sp;
                                     $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
@@ -1511,4 +1521,42 @@ class LeilaoController extends Controller
         $ret = Qlib::update_postmeta($leilao_id,'views',$total_views);
         return $ret;
     }
+    /**
+     * Metodo para listar todos os finalizados ate o momento
+     * @return array $ret
+     */
+    public function get_all_finalized(){
+        $ret = false;
+        $d = Post::select('posts.*','postmeta.meta_value')->
+        join('postmeta', 'postmeta.post_id', 'posts.ID')->
+        where('posts.post_status', '=', 'publish')->
+        where('postmeta.meta_key','=', $this->c_meta_situacao)->
+        where('postmeta.meta_value','=', 'f')->
+        where('posts.post_type', '=', $this->post_type)->get();
+        if($d->count() > 0){
+            $data = $d->toArray();
+            // if(is_array($data)){
+            // }
+            $ret['data'] = $data;
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para informa que é o ganhador, ou quem ganhou de um determinado leilao apartir do id do leilao
+     * @param integer $leilao_id, array| bool $dl pode ser informado um array com a consulta do leilao
+     * @return array $ret
+     */
+    public function who_won($leilao_id,$dl=false){
+        $dg = $this->get_lance_vencedor($leilao_id,$dl,'ultimo_lance');
+        $ret = $dg;
+        if(isset($dg['ultimo_lance']['author']) && ($user_id = $dg['ultimo_lance']['author'])){
+            $duser = User::find($user_id);
+            if($duser->count() > 0){
+                $duser = $duser->toArray();
+            }
+            $ret['duser'] = $duser;
+        }
+        return $ret;
+    }
+
 }

@@ -235,6 +235,29 @@ class UserController extends Controller
                     'script_show'=>'<p class="pt-2 mb-3 text-muted">Temos não aceitos</p>'
                 ];
             }
+            if(isset($dados['id'])){
+                //Veririca se está no blacklist
+                $bl = new BlacklistController;
+                if($bl->is_blacklist($dados['id'])){
+                    $duser = @$dados->toArray();
+                    $duser['motivo'] = Qlib::get_usermeta($dados['id'],$bl->campo_motivo,true);
+                    if($duser['motivo']){
+                        $duser['motivo'] = Qlib::lib_json_array($duser['motivo']);
+                        if(isset($duser['motivo']['leilao_id']) && ($leilao_id = $duser['motivo']['leilao_id'])){
+                            $duser['motivo']['link_front'] = (new LeilaoController)->get_link_front($leilao_id);
+                            $duser['motivo']['link_admin'] = (new LeilaoController)->get_link_admin($leilao_id);
+                        }
+                    }
+                    $ret['balcklist']=[
+                        'label'=>__('Link no site'),
+                        'type'=>'html',
+                        'active'=>false,
+                        'script'=>'admin.blacklist.card_detalhes',
+                        'script_show'=>'admin.blacklist.card_detalhes',
+                        'dados'=>$duser,
+                    ];
+                }
+            }
         }
         if(Qlib::is_frontend()){
             unset($ret['sep2c'],$ret['ativo'],$ret['id_permission']);

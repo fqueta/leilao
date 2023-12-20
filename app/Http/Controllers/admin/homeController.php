@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Http\Controllers\BlacklistController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\LeilaoController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -21,11 +23,18 @@ class homeController extends Controller
     {
         /*$controlerFamilias = new FamiliaController(Auth::user());
         $dadosFamilias = $controlerFamilias->queryFamilias();
+        */
+
+        $blacklist=(new BlacklistController())->get_blacklist();
         $config = [
-            'c_familias'=>$dadosFamilias,
-        ];*/
+            'blacklist'=>$ret = (new BlacklistController())->get_blacklist(),
+            'lista_leilao_terminado' => (new LeilaoController)->lista_leilao_terminado(),
+        ];
         return view('home',[
-            'config'=>[],
+            'config'=>$config,
+        ]);
+        return view('home',[
+            'config'=>$config,
         ]);
     }
 

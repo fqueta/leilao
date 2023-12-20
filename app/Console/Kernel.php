@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
-        $schedule->command('alertar:ganhador')->everyMinute();
+        $schedule->command('alertar:ganhador')->daily();
+        $schedule->command('send:blacklist')->daily();
         // $schedule->call((new LeilaoController)->list_alert_winners())->daily()->timezone('America/sao_Paulo');
     }
 
