@@ -114,24 +114,28 @@ class BlacklistController extends Controller
                             $add['exec'] = false;
                             if($send){
                                 $leilao_name = $vf['post_title'];
-                                $motivo = [
-                                    'description' =>'Seu cadastro em nossa plataforma foi suspenso devido ao não pagamento do leilão <b>'.$leilao_name.'</b> com o vencimento para '.$vencimento,
-                                    'termino' =>$dataTerminio,
-                                    'leilao_id' =>$vf['ID'],
-                                ];
-                                $add = $this->add($user_id,$motivo);
-                                $ret['leilao'][$vf['ID']]['add'] = $add;
-                                if($add['exec']){
-                                    $user = User::find($user_id);
-                                    if($user->count() > 0){
-                                        //notiicar o usuario
-                                        $n = explode(' ',$user['name']);
-                                        $user->notify(new SendBalcklistNotification([
-                                            'mensage' =>$motivo['description'],
-                                            'greeting' =>'Olá '.@$n[0],
-                                            'subject' =>'Usuário supenso',
-                                            'link_leilao' =>$lc->get_link_front($vf['ID']),
-                                        ]));
+                                //verifica se ja está na blacklist
+                                $is_blacklist = Qlib::get_usermeta($user_id,$this->campo,true);
+                                if($is_blacklist!='s'){
+                                    $motivo = [
+                                        'description' =>'Seu cadastro em nossa plataforma foi suspenso devido ao não pagamento do leilão <b>'.$leilao_name.'</b> com o vencimento para '.$vencimento,
+                                        'termino' =>$dataTerminio,
+                                        'leilao_id' =>$vf['ID'],
+                                    ];
+                                    $add = $this->add($user_id,$motivo);
+                                    $ret['leilao'][$vf['ID']]['add'] = $add;
+                                    if($add['exec']){
+                                        $user = User::find($user_id);
+                                        if($user->count() > 0){
+                                            //notiicar o usuario
+                                            $n = explode(' ',$user['name']);
+                                            $user->notify(new SendBalcklistNotification([
+                                                'mensage' =>$motivo['description'],
+                                                'greeting' =>'Olá '.@$n[0],
+                                                'subject' =>'Usuário supenso',
+                                                'link_leilao' =>$lc->get_link_front($vf['ID']),
+                                            ]));
+                                        }
                                     }
                                 }
                             }else{

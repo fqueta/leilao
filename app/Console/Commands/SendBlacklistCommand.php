@@ -12,7 +12,7 @@ class SendBlacklistCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'send:backlist';
+    protected $signature = 'send:blacklist';
 
     /**
      * The console command description.

@@ -84,13 +84,13 @@ class TesteController extends Controller
         //     'description' =>'Não pagamento',
         //     'leilao_id' =>'65',
         // ]);
-        $ret = (new LeilaoController)->list_alert_winners();
-        // $ret = (new BlacklistController())->send_to_blacklist(true);
-        // $ret = (new BlacklistController())->remove(1);
+        // $ret = (new LeilaoController)->list_alert_winners();
+        $ret = (new BlacklistController())->send_to_blacklist(false);
+        // $ret = (new BlacklistController())->remove(47);
         // // $ret = (new BlacklistController())->is_blacklist(3);
         // $ret = (new BlacklistController())->get_blacklist();
-        // dd($ret);
-        dd(NotificWinnerJob::dispatch());
+        dd($ret);
+        // dd(NotificWinnerJob::dispatch());
         // session(['user'=>'s']);
         // $request->session()->put('close_popup','s');
         // $request->session()->keep('close_popup');

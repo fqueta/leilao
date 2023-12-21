@@ -1332,13 +1332,13 @@ class Qlib
             if ($meses==0)
             {
                 $data1 = date('d/m/Y',mktime(0,0,0,$mes,$dia,$ano));
-                return self::proximoDiaUtil(dtBanco($data1), $formato);
+                return self::proximoDiaUtil(Qlib::dtBanco($data1), $formato);
             }
             else
             {
                 $data1 = date('d/m/Y',mktime(0,0,0,$mes+$meses,$dia,$ano));
                 if($retDiaUtl)
-                    return self::proximoDiaUtil(dtBanco($data1), $formato);
+                    return self::proximoDiaUtil(Qlib::dtBanco($data1), $formato);
                 else
                     return $data1;
             }

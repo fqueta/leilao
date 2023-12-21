@@ -10,6 +10,7 @@ class Kernel extends ConsoleKernel
 {
     protected $commands = [
         Commands\AlertWinnerCommand::class,
+        Commands\SendBlacklistCommand::class,
     ];
     protected function schedule(Schedule $schedule)
     {
