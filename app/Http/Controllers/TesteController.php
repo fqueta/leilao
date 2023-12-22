@@ -6,6 +6,7 @@ use App\Http\Controllers\admin\AsaasController;
 use App\Http\Controllers\admin\CobrancaController;
 use App\Http\Controllers\admin\ContratosController;
 use App\Http\Controllers\admin\PostController;
+use App\Http\Controllers\admin\QuickCadController;
 use App\Http\Controllers\BacklistController;
 use App\Jobs\NotificWinnerJob;
 use App\Mail\leilao\lancesNotific;
@@ -85,8 +86,9 @@ class TesteController extends Controller
         //     'leilao_id' =>'65',
         // ]);
         // $ret = (new LeilaoController)->list_alert_winners();
-        $ret = (new BlacklistController())->send_to_blacklist(false);
-        // $ret = (new BlacklistController())->remove(47);
+        // $ret = (new BlacklistController())->send_to_blacklist(false);
+        // $ret = (new BlacklistController())->remove(1);
+        $ret = (new QuickCadController())->link_step2(5);
         // // $ret = (new BlacklistController())->is_blacklist(3);
         // $ret = (new BlacklistController())->get_blacklist();
         dd($ret);

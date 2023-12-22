@@ -181,7 +181,6 @@ class PostController extends Controller
                 $data = $data->toArray();
                 if(isset($data['token'])){
                     $data['leilao'] = (new LeilaoController)->is_linked_leilao($data['token'],true);
-                    // dd($data);
                 }
             }
         }
@@ -191,7 +190,6 @@ class PostController extends Controller
             'ID'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'post_type'=>['label'=>'tipo de post','active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>$this->post_type],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
-            'post_title'=>['label'=>'Numero do contrato','active'=>true,'placeholder'=>'Ex.: Nome do produto ','type'=>'text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'12','title'=>'Identificador do contrado pode ser nome ou número'],
             'config[cliente]'=>[
                 'label'=>'Nome do cliente*',
                 'active'=>true,
@@ -202,8 +200,10 @@ class PostController extends Controller
                 'exibe_busca'=>true,
                 'option_select'=>true,
                 'class'=>'select2',
+                'value'=>@$_GET['config']['cliente'],
                 'cp_busca'=>'config][cliente',
             ],
+            'post_title'=>['label'=>'Numero do contrato','active'=>true,'placeholder'=>'Ex.: Nome do produto ','type'=>'text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'12','title'=>'Identificador do contrado pode ser nome ou número'],
             'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'4','cp_busca'=>'config][total_horas','title'=>'Número total de horas que serão leiloadas'],
             'config[valor_r]'=>['label'=>'Valor da Rescisão','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'4','cp_busca'=>'config][valor_r','title'=>'Valor da rescisão, este também será o valor de lance inicial quando o cliente criar o leilão'],
             'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][incremento','class'=>'','title'=>'Valor de incremento em cada lançe do Leilão'],
@@ -280,6 +280,15 @@ class PostController extends Controller
             @$data['token'] = uniqid();
             $data['post_title'] = 'Leilão '.$data['token'];
             $data['post_author'] = isset($_GET['post_author']) ? $_GET['post_author'] : false;
+            $contrato = isset($_GET['contrato']) ? $_GET['contrato'] : false;
+            if($contrato){
+                $dcontra = Qlib::buscaValorDb0('posts','token',$contrato,'config');
+                $data['post_content'] = Qlib::buscaValorDb0('posts','token',$contrato,'post_content');
+                if($dcontra){
+                    $data['config'] = Qlib::lib_json_array($dcontra);
+                    $data['config']['contrato'] = $contrato;
+                }
+            }
         }else{
             // if(count($arr_itens)==0 && isset($data['config']['itens']) && count($data['config']['itens'])){
                 //     $arr_itens = $data['config']['itens'];
@@ -314,8 +323,8 @@ class PostController extends Controller
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','value'=>@$data['token']],
             'config[origem]'=>['label'=>'origem','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][origem','value'=>$name_route],
             'post_author'=>[
-                'label'=>'Responsável',
-                'active'=>true,
+                'label'=>'Autor',
+                'active'=>false,
                 'type'=>'select',
                 'arr_opc'=>Qlib::sql_array("SELECT id,name FROM users WHERE ativo='s' AND id_permission>'1'",'name','id'),'exibe_busca'=>'d-block',
                 'event'=>'required onchange=select_contrato(this)',
@@ -352,6 +361,7 @@ class PostController extends Controller
                 'option_select'=>true,
                 'cp_busca'=>'config][contrato',
                 'class'=>'select2',
+                'value'=>@$data['config']['contrato'],
             ],
             'config[status]'=>[
                 'label'=>'Status*',
@@ -377,21 +387,8 @@ class PostController extends Controller
             'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_venda','value'=>@$data['config']['valor_venda'],'title'=>'Valor para venda sem leilão'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..'),'value'=>@$data['post_content']],
             'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Pix').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
-            //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
-            //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
-            // 'config[parcelamento]'=>[
-            //     'label'=>'Parcelamento cartão',
-            //     'active'=>true,
-            //     'type'=>'select',
-            //     'arr_opc'=>$arr_status,'exibe_busca'=>'d-block',
-            //     'event'=>'',
-            //     'tam'=>'12',
-            //     'class'=>'',
-            //     'exibe_busca'=>false,
-            //     'option_select'=>false,
-            //     'cp_busca'=>'config][parcelamento',
-            // ],
             'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'required min='.date('Y-m-d').'','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
             'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
             'config[pode_lance]'=>[
@@ -408,13 +405,12 @@ class PostController extends Controller
                 'cp_busca'=>'config][pode_lance',
             ],
             // 'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
-            'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..')],
         ];
         if(Qlib::is_backend()){
             $ret['ID']['active'] = true;
             $ret['post_status'] = ['label'=>'Liberado','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
             //Se tem um contrato cadastrado impedir de mudar o proprietário
-            if(isset($data['post_author']) && ($author_id = $data['post_author']) && isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
+            if(isset($data['config']['cliente']) && ($author_id = $data['config']['cliente']) && isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
                 $d_user = User::Find($author_id);
                 if($d_user){
                     // $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','value'=>$author_id,'tam'=>'12'];
@@ -438,7 +434,7 @@ class PostController extends Controller
             $ret['config[contrato]']['active'] = false;
             $ret['post_author'] = ['label'=>'Responsável','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','value'=>$value_author,'tam'=>'2'];
         }
-        if($ac!='cad'){
+        if($ac!='cad' || ($ac=='cad' && isset($data['config']['contrato']))){
             $link = $lc->get_link_front($post_id);
             $script = '<p><b>Ver no site: </b><a style="text-decoration:underline" href="'.$link.'" target="_blank">'.@$data['post_title'].'</a></p>';
             $script = false;
@@ -625,9 +621,9 @@ class PostController extends Controller
             if($sec=='posts'){
                 $title = __('Cadastro de postagens');
             }elseif($sec=='produtos'){
-                $title = __('Cadastro de Horas');
+                $title = __('Cadastro de contratos');
                 if($name=='produtos.edit'){
-                    $title = __('Editar Cadastro de Horas');
+                    $title = __('Editar Cadastro de contratos');
                 }
             }elseif($sec=='leiloes_adm'){
                 $title = __('Cadastro de leilao');
@@ -692,6 +688,7 @@ class PostController extends Controller
             'token'=>uniqid(),
         ];
         $campos = $this->campos();
+        // dd($campos);
          //REGISTRAR EVENTO CADASTRO
          $regev = Qlib::regEvent(['action'=>'create','tab'=>$this->tab,'config'=>[
             'obs'=>'Abriu tela de cadastro',
@@ -748,77 +745,49 @@ class PostController extends Controller
         $userLogadon = Auth::id();
         $dados['post_author'] = $userLogadon;
         $dados['token'] = !empty($dados['token'])?$dados['token']:uniqid();
-        // if($this->i_wp=='s' && isset($dados['post_type'])){
-        //     //$endPoint = isset($dados['endPoint'])?$dados['endPoint']:$dados['post_type'].'s';
-        //     $endPoint = 'post';
-        //     $params = $this->geraParmsWp($dados);
-
-        //     if($params){
-        //         $salvar = $this->wp_api->exec2([
-        //             'endPoint'=>$endPoint,
-        //             'method'=>'POST',
-        //             'params'=>$params
-        //         ]);
-        //         if(isset($salvar['arr']['id']) && $salvar['arr']['id']){
-        //             $mens = $this->label.' cadastrado com sucesso!';
-        //             $color = 'success';
-        //             $idCad = $salvar['arr']['id'];
-        //         }else{
-        //             $mens = 'Erro ao salvar '.$this->label.'';
-        //             $color = 'danger';
-        //             $idCad = 0;
-        //             if(isset($salvar['arr']['status'])&&$salvar['arr']['status']==400 && isset($salvar['arr']['message']) && !empty($salvar['arr']['message'])){
-        //                 $mens = $salvar['arr']['message'];
-        //             }
-        //         }
-        //     }else{
-        //         $color = 'danger';
-        //         $mens = 'Parametros invalidos!';
-        //     }
-        // }else{
-            $dados['post_status'] = isset($dados['post_status'])?$dados['post_status']:'pending';
-            $origem = isset($dados['config']['origem'])?$dados['config']['origem']:false;
-            $salvar = Post::create($dados);
-            $sm = false;
-            if(isset($salvar->id) && $salvar->id){
-                $mens = $this->label.' cadastrado com sucesso!';
-                $color = 'success';
-                $idCad = $salvar->id;
-                //REGISTRAR EVENTO STORE
-                if($salvar->id){
-                    //SALVAR MENU QUANDO ADICIONA UMA PÁGINA
-                    if($dados['post_type'] == 'paginas'){
-                        $sm = $this->addMenu($idCad);
-                    }
-                    if($dados['post_type'] == 'leiloes_adm'){
-                        $post_title = __('Leilão').' '.Qlib::zerofill($idCad,4);
-                        $sm = Post::where('id',$idCad)->update([
-                                'post_title'=>$post_title,
-                                'post_name'=>Qlib::createSlug($post_title),
-                            ]);
-                    }
-                    $regev = Qlib::regEvent(['action'=>'store','tab'=>$this->tab,'config'=>[
-                        'obs'=>'Cadastro guia Id '.$salvar->id,
-                        'link'=>$this->routa,
-                        ]
-                    ]);
-                    if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
-                        $meta_notific = 'notifica_email_moderador';
-                        //verifica se ja foi enviado um email e não foi aten
-                        // $verific_eviado
-                        $liberar_norificacao = Qlib::update_postmeta($idCad,$meta_notific,'n');
-                        if($liberar_norificacao){
-                            //Enviar notificação para o moderador
-                            $send_notific = (new LeilaoController)->notific_update_admin($idCad);
-                        }
+        $dados['post_status'] = isset($dados['post_status'])?$dados['post_status']:'pending';
+        $origem = isset($dados['config']['origem'])?$dados['config']['origem']:false;
+        // dd($dados);
+        $salvar = Post::create($dados);
+        $sm = false;
+        if(isset($salvar->id) && $salvar->id){
+            $mens = $this->label.' cadastrado com sucesso!';
+            $color = 'success';
+            $idCad = $salvar->id;
+            //REGISTRAR EVENTO STORE
+            if($salvar->id){
+                //SALVAR MENU QUANDO ADICIONA UMA PÁGINA
+                if($dados['post_type'] == 'paginas'){
+                    $sm = $this->addMenu($idCad);
+                }
+                if($dados['post_type'] == 'leiloes_adm'){
+                    $post_title = __('Leilão').' '.Qlib::zerofill($idCad,4);
+                    $sm = Post::where('id',$idCad)->update([
+                            'post_title'=>$post_title,
+                            'post_name'=>Qlib::createSlug($post_title),
+                        ]);
+                }
+                $regev = Qlib::regEvent(['action'=>'store','tab'=>$this->tab,'config'=>[
+                    'obs'=>'Cadastro guia Id '.$salvar->id,
+                    'link'=>$this->routa,
+                    ]
+                ]);
+                if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
+                    $meta_notific = 'notifica_email_moderador';
+                    //verifica se ja foi enviado um email e não foi aten
+                    // $verific_eviado
+                    $liberar_norificacao = Qlib::update_postmeta($idCad,$meta_notific,'n');
+                    if($liberar_norificacao){
+                        //Enviar notificação para o moderador
+                        $send_notific = (new LeilaoController)->notific_update_admin($idCad);
                     }
                 }
-            }else{
-                $mens = 'Erro ao salvar '.$this->label.'';
-                $color = 'danger';
-                $idCad = 0;
             }
-        // }
+        }else{
+            $mens = 'Erro ao salvar '.$this->label.'';
+            $color = 'danger';
+            $idCad = 0;
+        }
         //REGISTRAR EVENTOS
         (new EventController)->listarEvent(['tab'=>$this->tab,'id'=>@$salvar->id,'this'=>$this]);
 
@@ -1011,7 +980,6 @@ class PostController extends Controller
             }
             //REGISTRAR EVENTOS
             (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-
             $ret = [
                 'value'=>$dados[0],
                 'config'=>$config,

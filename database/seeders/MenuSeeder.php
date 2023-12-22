@@ -66,7 +66,7 @@ class MenuSeeder extends Seeder
                 'icon'=>'fas fa-plus',
                 'actived'=>true,
                 'url'=>'create',
-                'route'=>'leiloes_adm.create',
+                'route'=>'quick.add.leilao',
                 'pai'=>'cad-leiloes'
             ],
             [

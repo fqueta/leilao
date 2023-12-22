@@ -13,9 +13,21 @@
 
 @section('content')
     @include('admin.partes.header')
+    {{-- <div class="row mb-2">
+        <div class="col-sm-6">
+            <h1 class="m-0 tit-sep">Painel</h1>
+        </div>
+        <div class="col-sm-6 text-right">
+            <div class="btn-group" role="group" aria-label="actions">
+                <a href="https://cmd.databrasil.app.br/familias/create" class="btn btn-primary"><i class="fa fa-plus"></i> Novo cadastro</a>
+                <a href="https://cmd.databrasil.app.br/familias" class="btn btn-secondary"><i class="fa fa-list"></i> Ver cadastros</a>
+            </div>
+        </div>
+    </div> --}}
+
     <div class="row mb-2">
         <div class="col-sm-6">
-            <h1 class="m-0">{{__('Painel')}}</h1>
+            <h1 class="m-0 tit-sep">{{__('Painel')}}</h1>
         </div>
         <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">

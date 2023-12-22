@@ -20,7 +20,6 @@
                 </div>
             </div>
             <div class="card-body">
-
                 {{App\Qlib\Qlib::formulario([
                     'campos'=>$campos,
                     'config'=>$config,

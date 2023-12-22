@@ -143,7 +143,6 @@
         </div>
     @elseif ($config['type']=='html')
         @php
-        dd($config);
            $config['script'] = isset($config['script'])?$config['script']:false;
         @endphp
         <div class="col-{{$config['col']}}-{{$config['tam']}} {{$config['class_div']}}" div-id="{{$config['campo']}}">

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\EventController;
+use App\Http\Controllers\admin\QuickCadController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BairroController;
@@ -44,6 +45,9 @@ Route::prefix('admin')->group(function(){
     // Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
     // Route::post('login', 'Auth\LoginController@login');
     // Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+    Route::prefix('quick-cad')->group(function(){
+        Route::get('/leilao',[QuickCadController::class,'leilao'])->name('quick.add.leilao');
+    });
     Route::prefix('users')->group(function(){
         Route::get('/',[UserController::class,'index'])->name('users.index');
 

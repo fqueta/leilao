@@ -31,7 +31,15 @@
                                 window.close(); // Close the current popup
                                 return;
                             }else{
-                                window.location = redirect;
+                                try {
+                                    if(res.redirect){
+                                        window.location = res.redirect;
+                                        return;
+                                    }
+                                } catch (error) {
+                                    window.location = redirect;
+                                    console.log(error);
+                                }
                             }
                         }else if(res.return){
                             if(pop){

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\EventController;
+use App\Http\Controllers\admin\QuickCadController;
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -179,7 +180,7 @@ class UserController extends Controller
             'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'6'],
             'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
             'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Documentos').'</h6><hr class="mt-0">','script_show'=>''],
-            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3'],
+            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3','value'=>@$_GET['cpf']],
             'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3','cp_busca'=>'config][cep'],
             'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'6','cp_busca'=>'config][endereco'],
@@ -211,6 +212,10 @@ class UserController extends Controller
             unset($ret['id_permission']);
         }
         if($origem=='admin'){
+            //Adicionar input hidden para o quick cadastro
+            if(isset($_GET['quick_cad'])){
+                $ret['quick_cad'] = ['label'=>'quick cad','active'=>false,'type'=>'hidden','value'=>$_GET['quick_cad'],'exibe_busca'=>'d-block','event'=>'','tam'=>'2'];
+            }
             $ret['sep3']=[
                 'label'=>'Termos',
                 'active'=>false,
@@ -452,6 +457,7 @@ class UserController extends Controller
     }
     public function index()
     {
+        $ajax = isset($_GET['ajax'])?$_GET['ajax']:'n';
         $user = $this->user;
         $this->authorize('is_admin', $user);
         $title = 'Usuários Cadastrados';
@@ -463,7 +469,7 @@ class UserController extends Controller
 
         //REGISTRAR EVENTOS
         (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-        return view($routa.'.index',[
+        $ret = [
             'dados'=>$queryUsers['user'],
             'title'=>$title,
             'titulo'=>$titulo,
@@ -475,7 +481,12 @@ class UserController extends Controller
             'routa'=>$routa,
             'view'=>$view,
             'i'=>0,
-        ]);
+        ];
+        if($ajax=='s'){
+            return response()->json($ret);
+        }else{
+            return view($routa.'.index',$ret);
+        }
     }
     public function create(User $user)
     {
@@ -580,7 +591,14 @@ class UserController extends Controller
                 //requisição realizada no painel de administrador
                 (new EventController)->listarEvent(['tab'=>$this->tab,'id'=>$salvar->id,'this'=>$this]);
                 $ret['return'] = route($route).'?idCad='.$salvar->id;
-                $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+                if($request->has('quick_cad')){
+                    if($request->get('quick_cad')=='leilao'){
+                        //go to stet 2
+                        $ret['redirect'] = (new QuickCadController())->link_step2(@$salvar->id);;
+                    }
+                }else{
+                    $ret['redirect'] = route($this->routa.'.edit',['id'=>$salvar->id]);
+                }
             }else{
                 //requisição realizada pelo usuario do site
                 if($salvar->id){
@@ -808,6 +826,11 @@ class UserController extends Controller
                 's_me'=>$s_me,
                 'return'=>$route,
             ];
+            if($request->has('redirect')){
+                $ret['redirect'] = $request->get('redirect');
+            }else{
+                $ret['redirect'] = route('users.show',['id'=>$id]);
+            }
             if($atualizar){
                 //REGISTRAR EVENTOS
                 (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);

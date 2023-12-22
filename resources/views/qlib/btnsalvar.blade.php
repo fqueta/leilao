@@ -1,6 +1,16 @@
 
 @php
     $redirect_base = false;
+    $btn_continuar = isset($_GET['bc']) ? $_GET['bc'] : 'true';
+    $label_btn_permanecer = isset($_GET['lbp']) ? $_GET['lbp']:__('Salvar e permanecer');
+    $label_btn_sair = isset($_GET['lbs']) ? $_GET['lbs']:__('Salvar e prosseguir');
+    $btn_sair = isset($_GET['bs']) ? $_GET['bs'] : 'true';
+    if(isset($config['ac']) && $config['ac']=='cad'){
+        $redirect_base = isset($config['redirect'])?$config['redirect']:$redirect_base;
+        if(isset($_GET['rbase']) && !empty($_GET['rbase'])){
+            $redirect_base = base64_decode($_GET['rbase']);
+        }
+    }
     if(isset($config['ac']) && $config['ac']=='alt'){
         $_GET['redirect'] = isset($_GET['redirect']) ? $_GET['redirect'] : route($config['route'].'.index').'?idCad='.$value['id'];
         if(isset($_GET['redirect_base'])&&!empty($_GET['redirect_base'])){
@@ -47,8 +57,12 @@
                 <a href="{{$r_novo_cadastro}}" class="btn btn-default"> <i class="fas fa-plus"></i> Novo cadastro</a>
             @endcan
             @can('update',$config['route'])
-                <button type="submit" btn="permanecer" class="btn btn-primary">Salvar e permanecer</button>
-                <button type="submit" btn="sair"  class="btn btn-outline-primary">Salvar e Sair <i class="fa fa-chevron-right"></i></button>
+                @if($btn_continuar=='true')
+                    <button type="submit" btn="permanecer" class="btn btn-primary">{{$label_btn_permanecer}}</button>
+                @endif
+                @if ($btn_sair=='true')
+                    <button type="submit" btn="sair"  class="btn btn-outline-primary">Salvar e Sair <i class="fa fa-chevron-right"></i></button>
+                @endif
             @endcan
         @else
             @if($frontend)
@@ -56,9 +70,19 @@
             @else
                 @can('create',$config['route'])
                     @if (!isset($_GET['popup']))
-                        <button type="submit" btn="permanecer" class="btn btn-primary">Salvar e permanecer</button>
+                        @if(isset($_GET['qc']) && $_GET['qc']!='s')
+                            <button type="submit" btn="permanecer" class="btn btn-primary">{{$label_btn_permanecer}}</button>
+                        @endif
                     @endif
-                    <button type="submit" btn="sair"  class="btn btn-outline-primary">Salvar e Sair <i class="fa fa-chevron-right"></i></button>
+                    @if($btn_continuar=='true')
+                        <button type="submit" btn="permanecer" class="btn btn-primary">{{$label_btn_permanecer}}</button>
+                    @endif
+                    @if(isset($_GET['qc']) && $_GET['qc']=='s')
+                        <button type="submit" btn="sair"  class="btn btn-primary">Salvar e Prosseguir <i class="fa fa-chevron-right"></i></button>
+                    @endif
+                    @if($btn_sair=='true')
+                        <button type="submit" btn="sair"  class="btn btn-outline-primary">{{$label_btn_sair}} <i class="fa fa-chevron-right"></i></button>
+                    @endif
                 @endcan
             @endif
         @endif
