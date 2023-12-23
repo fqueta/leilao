@@ -1098,7 +1098,7 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
-     * Metodo para listar informações do vencedores do leilao que terminou
+     * Metodo para listar informações do(s) vencedore(s) do leilao que terminou
      * @param int $id_user
      * @return array $ret
      */

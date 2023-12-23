@@ -30,10 +30,10 @@ class homeController extends Controller
         $lc = new LeilaoController;
         $uc = new UserController;
         $card_top = [
-            'finalizados' => ['label' => __('Leilões finalizados'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_finalizados(),'color' => 'bg-info'],
-            'andamento' => ['label' => __('Leilões em andamento'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_situacao('ea'),'color' => 'bg-success'],
-            'cadastrados' => ['label' => __('Usuários cadastrados'),'icon' => 'fas fa-users','link' => '','value' => $uc->total(),'color' => 'bg-warning'],
-            'total' => ['label' => __('Valor dos contratos'),'icon' => 'fa fa-cash','link' => '','value' => '150','color' => 'bg-danger'],
+            'finalizados' => ['label' => __('Leilões finalizados'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_finalizados(),'color' => 'bg-info','title'=>''],
+            'andamento' => ['label' => __('Leilões em andamento'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_situacao('ea'),'color' => 'bg-success','title'=>''],
+            'cadastrados' => ['label' => __('Usuários cadastrados'),'icon' => 'fas fa-users','link' => route('users.index'),'value' => $uc->total(),'color' => 'bg-warning','title'=>''],
+            'total' => ['label' => __('Leilões não pagos'),'icon' => 'fa fa-cash','link' => '','value' => '150','color' => 'bg-danger','title'=>'Contratos de leilões arrematados e não pagos'],
         ];
         // dd($card_top);
         $config = [
