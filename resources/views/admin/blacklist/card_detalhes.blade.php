@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-md-12">
                 <label>{{__('Motivo')}}: </label>
-                <span>{{$dados['motivo']['description']}}</span>
+                <span>{!!$dados['motivo']['description']!!}</span>
             </div>
             {{-- <div class="col-md-6">
                 <label>{{__('Motivo')}}: </label>

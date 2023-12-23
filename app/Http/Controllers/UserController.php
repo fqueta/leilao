@@ -236,8 +236,8 @@ class UserController extends Controller
                     'label'=>'Termos',
                     'active'=>false,
                     'type'=>'html_script',
-                    'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script_'=>'<p class="pt-2 mb-3 text-muted">Temos não aceitos</p>',
-                    'script_show'=>'<p class="pt-2 mb-3 text-muted">Temos não aceitos</p>'
+                    'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script_'=>'<p class="pt-2 mb-3 text-danger">Usuário ainda não concordou com os temos.</p>',
+                    'script_show'=>'<p class="pt-2 mb-3 text-danger">Usuário ainda não concordou com os temos.</p>'
                 ];
             }
             if(isset($dados['id'])){
@@ -917,7 +917,7 @@ class UserController extends Controller
             $arr_t = Qlib::lib_json_array($termo);
             if(@$arr_t['aceito_termo']=='s'){
                 if($type=='html'){
-                    $ret = '<span class="text-danger">Termos aceitos pelo usuário em {data} :: {ip}</span>';
+                    $ret = '<span class="text-success">Termos aceitos pelo usuário em {data} :: {ip}</span>';
                     $ret = str_replace('{data}',$arr_t['data'],$ret);
                     $ret = str_replace('{ip}',$arr_t['ip'],$ret);
                 }else{
@@ -1205,5 +1205,14 @@ class UserController extends Controller
     public function get_users_site(){
 
     }
+    /**
+     * Metodo para retorna o total de usuarios cadastrados
+     */
+    public function total(){
+        $d = User::all()->count();
+        return $d;
+
+    }
+
 }
 

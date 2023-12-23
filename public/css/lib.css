@@ -20,6 +20,9 @@ table.familias td{
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.breadcrumb{
+    background-color:transparent !important;
+}
 .card-top .small-box p {
     max-width: 28ch;
     overflow: hidden;

@@ -24,7 +24,6 @@
             </div>
         </div>
     </div> --}}
-
     <div class="row mb-2">
         <div class="col-sm-6">
             <h1 class="m-0 tit-sep">{{__('Painel')}}</h1>
@@ -36,6 +35,26 @@
             </ol>
         </div>
     </div>
+    @if (isset($config['card_top']) && is_array($config['card_top']))
+        <div class="row">
+            @foreach ($config['card_top'] as $ck=>$cardv)
+                <div class="col-lg-3 col-6">
+                    <div class="small-box {{$cardv['color']}}">
+                        <div class="inner">
+                            <h3>{{$cardv['value']}}</h3>
+                            <p>{{$cardv['label']}}</p>
+                        </div>
+                        <div class="icon">
+                            <i class="{{$cardv['icon']}}"></i>
+                        </div>
+                        <a href="{{$cardv['link']}}" class="small-box-footer">Saiba mais <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            @endforeach
+
+        </div>
+    @endif
+
     <div class="row mb-2">
         @include('admin.leilao.lista_leilao_terminado')
         @include('admin.blacklist.cardpainel')

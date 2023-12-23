@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\BlacklistController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\LeilaoController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -26,9 +27,19 @@ class homeController extends Controller
         */
 
         $blacklist=(new BlacklistController())->get_blacklist();
+        $lc = new LeilaoController;
+        $uc = new UserController;
+        $card_top = [
+            'finalizados' => ['label' => __('Leilões finalizados'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_finalizados(),'color' => 'bg-info'],
+            'andamento' => ['label' => __('Leilões em andamento'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_situacao('ea'),'color' => 'bg-success'],
+            'cadastrados' => ['label' => __('Usuários cadastrados'),'icon' => 'fas fa-users','link' => '','value' => $uc->total(),'color' => 'bg-warning'],
+            'total' => ['label' => __('Valor dos contratos'),'icon' => 'fa fa-cash','link' => '','value' => '150','color' => 'bg-danger'],
+        ];
+        // dd($card_top);
         $config = [
             'blacklist'=>$ret = (new BlacklistController())->get_blacklist(),
-            'lista_leilao_terminado' => (new LeilaoController)->lista_leilao_terminado(),
+            'lista_leilao_terminado' => $lc->lista_leilao_terminado(),
+            'card_top' => $card_top,
         ];
         return view('home',[
             'config'=>$config,

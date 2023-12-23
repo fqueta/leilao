@@ -414,6 +414,29 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
+     * Metodo para atualização a situalão de um lelilão de acorto com a necessidade
+     * @param integer $leilao_id, string $situacao
+     */
+    public function atualiza_situacao($leilao_id,$situacao){
+        $ret = Qlib::update_postmeta($leilao_id,$this->c_meta_situacao,$situacao);
+        return $ret;
+    }
+    /**
+     * Retorna um arra com todos status de situacação do leilão
+     */
+    public function label_situacao($val=false){
+        $arr = [
+            'ea'=>'Em Andamento',
+            'f'=>'Leilão Finalizado',
+            'a'=>'Aguardando Publicação',
+        ];
+        if($val){
+            return $arr[$val];
+        }else{
+            return $arr;
+        }
+    }
+    /**
      * Metodo Mostrar o lance vencedor
      * @param integer $leilao_id, array $dl=dados dos leilão, string $get_meta_tipo=tipo de dados para trazer junto
     */
@@ -1469,7 +1492,7 @@ class LeilaoController extends Controller
         $this->middleware('auth');
         $user_id = $user_id ? $user_id : Auth::id();
         $seguindo = Post::select('posts.*')->join('postmeta','posts.id','=','postmeta.post_id')->
-            where('posts.post_type','=','leiloes_adm')->
+            where('posts.post_type','=',$this->post_type)->
             where('postmeta.meta_key','=','seguidor')->
             where('postmeta.meta_value','LIKE','%"'.$user_id.'"%')->
             orderBy('posts.ID','Asc')->
@@ -1558,5 +1581,34 @@ class LeilaoController extends Controller
         }
         return $ret;
     }
-
+    /**
+     * Metodo responsavel por buscar o total dos leilões que finalizaram
+     *
+     */
+    public function total_finalizados(){
+       $ret = Post::join('postmeta','posts.id','=','postmeta.post_id')->
+       where('postmeta.meta_key','=','situacao_leilao')->
+       where('postmeta.meta_value','f')->
+       where('posts.post_type',$this->post_type)->
+       where('posts.post_status','publish')->
+       where('posts.config','LIKE','%status":"publicado%')->
+       where('posts.config','LIKE','%contrato":"%')->
+       count();
+       return $ret;
+    }
+    /**
+     * Retorna total de leilão em determinada situacao
+     * @param $status
+     */
+    public function total_situacao($situacao){
+       $ret = Post::join('postmeta','posts.id','=','postmeta.post_id')->
+       where('postmeta.meta_key','=','situacao_leilao')->
+       where('postmeta.meta_value',$situacao)->
+       where('posts.post_type',$this->post_type)->
+       where('posts.post_status','!=','trash')->
+    //    where('posts.config','LIKE','%status":"publicado%')->
+       where('posts.config','LIKE','%contrato":"%')->
+       count();
+       return $ret;
+    }
 }

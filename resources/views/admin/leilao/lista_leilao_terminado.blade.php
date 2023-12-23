@@ -5,7 +5,7 @@
     <div class="card">
         <div class="card-header  border-transparent">
             <h3 class="card-title">
-                {{__('Vencedores')}}
+                {{__('Lista de leilões finalizados e ganhadores')}}
             </h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -22,7 +22,7 @@
                     <thead>
                         <tr>
                             <th>{{__('Leilão')}}</th>
-                            <th>{{__('Nome')}}</th>
+                            <th>{{__('Ganhador')}}</th>
                             <th>{{__('Termino')}}</th>
                             <th>{{__('Valor')}}</th>
                             <th class="">{{__('Pagamento')}}</th>

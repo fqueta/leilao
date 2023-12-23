@@ -1073,6 +1073,7 @@ class PostController extends Controller
                 $mens = $this->label.' cadastrado com sucesso!';
                 $color = 'success';
                 $id = $id;
+
                 //REGISTRAR EVENTOS
                 (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
                 if(isset($dados['post_type']) && $dados['post_type']=='leiloes_adm'){
@@ -1081,6 +1082,17 @@ class PostController extends Controller
                     $liberar_norificacao = Qlib::update_postmeta($id,$meta_notific,'n');
                     if($liberar_norificacao){
                         $send_notific = (new LeilaoController)->notific_update_admin($id);
+                    }
+                    //Atualizar o situação
+                    if($dados['post_status']=='publish'){
+                        if(is_string(@$dados['config'])){
+                            $arr_c = Qlib::lib_json_array($dados['config']);
+                            if(@$arr_c['status'] == 'publicado'){
+                                $stus = (new LeilaoController)->atualiza_situacao($id,'ea'); //em andamento
+                            }else{
+                                $stus = (new LeilaoController)->atualiza_situacao($id,'a'); //aguardando publicação
+                            }
+                        }
                     }
                 }
             }else{
