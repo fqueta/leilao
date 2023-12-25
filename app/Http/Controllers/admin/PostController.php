@@ -203,7 +203,7 @@ class PostController extends Controller
                 'value'=>@$_GET['config']['cliente'],
                 'cp_busca'=>'config][cliente',
             ],
-            'post_title'=>['label'=>'Numero do contrato','active'=>true,'placeholder'=>'Ex.: Nome do produto ','type'=>'text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'12','title'=>'Identificador do contrado pode ser nome ou número'],
+            'post_title'=>['label'=>'Número do contrato','active'=>true,'placeholder'=>'Ex.: 5621.11.2023','type'=>'text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'12','title'=>'Identificador do contrado pode ser nome ou número'],
             'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'4','cp_busca'=>'config][total_horas','title'=>'Número total de horas que serão leiloadas'],
             'config[valor_r]'=>['label'=>'Valor da Rescisão','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'4','cp_busca'=>'config][valor_r','title'=>'Valor da rescisão, este também será o valor de lance inicial quando o cliente criar o leilão'],
             'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][incremento','class'=>'','title'=>'Valor de incremento em cada lançe do Leilão'],
