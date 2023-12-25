@@ -30,6 +30,7 @@
                         </tr>
                     </thead>
                     @if (isset($config['lista_leilao_terminado']) && is_array($config['lista_leilao_terminado']))
+
                         @foreach ($config['lista_leilao_terminado'] as $k=>$v)
                             <tr>
                                 @if(isset($v['link_leilao_front']) && $v['link_leilao_front'])
@@ -48,6 +49,8 @@
                                         <a class="underline" href="{{route('users.show',['id'=>$v['venc']['author']]).$redirect}}" rel="">
                                             {{@$v['venc']['nome']}}
                                         </a>
+                                    @else
+                                        <span class="text-danger"> {{__('Sem lances')}} </span>
                                     @endif
                                 </td>
                                 <td>{{@$v['term']['html']}}</td>

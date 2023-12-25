@@ -1611,4 +1611,49 @@ class LeilaoController extends Controller
        count();
        return $ret;
     }
+    /**
+     * Retorna os dados de todos os leilões publicados finalizados e não pagos
+     * @return array $ret
+     */
+    public function finalizados_nao_pagos(){
+        //(new LeilaoController())->finalizados_nao_pagos();
+        $ret = false;
+        $d = Post::join('postmeta','posts.id','=','postmeta.post_id')->
+        where('postmeta.meta_key','=','situacao_leilao')->
+        where('postmeta.meta_value','f')->
+        where('posts.post_type',$this->post_type)->
+        where('posts.post_status','publish')->
+        where('posts.config','LIKE','%status":"publicado%')->
+        where('posts.config','LIKE','%contrato":"%')->
+        get();
+        $dados = [];
+        $total_pago = NULL;
+        $total_apagar = NULL;
+        if($d->count()){
+            $d = $d->toArray();
+            foreach ($d as $k => $v) {
+                if(isset($v['ID'])){
+                    $ul = $this->get_lance_vencedor($v['ID'],$v,'ultimo_lance');
+                    if(isset($ul['ultimo_lance'])){
+                        $ul = @$ul['ultimo_lance']->toArray();
+                        //verificar se está pago
+                        if($is_payd = $this->is_paid($v['ID'])){
+                            $total_pago += isset($ul['valor_lance']) ? $ul['valor_lance'] : 0;
+                        }else{
+                            $total_apagar += isset($ul['valor_lance']) ? $ul['valor_lance'] : 0;
+                            $v['is_payd'] = $is_payd;
+                            $v['ul'] = $ul;
+                            $dados[$k] = $v;
+
+                        }
+                    }
+                }
+            }
+            $ret['dados'] = $dados;
+            $ret['total_pago'] = $total_pago;
+            $ret['total_apagar'] = $total_apagar;
+            $ret['d'] = $d;
+        }
+        return $ret;
+    }
 }

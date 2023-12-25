@@ -88,7 +88,8 @@ class TesteController extends Controller
         // $ret = (new LeilaoController)->list_alert_winners();
         // $ret = (new BlacklistController())->send_to_blacklist(false);
         // $ret = (new BlacklistController())->remove(1);
-        $ret = (new QuickCadController())->link_step2(5);
+        // $ret = (new QuickCadController())->link_step2(5);
+        $ret = (new LeilaoController())->finalizados_nao_pagos();
         // // $ret = (new BlacklistController())->is_blacklist(3);
         // $ret = (new BlacklistController())->get_blacklist();
         dd($ret);
