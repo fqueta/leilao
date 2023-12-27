@@ -42,7 +42,7 @@
                 </li>
                 <li>
                     <i class="bx bx-chevron-right"></i>
-                    <a href="https://aeroclubejf.com.br/termos-e-condicoes/">Termos e Condições</a>
+                    <a href="/termos-do-site">Termos e Condições</a>
                 </li>
                 <li>
                     <i class="bx bx-chevron-right"></i>

@@ -24,7 +24,8 @@
                 stateSave: true,
                 language: {
                     url: '/DataTables/datatable-pt-br.json'
-                }
+                },
+                order:[]
         });
         carregaMascaraMoeda(".moeda");
         $('[selector-event]').on('change',function(){

@@ -688,7 +688,7 @@ class PaymentController extends Controller
                 $situacao_pagamento = $sp;
             }
         }else{
-            $sp = 'Aguardando pagamento';
+            $sp = 'Aguardando';
             if($type=='html'){
                 $situacao_pagamento = '<span class="text-danger">'.$sp.'</span>';
             }else{

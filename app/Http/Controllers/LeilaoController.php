@@ -390,9 +390,9 @@ class LeilaoController extends Controller
             $sd1 = strtotime($d1);
             $sd2 = strtotime($d2);
             if($sd1<$sd2){
-                //marcar leilão como terminado caso não sena sido feito ainda
+                //marcar leilão como terminado caso não sena sido feito ainda ou se está na reciclagem
                 $situacao_leilao = Qlib::get_postmeta($leilao_id,$this->c_meta_situacao,true);
-                if($situacao_leilao!='f'){
+                if($situacao_leilao!='f' && $situacao_leilao!='r'){
                     $ret['s_s'] = Qlib::update_postmeta($leilao_id,$this->c_meta_situacao,'f');
                     $ret['s_d'] = Qlib::update_postmeta($leilao_id,$this->c_meta_detalhes_situacao,Qlib::lib_array_json([
                         'data_situacao'=>Qlib::dataBanco(),
@@ -424,12 +424,22 @@ class LeilaoController extends Controller
     /**
      * Retorna um arra com todos status de situacação do leilão
      */
-    public function label_situacao($val=false){
-        $arr = [
-            'ea'=>'Em Andamento',
-            'f'=>'Leilão Finalizado',
-            'a'=>'Aguardando Publicação',
-        ];
+    public function arr_situacao($val=false,$type=1){
+        if($type==2){
+            $arr = [
+                'ea'=>'<span class="text-success">Em Andamento</span>',
+                'f'=>'<span class="text-danger">Leilão Finalizado</span>',
+                'a'=>'<span class="text-warning">Aguardando Publicação</span>',
+                'r'=>'<span class="text-info">Reciclagem solicitada</span>',
+            ];
+        }else{
+            $arr = [
+                'ea'=>'Em Andamento',
+                'f'=>'Leilão Finalizado',
+                'a'=>'Aguardando Publicação',
+                'r'=>'Reciclagem solicitada',
+            ];
+        }
         if($val){
             return $arr[$val];
         }else{
@@ -745,6 +755,7 @@ class LeilaoController extends Controller
         $data['link_thumbnail'] = Qlib::get_thumbnail_link($data['ID']);
         $data['link_leilao'] = $lc->get_link_front($data['ID']);
         $data['total_views'] = $lc->get_total_views($data['ID']);
+        $data['situacao_html'] = $lc->situacao_html($data['ID']);
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_venda']) && !empty($data['config']['valor_venda'])){
             //Exibir botão comprar
             $vv = Qlib::precoBanco($data['config']['valor_venda']);
@@ -1196,7 +1207,9 @@ class LeilaoController extends Controller
         where('post_status','publish')->
         where('config','LIKE','%status":"publicado%')->
         where('config','LIKE','%contrato":"%')->
+        orderBy('ID','desc')->
         get();
+        // dd($list->toArray());
         $pc = new PaymentController();
         if($list->count()){
             $arr_l = $list->toArray();
@@ -1259,6 +1272,7 @@ class LeilaoController extends Controller
                                 // }
                                 $situacao_pagamento = $pc->get_status_payment($leilao_id);
                                 $ret[$key]['status_pago'] = $sp;
+                                $ret[$key]['situacao'] = $this->situacao($leilao_id);
                                 $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
                                 $ret[$key]['link_leilao_front'] = $link_leilao_front;
                                 $ret[$key]['pago'] = $this->is_paid($leilao_id);
@@ -1276,14 +1290,13 @@ class LeilaoController extends Controller
                             $sp = Qlib::get_postmeta($leilao_id,$meta_status_pagamento,true);
                             $situacao_pagamento = $pc->get_status_payment($leilao_id);
                             $ret[$key]['status_pago'] = $sp;
+                            $ret[$key]['situacao'] = $this->situacao($leilao_id);
                             $ret[$key]['situacao_pagamento'] = $situacao_pagamento;
                             $ret[$key]['link_leilao_front'] = $link_leilao_front;
                             $ret[$key]['link_pagamento'] = $this->get_link_pagamento($leilao_id);
                             // dd($ret);
                         }
                     }
-
-
                 }
             }
         }
@@ -1343,6 +1356,27 @@ class LeilaoController extends Controller
             return $st;
         }else{
             if($st == 's'){
+                $ret = true;
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para verificar se um leilao está finalizado
+     * @param $leilao_id
+     * @return boolean true || false
+     */
+    public function is_end($leilao_id,$type='boolean') {
+        $meta_finalizado = $this->c_meta_situacao;
+        $st = Qlib::get_postmeta($leilao_id,$meta_finalizado,true);
+        $ret = false;
+        if($type=='string'){
+            if(!$st){
+                $st='n';
+            }
+            return $st;
+        }else{
+            if($st == 'f'){
                 $ret = true;
             }
         }
@@ -1588,12 +1622,17 @@ class LeilaoController extends Controller
     public function total_finalizados(){
        $ret = Post::join('postmeta','posts.id','=','postmeta.post_id')->
        where('postmeta.meta_key','=','situacao_leilao')->
-       where('postmeta.meta_value','f')->
+       Where('postmeta.meta_value','=','f')->
+    //    orWhere('postmeta.meta_value','=','f')->
+    //    orWhere('postmeta.meta_value','=','r')->
        where('posts.post_type',$this->post_type)->
        where('posts.post_status','publish')->
        where('posts.config','LIKE','%status":"publicado%')->
        where('posts.config','LIKE','%contrato":"%')->
+       orderBy('posts.ID','desc')->
        count();
+    //    get();
+    // dd($ret->toArray());
        return $ret;
     }
     /**
@@ -1653,6 +1692,59 @@ class LeilaoController extends Controller
             $ret['total_pago'] = $total_pago;
             $ret['total_apagar'] = $total_apagar;
             $ret['d'] = $d;
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para reciclar um leilão finalizado
+     * @param int $leilao_id
+     */
+    public function reciclar($leilao_id){
+        $ret['exec'] = false;
+        //Verificar se está finalizado
+        if($this->is_end($leilao_id)){
+            //atualizar o situação de r de reciclar
+            $situacao = 'r';
+            $ret['exec'] = Qlib::update_postmeta($leilao_id,$this->c_meta_situacao,$situacao);
+            //Salvar evento para historico.
+            if($ret['exec']){
+                $user = Auth::user();
+                $regev = Qlib::regEvent(['action'=>'update','tab'=>'Posts','post_id'=>$leilao_id,'config'=>[
+                        'obs'=>'Solicitação de reciclagem feita por '.$user['name'],
+                        'data_solicitacao'=>Qlib::dataLocal(),
+                    ]
+                ]);
+                $ret['evento'] = $regev;
+                //excluir lances anteriores.
+                $removeLances = lance::where('leilao_id',$leilao_id)->update([
+                    'excluido'=>'s',
+                    'reg_excluido'=>Qlib::lib_array_json(['excluido_por'=>$user['id'],'data_excluido'=>Qlib::dataLocal()]),
+                ]);
+            }
+        }
+        return response()->json($ret);
+    }
+    /**
+     * Metodo para retornar a situação de um leilão com uma letra
+     * @param integer $leilao_id
+     * @return string
+     */
+    public function situacao($leilao_id){
+        return Qlib::get_postmeta($leilao_id,$this->c_meta_situacao,true);
+    }
+    /**
+     * Metodo para retornar a situação de um leilão em html
+     * @param integer $leilao_id
+     * @return string $ret
+     */
+    public function situacao_html($leilao_id){
+        $situacao =  Qlib::get_postmeta($leilao_id,$this->c_meta_situacao,true);
+        if($situacao){
+            $sh = $this->arr_situacao($situacao,2);
+            $tm = '<label>'.__('Situação').':</label> <span>{sh}</span>';
+            $ret = str_replace('{sh}',$sh,$tm);
+        }else{
+            $ret = false;
         }
         return $ret;
     }

@@ -2392,7 +2392,7 @@ function lib_gerLances(redirect){
         // if(!window.confirm('DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'? \n Ao fazer isso você está concordando também com os nossos termos de usos')){
         //     return ;
         // }
-        var msg = '<div class="row"><div id="exibe_etapas" class="col-md-12 text-center"><h6>DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'?</h6><p>\n Ao fazer isso você estara concordando também com os nossos termos de usos</p></div><div class="col-md-12 mt-3 text-center"></div></div>';
+        var msg = '<div class="row"><div id="exibe_etapas" class="col-md-12 text-center"><h6>DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'?</h6><p>\n Ao fazer isso você estara concordando também com os nossos <a href="/termos-do-site" targer="_BLANK">termos de uso</a>></p></div><div class="col-md-12 mt-3 text-center"></div></div>';
         // var btns = '<button type="button" class="btn btn-primary" salvar-agora>Salvar agora</button>';
         // alerta2(msg,'modal-lance','Atenção','',true,9000,true);
         $('#modal-dar-lance .modal-body').html(msg);
@@ -2805,4 +2805,26 @@ function close_popup(){
     //     $('#preload').fadeOut("fast");
     //     console.log(err);
     // });
+}
+function modalConfirm(mes,callB){
+    if(window.confirm(mes)){
+        callB;
+    }
+}
+function reciclar(lid){
+    var m='Ao reciclar este leilão todos os lances serão apagados \n DESEJA CONTINUAR?';
+    modalConfirm(m,getAjax({
+            url:'/ajax/reciclar-leilao/'+lid,
+            type:'POST',
+            dataType: 'json',
+            csrf: true,
+        },function(res){
+            $('#preload').fadeOut("fast");
+            if(res.exec){
+                var url = '/admin/leiloes_adm/'+lid+'/edit';
+                $('#preload').fadeIn();
+                window.location = url;
+            }
+        })
+    );
 }

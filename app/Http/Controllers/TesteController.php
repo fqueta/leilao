@@ -85,11 +85,12 @@ class TesteController extends Controller
         //     'description' =>'Não pagamento',
         //     'leilao_id' =>'65',
         // ]);
-        // $ret = (new LeilaoController)->list_alert_winners();
+        $ret = (new LeilaoController)->reciclar(54);
+        $ret = (new LeilaoController)->situacao_html(54);
         // $ret = (new BlacklistController())->send_to_blacklist(false);
         // $ret = (new BlacklistController())->remove(1);
         // $ret = (new QuickCadController())->link_step2(5);
-        $ret = (new LeilaoController())->finalizados_nao_pagos();
+        // $ret = (new LeilaoController())->finalizados_nao_pagos();
         // // $ret = (new BlacklistController())->is_blacklist(3);
         // $ret = (new BlacklistController())->get_blacklist();
         dd($ret);

@@ -26,7 +26,7 @@
 
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table m-0 dataTable">
+                    <table id="table-blacklist-home" class="table m-0 dataTable">
                         <thead>
                             <tr>
                                 <th>ID</th>

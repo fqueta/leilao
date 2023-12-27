@@ -10,6 +10,7 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\EtapaController;
 use App\Http\Controllers\EscolaridadeController;
 use App\Http\Controllers\EstadocivilController;
+use App\Http\Controllers\LeilaoController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RelatoriosController;
 use Illuminate\Support\Facades\Auth;
@@ -192,6 +193,8 @@ Route::prefix('ajax')->group(function(){
     Route::post('/ger-seguidores',[App\Http\Controllers\LeilaoController::class,'ger_seguidores']);
     Route::post('/notification',[App\Http\Controllers\NotificationController::class,'receive_ajax']);
     Route::post('/session-m',[App\Http\Controllers\admin\sessionController::class,'sessionManagerAction']);
+    Route::post('/reciclar-leilao/{leilao_id}',[LeilaoController::class,'reciclar'])->name('leiloes.reciclar');
+
 });
 Route::prefix('notification')->group(function(){
     Route::get('/index',[App\Http\Controllers\NotificationController::class,'index'])->name('notification.index');

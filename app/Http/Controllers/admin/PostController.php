@@ -379,11 +379,7 @@ class PostController extends Controller
             'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','class'=>'text-field-leilao','tam'=>'6','cp_busca'=>'config][total_horas','value'=>@$data['config']['total_horas'],'title'=>'Número total de horas'],
             // 'config[valor_r]'=>['label'=>'Lance inicial','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_r','title'=>'Valor do reembolso'],
             'config[valor_r]'=>['label'=>'Lance inicial','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','class'=>'text-field-leilao','tam'=>'6','cp_busca'=>'config][valor_r','value'=>@$data['config']['valor_r'],'title'=>'Valor do reembolso'],
-            // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
-            // 'config[lance_inicial]'=>['label'=>'Lance inicial','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][lance_inicial','title'=>'Valor do lance inicial'],
-            // 'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][incremento','title'=>'Valor de incremento em cada lançe'],
             'config[incremento]'=>['label'=>'Incremento','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'','tam'=>'6','cp_busca'=>'config][incremento','class'=>'text-field-leilao','value'=>@$data['config']['incremento'],'title'=>'Valor de incremento em cada lançe'],
-            // 'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
             'config[valor_venda]'=>['label'=>'Compre já','active'=>false,'placeholder'=>'','type'=>'hidden_text','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_venda','value'=>@$data['config']['valor_venda'],'title'=>'Valor para venda sem leilão'],
             // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
@@ -408,6 +404,14 @@ class PostController extends Controller
         ];
         if(Qlib::is_backend()){
             $ret['ID']['active'] = true;
+            // if($ac=='alt'){
+            //     $ret['post_title'] = ['label'=>'Nome do Leilão','active'=>true,'placeholder'=>'Ex.: leilão 55 ','type'=>'text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'7','title'=>'Identificador do contrado pode ser nome ou número','value'=>@$data['post_title']];
+            // }
+            if(isset($data['ID'])){
+                //Verificar qual a situação interna
+                $situacao = Qlib::get_postmeta($data['ID'],);
+                // dd($data['ID']);
+            }
             $ret['post_status'] = ['label'=>'Liberado','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']];
             //Se tem um contrato cadastrado impedir de mudar o proprietário
             if(isset($data['config']['cliente']) && ($author_id = $data['config']['cliente']) && isset($data['config']['contrato']) && !empty($data['config']['contrato'])){
@@ -1027,6 +1031,23 @@ class PostController extends Controller
                 ];
                 return response()->json($ret);
             }
+            //verificar se está finalizado
+            $finalizado = $lc->is_end($id);
+            if($finalizado){
+                //
+                $mens = 'Para editar leilão finalizado use a função de Reciclagem antes';
+                $ret = [
+                    'exec'=>true,
+                    'id'=>$id,
+                    'mens'=>$mens,
+                    'mensa'=>$mens,
+                    'color'=>'danger',
+                ];
+                return response()->json($ret);
+            }
+
+            //se estiver finalizado pede para usar a função reciclar para liberar o leilao e ser salvo
+
         }
         $data = [];
         $mens=false;

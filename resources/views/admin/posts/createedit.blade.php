@@ -84,7 +84,7 @@
                 @endif
             </div>
         </div>
-        @if ($config['sec']!='decretos')
+        {{-- @if ($config['sec']!='decretos')
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
@@ -119,7 +119,7 @@
                 </div>
             </div>
         </div>
-        @endif
+        @endif --}}
     </div>
     @endif
 </div>

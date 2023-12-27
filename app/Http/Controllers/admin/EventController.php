@@ -57,7 +57,6 @@ class EventController extends Controller
                     'tab'=>$tab,
                     'config'=>Qlib::lib_array_json($conf),
                 ];
-                // dd($ds);
                 $ret = Event::create($ds);
             }
         }

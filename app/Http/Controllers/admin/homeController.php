@@ -31,20 +31,18 @@ class homeController extends Controller
         $uc = new UserController;
         $fnp = $lc->finalizados_nao_pagos();
         $card_top = [
-            'finalizados' => ['label' => __('Leilões finalizados'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_finalizados(),'color' => 'bg-info','title'=>''],
+            'finalizados' => ['label' => __('Leilões finalizados'),'icon' => 'fas fa-gavel','link' => url('/admin#list-finalizados'),'value' => $lc->total_finalizados(),'color' => 'bg-info','title'=>''],
             'andamento' => ['label' => __('Leilões em andamento'),'icon' => 'fas fa-gavel','link' => '','value' => $lc->total_situacao('ea'),'color' => 'bg-success','title'=>''],
             'cadastrados' => ['label' => __('Usuários cadastrados'),'icon' => 'fas fa-users','link' => route('users.index'),'value' => $uc->total(),'color' => 'bg-warning','title'=>''],
             'total' => ['label' => __('Leilões não pagos'),'icon' => 'fa fa-cash','link' => '','value' => Qlib::valor_moeda(@$fnp['total_apagar'],'R$'),'color' => 'bg-danger','title'=>'Contratos de leilões arrematados e não pagos'],
         ];
         // dd($card_top);
         $config = [
-            'blacklist'=>$ret = (new BlacklistController())->get_blacklist(),
-            'lista_leilao_terminado' => $lc->lista_leilao_terminado(),
             'card_top' => $card_top,
+            'lista_leilao_terminado' => $lc->lista_leilao_terminado(),
+            'blacklist'=>$ret = (new BlacklistController())->get_blacklist(),
         ];
-        return view('home',[
-            'config'=>$config,
-        ]);
+        // dd($config);
         return view('home',[
             'config'=>$config,
         ]);
