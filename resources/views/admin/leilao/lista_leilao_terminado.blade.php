@@ -71,7 +71,7 @@
                                         @endphp
                                     @else
                                         @if (@$v['situacao']=='r')
-                                            <a href="{{route('leiloes_adm.edit',['id'=>$v['ID']])}}" title=" {{__('Editar')}} " class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> {{__('Editar')}} </a>
+                                            <a href="{{route('leiloes_adm.edit',['id'=>$v['ID']])}}?redirect={{url('/admin')}}" title=" {{__('Editar')}} " class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> {{__('Editar')}} </a>
                                         @else
                                             <button title=" {{__('Reciclar o leilão')}} " onclick="reciclar('{{$v['ID']}}');" class="btn btn-info btn-sm"><i class="fas fa-recycle"></i> {{__('Reciclar')}} </button>
                                         @endif

@@ -2,6 +2,7 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const pop = urlParams.get('popup');
 const RAIZ = '/';
+const domain = window.location.origin;
 function uniqid(prefix, more_entropy) {
   // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
   // +    revised by: Kankrelune (http://www.webfaktory.info/)
@@ -2813,7 +2814,23 @@ function modalConfirm(mes,callB){
 }
 function reciclar(lid){
     var m='Ao reciclar este leilão todos os lances serão apagados \n DESEJA CONTINUAR?';
-    modalConfirm(m,getAjax({
+    // modalConfirm(m,
+    //     getAjax({
+    //         url:'/ajax/reciclar-leilao/'+lid,
+    //         type:'POST',
+    //         dataType: 'json',
+    //         csrf: true,
+    //     },function(res){
+    //         $('#preload').fadeOut("fast");
+    //         if(res.exec){
+    //             var url = '/admin/leiloes_adm/'+lid+'/edit?redirect='+domain+'/admin';
+    //             $('#preload').fadeIn();
+    //             window.location = url;
+    //         }
+    //     })
+    // );
+    if(window.confirm(m)){
+        getAjax({
             url:'/ajax/reciclar-leilao/'+lid,
             type:'POST',
             dataType: 'json',
@@ -2821,10 +2838,10 @@ function reciclar(lid){
         },function(res){
             $('#preload').fadeOut("fast");
             if(res.exec){
-                var url = '/admin/leiloes_adm/'+lid+'/edit';
+                var url = '/admin/leiloes_adm/'+lid+'/edit?redirect='+domain+'/admin';
                 $('#preload').fadeIn();
                 window.location = url;
             }
         })
-    );
+    }
 }
