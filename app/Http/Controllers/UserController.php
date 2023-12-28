@@ -829,7 +829,11 @@ class UserController extends Controller
             if($request->has('redirect')){
                 $ret['redirect'] = $request->get('redirect');
             }else{
-                $ret['redirect'] = route('users.show',['id'=>$id]);
+                if(isset($data['config']['origem']) && $data['config']['origem']=='site'){
+                    //$ret['redirect'] = route('users.show',['id'=>$id]);
+                }else{
+                    $ret['redirect'] = route('users.show',['id'=>$id]);
+                }
             }
             if($atualizar){
                 //REGISTRAR EVENTOS
