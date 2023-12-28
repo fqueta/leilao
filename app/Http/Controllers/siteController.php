@@ -26,7 +26,8 @@ class siteController extends Controller
         $slug2 = $this->sec2 ? $this->sec2 : false;
         $ret['exec']=false;
         $ret['dados']=false;
-        global $post,$menus,$notification,$ganhador;
+        global $post,$menus,$notification,$ganhador,$user;
+        $user = false;
         if(Auth::check()){
             $user_id = Auth::id();
             $user = User::find($user_id);

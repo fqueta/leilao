@@ -169,6 +169,141 @@ class PostController extends Controller
         ];
         return $ret;
     }
+    public function queryPostLeilao($get=false,$config=false,$post_type=false)
+    {
+
+        $ret = false;
+        $get = isset($_GET) ? $_GET:[];
+        $ano = date('Y');
+        $mes = date('m');
+        //$todasFamilias = Post::where('excluido','=','n')->where('deletado','=','n');
+        $config = [
+            'limit'=>isset($get['limit']) ? $get['limit']: 50,
+            'order'=>isset($get['order']) ? $get['order']: 'desc',
+        ];
+        $post_type = $post_type?$post_type:$this->post_type;
+        // dd($post_type,$get);
+        if($post_type){
+            if(Qlib::is_frontend()){
+                $seg1 = request()->segment(1); //link da página em questão
+                $urlB = Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
+                if($seg1==$urlB){
+                    //Exibir apenas leiloes publicos
+                    $post =  Post::select('posts.*','postmeta.meta_key')->
+                    join('postmeta','posts.ID','=','postmeta.post_id')->
+                    where('posts.post_status','!=','inherit')->
+                    where('posts.post_status','=','publish')->where('posts.post_type','=',trim($post_type))->where('config','LIKE','%"status":"publicado"%')->orderBy('id',$config['order']);
+                    //começar aqui
+                }else{
+                    $post =  Post::select('posts.*','postmeta.meta_key')->
+                    join('postmeta','posts.ID','=','postmeta.post_id')->
+                    where('posts.post_author','=',Auth::id())->where('posts.post_status','!=','inherit')->where('post_status','!=','trash')->where('post_type','=',trim($post_type))->orderBy('id',$config['order']);
+                }
+
+            }else{
+                $post =  Post::select('posts.*','postmeta.meta_key')->
+                join('postmeta','posts.ID','=','postmeta.post_id')->
+                where('posts.post_status','!=','inherit')->where('posts.post_status','!=','trash')->where('posts.post_type','=',trim($post_type))->orderBy('id',$config['order']);
+            }
+        }else{
+            $post =  Post::select('posts.*','postmeta.meta_key')->
+            join('postmeta','posts.ID','=','postmeta.post_id')->
+            where('posts.post_status','!=','inherit')->where('posts.post_status','!=','trash')->orderBy('id',$config['order']);
+        }
+        if(isset($get['situacao'])){
+            $post->where('postmeta.meta_key','=','situacao_leilao')->
+            where('postmeta.meta_value',$get['situacao']);
+            if(isset($get['contrato']) && $get['contrato']=='s'){
+                $post->where('posts.config','LIKE','%status":"publicado%')->
+                where('posts.config','LIKE','%contrato":"%');
+            }
+        }
+        //$post =  DB::table('posts')->where('excluido','=','n')->where('deletado','=','n')->orderBy('id',$config['order']);
+
+        $post_totais = new stdClass;
+        $campos = $this->campos(false,$post_type);
+        $tituloTabela = 'Lista de todos cadastros';
+        $arr_titulo = false;
+        if(isset($get['filter'])){
+                $titulo_tab = false;
+                $i = 0;
+                if(isset($get['filter']['post_status'])){
+                    $get['filter']['post_status'] = 'publish';
+                }else{
+                    if(isset($get['origem'])=='site'){
+                        $get['filter']['post_status'] = 'publish';
+                    }else{
+                        $get['filter']['post_status'] = 'pending';
+                    }
+                }
+                foreach ($get['filter'] as $key => $value) {
+                    if(!empty($value)){
+                        if($key=='id' || $key=='ID'){
+                            $post->where('posts.'.$key,'LIKE', $value);
+                            $titulo_tab .= 'Todos com *'. $campos[$key]['label'] .'% = '.$value.'& ';
+                            $arr_titulo[$campos[$key]['label']] = $value;
+                        }else{
+                            if(is_array($value)){
+                                foreach ($value as $kb => $vb) {
+                                    if(!empty($vb)){
+                                        if($key=='tags'){
+                                            $post->where('posts.'.$key,'LIKE', '%"'.$vb.'"%' );
+                                        }else{
+                                            $post->where('posts.'.$key,'LIKE', '%"'.$kb.'":"'.$vb.'"%' );
+                                        }
+                                    }
+                                }
+                            }else{
+                                $post->where('posts.'.$key,'LIKE','%'. $value. '%');
+                                if(isset($campos[$key]['type']) && $campos[$key]['type']=='select'){
+                                    $value = $campos[$key]['arr_opc'][$value];
+                                }
+                                @$arr_titulo[@$campos[$key]['label']] = $value;
+                                $titulo_tab .= 'Todos com *'. @$campos[$key]['label'] .'% = '.$value.'& ';
+                            }
+                        }
+                        $i++;
+                    }
+                }
+                if($titulo_tab){
+                    $tituloTabela = 'Lista de: &'.$titulo_tab;
+                                //$arr_titulo = explode('&',$tituloTabela);
+                }
+                $fm = $post;
+                if($config['limit']=='todos'){
+                    $post = $post->get();
+                }else{
+                    $post = $post->paginate($config['limit']);
+                }
+        }else{
+            $fm = $post;
+            if($config['limit']=='todos'){
+                $post = $post->get();
+            }else{
+                $post = $post->paginate($config['limit']);
+            }
+        }
+        $post_totais->todos = $fm->count();
+        $post_totais->esteMes = $fm->whereYear('post_date', '=', $ano)->whereMonth('post_date','=',$mes)->count();
+        $post_totais->ativos = $fm->where('post_status','=','publish')->count();
+        $post_totais->inativos = $fm->where('post_status','!=','publish')->count();
+        // dd($post);
+
+        $ret['post'] = $post;
+        $ret['post_totais'] = $post_totais;
+        $ret['arr_titulo'] = $arr_titulo;
+        $ret['campos'] = $campos;
+        $ret['config'] = $config;
+        $ret['post_type'] = $this->post_type;
+        $ret['tituloTabela'] = $tituloTabela;
+        $ret['config']['resumo'] = [
+            'todos_registro'=>['label'=>'Todos cadastros','value'=>$post_totais->todos,'icon'=>'fas fa-calendar'],
+            'todos_mes'=>['label'=>'Cadastros recentes','value'=>$post_totais->esteMes,'icon'=>'fas fa-calendar-times'],
+            'todos_ativos'=>['label'=>'Cadastros ativos','value'=>$post_totais->ativos,'icon'=>'fas fa-check'],
+            'todos_inativos'=>['label'=>'Cadastros inativos','value'=>$post_totais->inativos,'icon'=>'fas fa-archive'],
+        ];
+        return $ret;
+    }
 
     public function campos_produtos($post_id=false){
         $hidden_editor = '';
@@ -385,8 +520,8 @@ class PostController extends Controller
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..'),'value'=>@$data['post_content']],
             'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Pix').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
-            'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'required min='.date('Y-m-d').'','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
-            'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
+            'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-none','event'=>'required min='.date('Y-m-d').'','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
+            'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-none','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
             'config[pode_lance]'=>[
                 'label'=>'Quem pode dar lances em seu leilão',
                 'active'=>false,
@@ -592,7 +727,11 @@ class PostController extends Controller
         $selTypes = $this->selectType($this->sec);
         $title = $selTypes['title'];
         $titulo = $title;
-        $queryPost = $this->queryPost($_GET);
+        if($this->post_type=='leiloes_adm'){
+            $queryPost = $this->queryPostLeilao($_GET);
+        }else{
+            $queryPost = $this->queryPost($_GET);
+        }
         $queryPost['config']['exibe'] = 'html';
         $routa = $this->routa;
         //if(isset($queryPost['post']));

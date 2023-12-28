@@ -2393,7 +2393,7 @@ function lib_gerLances(redirect){
         // if(!window.confirm('DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'? \n Ao fazer isso você está concordando também com os nossos termos de usos')){
         //     return ;
         // }
-        var msg = '<div class="row"><div id="exibe_etapas" class="col-md-12 text-center"><h6>DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'?</h6><p>\n Ao fazer isso você estara concordando também com os nossos <a href="/termos-do-site" targer="_BLANK">termos de uso</a>></p></div><div class="col-md-12 mt-3 text-center"></div></div>';
+        var msg = '<div class="row"><div id="exibe_etapas" class="col-md-12 text-center"><h6>DESEJA MESMO CONFIRMAR O LANCE DE R$ '+valor_l+'?</h6><p>\n Ao fazer isso você estara concordando também com os nossos <a href="/termos-do-site" target="_BLANK" class="text-decoration-underline">termos de uso</a></p></div><div class="col-md-12 mt-3 text-center"></div></div>';
         // var btns = '<button type="button" class="btn btn-primary" salvar-agora>Salvar agora</button>';
         // alerta2(msg,'modal-lance','Atenção','',true,9000,true);
         $('#modal-dar-lance .modal-body').html(msg);

@@ -47,7 +47,7 @@
                         <div class="icon">
                             <i class="{{$cardv['icon']}}"></i>
                         </div>
-                        <a href="{{$cardv['link']}}" class="small-box-footer">Saiba mais <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{$cardv['link']}}" {{@$cardv['event']}} class="small-box-footer">Saiba mais <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             @endforeach
@@ -62,6 +62,11 @@
 
 
   </div>
+  <script>
+    // function buscaNp(){
+    //     document.getElementById('list-finalizados_filter').querySelector('input[type="search"]').innerHTML = 'Aguardando';
+    // }
+  </script>
 @stop
 
 @section('css')
