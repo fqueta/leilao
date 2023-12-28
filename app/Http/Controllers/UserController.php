@@ -830,7 +830,7 @@ class UserController extends Controller
                 $ret['redirect'] = $request->get('redirect');
             }else{
                 if(isset($data['config']['origem']) && $data['config']['origem']=='site'){
-                    //$ret['redirect'] = route('users.show',['id'=>$id]);
+                    //$ret['redirect'] = route('users.show',['id'=>$id]); sem ação no memento
                 }else{
                     $ret['redirect'] = route('users.show',['id'=>$id]);
                 }
