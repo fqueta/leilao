@@ -356,7 +356,6 @@ class LeilaoController extends Controller
     public function array_contratos($id_cliente=false, $is_linked=true){
         $ret = array();
         $r = [];
-        // dd($id_cliente, $is_linked);
         if($id_cliente){
             $r = Qlib::sql_array("SELECT token,post_title FROM posts WHERE post_status='publish'  AND post_type='produtos' AND config LIKE '%\"cliente\":\"".$id_cliente."\"%'",'post_title','token');
         }else{

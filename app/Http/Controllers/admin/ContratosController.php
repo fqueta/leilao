@@ -189,7 +189,6 @@ class ContratosController extends Controller
         $idCad = false;
         // dd($user_id);
         if($user_id && isset($dados['numero'])){
-            // $ret['dc67'] = Post::Find(67);
             $idn = explode('.',$dados['numero']);
             if(!isset($idn[0])){
                 $ret['mens'] = 'número de contrato inválido';
@@ -206,7 +205,7 @@ class ContratosController extends Controller
                 'post_type' =>'produtos',
                 'post_content' =>isset($dados['descricao'])?$dados['descricao']:'Contrato adicionado pelo CRM ',
                 'config' =>[
-                    'cliente'=>$user_id,
+                    'cliente'=>(string)$user_id,
                     'total_horas'=>$dados['horas'],
                     'valor_r'=>$dados['valor_r'],
                     'valor_venda'=>@$dados['valor_venda'],
@@ -215,7 +214,8 @@ class ContratosController extends Controller
                 ],
                 'token' =>$token?$token:uniqid(),
             ];
-            $verf_cad = Post::where('post_name', '=',$post_name)->get();
+            $verf_cad = Post::where('post_name', '=',$post_name)->where('post_status','!=','trash')->get();
+            // return $verf_cad;
             if($verf_cad->count() > 0){
                 $verf_cad = $verf_cad->toArray();
                 $idCad = $verf_cad[0]['ID'];

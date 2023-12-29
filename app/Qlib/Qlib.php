@@ -339,8 +339,11 @@ class Qlib
             return false;
         }
     }
-    static function sql_array($sql, $ind, $ind_2, $ind_3 = '', $leg = '',$type=false){
+    static function sql_array($sql, $ind, $ind_2, $ind_3 = '', $leg = '',$type=false,$debug=false){
         $table = DB::select($sql);
+        if($debug){
+            echo $sql;
+        }
         $userinfo = array();
         if($table){
             //dd($table);

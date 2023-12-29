@@ -432,7 +432,7 @@ class PostController extends Controller
         }
         if(Qlib::is_backend()){
             $event_status = ' onchange=exibeStatus(this);';
-            $arr_itens = $lc->array_contratos();
+            // $arr_itens = $lc->array_contratos();
             if($seg3=='create'){
                 $ac = 'cad';
                 $arr_itens = $lc->array_contratos(@$data['post_author']);
@@ -751,7 +751,6 @@ class PostController extends Controller
 
         //REGISTRAR EVENTOS
         (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-
         return view($this->view.'.index',$ret);
     }
     public function selectType($sec=false)

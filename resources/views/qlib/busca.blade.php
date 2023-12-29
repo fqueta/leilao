@@ -23,6 +23,9 @@
                                     if($vbu['type']=='hidden_text'){
                                         $vbu['type'] = 'text';
                                     }
+                                    if($vbu['type']=='chave_checkbox'){
+                                        // $_GET['filter'][$kbu] = isset($_GET['filter'][$kbu]) ? $_GET['filter'][$kbu] : @$vbu['valor_padrao'];
+                                    }
                                     if($kbu!='obs')
                                         $vbu['tam'] = 3;
                                     $cp_busca = isset($vbu['cp_busca'])?$vbu['cp_busca']:$kbu;
@@ -34,11 +37,13 @@
                                     'label'=>$vbu['label'],
                                     'ac'=>'alt',
                                     'value'=>@$_GET['filter'][$kbu],
+                                    'valor_padrao'=>@$vbu['valor_padrao'],
                                     'tam'=>isset($vbu['tam'])?$vbu['tam']:'3',
                                     'class_div'=>$vbu['exibe_busca'],
                                     'event'=>isset($vbu['event_busca'])?$vbu['event_busca']:'',
                                     'arr_opc'=>isset($vbu['arr_opc'])?$vbu['arr_opc']:'',
                                     'label_option_select'=>'Todas',
+                                    'checked'=>@$_GET['filter'][$kbu],
                                 ])}}
                             @endif
 

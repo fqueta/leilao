@@ -124,6 +124,7 @@
         </div>
     @elseif ($config['type']=='chave_checkbox')
         <!--config['checked'] é o gravado no bando do dedos e o value é o valor para ficar checado-->
+        {{-- {{dd($config)}} --}}
         <div class="form-group col-{{$config['col']}}-{{$config['tam']}}">
             <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success @error($config['campo']) is-invalid @enderror {{$config['class']}}">
                 <input type="checkbox" class="custom-control-input" @if(isset($config['checked']) && $config['checked'] == $config['value']) checked @endif  value="{{$config['value']}}"  name="{{$config['campo']}}" id="{{$config['campo']}}">

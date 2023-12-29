@@ -26,8 +26,9 @@
                     </div>
                 </div>
                 <div class="card-footer text-muted text-right">
-                    @if(!isset($dados['leilao']['ID']))
-                            <a href="{{url('/admin/leiloes_adm/create?post_author=').$dados['config']['cliente']}}" class="btn btn-secondary">{{__('Criar leilão agora')}} <i class="fas fa-chevron-circle-right"></i></a>
+                    @if(!isset($dados['leilao']['ID']) && isset($dados['token']))
+
+                            <a href="{{url('/admin/leiloes_adm/create?post_author=').$dados['config']['cliente']}}&bc=true&bs=false&contrato={{$dados['token']}}&lbp=Salvar e prosseguir" class="btn btn-secondary">{{__('Criar leilão agora')}} <i class="fas fa-chevron-circle-right"></i></a>
                     @endif
                 </div>
             </div>
