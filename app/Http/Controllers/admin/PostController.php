@@ -727,7 +727,7 @@ class PostController extends Controller
         $selTypes = $this->selectType($this->sec);
         $title = $selTypes['title'];
         $titulo = $title;
-        if($this->post_type=='leiloes_adm'){
+        if($this->post_type=='leiloes_adm' && isset($_GET['situacao'])){
             $queryPost = $this->queryPostLeilao($_GET);
         }else{
             $queryPost = $this->queryPost($_GET);
