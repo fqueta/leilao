@@ -1826,7 +1826,8 @@ class LeilaoController extends Controller
                         foreach ($d as $key => $value) {
                             if($vg==1){
                                 //Pegando o 1 ganhador
-                                if($key==0 && $value['superado']=='n'){
+                                // if($key==0 && $value['superado']=='n'){
+                                if($key==0){
                                     $arr[$vg] = $value;
                                     if($this->is_paid($leilao_id)){
                                         $arr[$vg]['color'] = 'success';
