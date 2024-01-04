@@ -35,13 +35,13 @@
                         @foreach ($config['lista_leilao_terminado'] as $k=>$v)
                             <tr>
                                 <td>
-                                    <a href="{{url('/admin/leiloes_adm/'.$v['ID'].'?redirect=').url('/admin')}}" class="underline" data-togle="tooltip" title="{{__('Ver no painel Admin')}}">
+                                    <a href="{{$v['link_leilao_front'].$redirect}}" title="{{$v['post_title']}}" class="underline" data-togle="tooltip" title="{{__('Ver no painel Admin')}}">
                                         {{$v['ID']}}
                                     </a>
                                 </td>
                                 @if(isset($v['link_leilao_front']) && $v['link_leilao_front'])
                                 <td class="title-table-home-leilao">
-                                    <a href="{{$v['link_leilao_front'].$redirect}}" title="{{$v['post_title']}}" class="underline" rel="">
+                                    <a href="{{url('/admin/leiloes_adm/'.$v['ID'].'?redirect=').url('/admin')}}" class="underline" rel="">
                                         {{$v['post_title']}}
                                     </a>
                                 </td>
@@ -65,6 +65,7 @@
                                     {!!@$v['situacao_pagamento']!!}
                                 </td>
                                 <td class="text-right">
+                                    <a href="{{route('leiloes_adm.show',['id'=>$v['ID']])}}?redirect={{url('/admin')}}" title=" {{__('Visualizar')}} " class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i></a>
                                     @if (isset($v['status_pago']) && ($v['status_pago']=='s' || $v['status_pago']=='a'))
                                         @php
                                             echo (new App\Http\Controllers\PaymentController) -> get_info_pagamento($v['ID'])
@@ -73,7 +74,7 @@
                                         @if (@$v['situacao']=='r')
                                             <a href="{{route('leiloes_adm.edit',['id'=>$v['ID']])}}?redirect={{url('/admin')}}" title=" {{__('Editar')}} " class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> {{__('Editar')}} </a>
                                         @else
-                                            <button title=" {{__('Reciclar o leilão')}} " onclick="reciclar('{{$v['ID']}}');" class="btn btn-info btn-sm"><i class="fas fa-recycle"></i> {{__('Reciclar')}} </button>
+                                            <button title=" {{__('Reciclar o leilão')}} " onclick="reciclar('{{$v['ID']}}');" class="btn btn-info btn-sm"><i class="fas fa-recycle"></i></button>
                                         @endif
                                     @endif
                                 </td>

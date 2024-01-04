@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\LanceController;
 use App\Http\Controllers\LeilaoController;
 use App\Http\Controllers\wp\ApiWpController;
 use App\Http\Requests\StorePostRequest;
@@ -961,10 +962,19 @@ class PostController extends Controller
 
     public function show($id)
     {
-        $dados = Post::findOrFail($id);
+        $lc = new LeilaoController;
+        if($this->routa=='leiloes_adm'){
+            $dados = $lc->get_leilao($id);
+        }else{
+            $dados = Post::findOrFail($id);
+        }
         $this->authorize('ler', $this->routa);
         if(!empty($dados)){
             $title = 'Visualização da leilões';
+            if($this->routa=='leiloes_adm'){
+                //list lances
+            //    dd($dados);
+            }
             $titulo = $title;
             //dd($dados);
             $dados['ac'] = 'alt';
@@ -987,8 +997,8 @@ class PostController extends Controller
                 'class_card2'=>'col-md-4',
             ];
 
-            if(!$dados['matricula'])
-                $config['display_matricula'] = 'd-none';
+            // if(!isset$dados['matricula'])
+            //     $config['display_matricula'] = 'd-none';
             if(isset($dados['config']) && is_array($dados['config'])){
                 foreach ($dados['config'] as $key => $value) {
                     if(is_array($value)){
@@ -1007,18 +1017,18 @@ class PostController extends Controller
             }
             $ret = [
                 'value'=>$dados,
+                'dados'=>$dados,
                 'config'=>$config,
                 'title'=>$title,
                 'titulo'=>$titulo,
                 'listFiles'=>$listFiles,
                 'campos'=>$campos,
                 'routa'=>$this->routa,
-                'routa'=>$this->routa,
                 'exec'=>true,
             ];
             //REGISTRAR EVENTOS
             (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-            return view('padrao.show',$ret);
+            return view($this->view.'.show',$ret);
         }else{
             $ret = [
                 'exec'=>false,

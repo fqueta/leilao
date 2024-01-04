@@ -17,6 +17,7 @@ use App\Notifications\EmailDonoLeilaoNotification;
 use App\Notifications\ganhadorPainelNotification;
 use App\Qlib\Qlib;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use JeroenNoten\LaravelAdminLte\Components\Tool\Modal;
@@ -34,11 +35,13 @@ class LeilaoController extends Controller
      */
     public $c_meta_situacao;
     public $c_meta_detalhes_situacao;
+    public $c_meta_lance_vencedor;
     public function __construct()
     {
-        $this->post_type = 'leiloes_adm';
-        $this->c_meta_situacao = 'situacao_leilao'; //f=Finalizado, a=em andamento
-        $this->c_meta_detalhes_situacao = 'situacao_leilao_detalhes'; //salva um json contendo detalhes daquela situação
+        $this->post_type                 = 'leiloes_adm';
+        $this->c_meta_situacao           = 'situacao_leilao'; //f=Finalizado, a=em andamento
+        $this->c_meta_detalhes_situacao  = 'situacao_leilao_detalhes'; //salva um json contendo detalhes daquela situação
+        $this->c_meta_lance_vencedor     = 'id_lance_vencedor'; //salva o id do lance vencedor
     }
     /**Metodo para gerar o formulario no front pode ser iniciado com o short_de [sc ac="form_leilao"] */
     public function form_leilao($post_id=false,$dados=false,$leilao_id=false){
@@ -373,6 +376,39 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
+     * Metodo para finalizar o leilao
+     * @param int $leilao_id, $dl
+     */
+    public function finaliza_leilao($leilao_id,$dl=false){
+        $ret['exec'] = false;
+        if(!$dl && $leilao_id){
+            $dl = Post::Find($leilao_id);
+        }
+        if($dl){
+            $d1 = @$dl['config']['termino'].' '.@$dl['config']['hora_termino'];
+            $d2 = Qlib::dataLocalDb();
+            $sd1 = strtotime($d1);
+            $sd2 = strtotime($d2);
+            if($sd1<$sd2){
+                //Pegar e salvar o ultimo lance
+                $lv = (new LanceController)->ultimo_lance($leilao_id);
+                $ret['lance_vencedor']=$lv;
+                $ret['s_s'] = Qlib::update_postmeta($leilao_id,$this->c_meta_situacao,'f');
+                $ret['s_d'] = Qlib::update_postmeta($leilao_id,$this->c_meta_detalhes_situacao,Qlib::lib_array_json([
+                    'data_situacao'=>Qlib::dataBanco(),
+                    'label'=>'Finalizado',
+                    'color'=>'danger',
+                ]));
+                if($ret['s_s']){
+                    //Salver o id do lance vencedor..
+
+                    $ret['exec'] = true;
+                }
+            }
+        }
+        return $ret;
+    }
+    /**
      * Metodo de display de terminio de lelao
      */
     public function info_termino($leilao_id=false,$dl=false){
@@ -389,15 +425,10 @@ class LeilaoController extends Controller
             $sd1 = strtotime($d1);
             $sd2 = strtotime($d2);
             if($sd1<$sd2){
-                //marcar leilão como terminado caso não sena sido feito ainda ou se está na reciclagem
+                //marcar leilão como terminado caso não tenha sido feito ainda ou se está na reciclagem
                 $situacao_leilao = Qlib::get_postmeta($leilao_id,$this->c_meta_situacao,true);
                 if($situacao_leilao!='f' && $situacao_leilao!='r'){
-                    $ret['s_s'] = Qlib::update_postmeta($leilao_id,$this->c_meta_situacao,'f');
-                    $ret['s_d'] = Qlib::update_postmeta($leilao_id,$this->c_meta_detalhes_situacao,Qlib::lib_array_json([
-                        'data_situacao'=>Qlib::dataBanco(),
-                        'label'=>'Finalizado',
-                        'color'=>'danger',
-                    ]));
+                    $ret = $this->finaliza_leilao($leilao_id,$dl);
                 }
                 $ret['exec'] = true;
                 $ret['situacao_leilao'] = $situacao_leilao;
@@ -755,6 +786,11 @@ class LeilaoController extends Controller
         $data['link_leilao'] = $lc->get_link_front($data['ID']);
         $data['total_views'] = $lc->get_total_views($data['ID']);
         $data['situacao_html'] = $lc->situacao_html($data['ID']);
+        $data['situacao'] = $lc->situacao($data['ID']);
+        if($data['situacao']=='f'){
+            $ranking = $lc->get_ranking($data['ID']);
+            $data['ranking'] = $ranking;
+        }
         if($data['proximo_lance'] && ($pl=$data['proximo_lance']) && isset($data['config']['valor_venda']) && !empty($data['config']['valor_venda'])){
             //Exibir botão comprar
             $vv = Qlib::precoBanco($data['config']['valor_venda']);
@@ -787,6 +823,13 @@ class LeilaoController extends Controller
                     $data['link_btn_comprar'] = $link_btn_comprar;
                 }
             }
+        }
+        //Historico de lances..
+        $ll = $lac->get_lances($data['ID'],true);
+        if(isset($ll['total'])){
+            $data['list_lances'] = @$ll['list'];
+            $data['total_lances'] = $ll['total'];
+
         }
         $ret = $data;
         return $ret;
@@ -1745,6 +1788,82 @@ class LeilaoController extends Controller
         }else{
             $ret = false;
         }
+        return $ret;
+    }
+    /**
+     * Metodo para listar o ranking do leilão
+     * @param int $leilao_id
+     * @return array $ret
+     */
+    public function get_ranking($leilao_id=false){
+        $ret['exec'] = false;
+        if($leilao_id){
+            $d = lance::select('lances.*','users.name','users.cpf','users.email','users.config')
+            ->join('users','users.id','=','lances.author')
+            ->where('lances.leilao_id',$leilao_id)
+            ->where('lances.type','=','lance')
+            ->where('lances.excluido','=','n')
+            ->orderBy('lances.valor_lance','desc')
+            ->get();
+            $competidores = lance::select('author','id','valor_lance','type')
+                        ->distinct()
+                        ->groupBy('author')
+                        ->where('leilao_id',$leilao_id)
+                        ->where('type','=','lance')
+                        ->where('excluido','=','n')
+                        ->orderBy('id','desc')
+                        ->get();
+            // $d = DB::select("SELECT DISTINCT author,id,valor_lance,type FROM lances WHERE leilao_id='$leilao_id' AND type='lance' GROUP BY author ORDER BY id DESC");
+            if($d->count() && $competidores->count()){
+                $ret['total_competidores'] = $competidores->count();
+                $ret['competidores'] = $competidores->toArray();
+                $ret['exec'] = true;
+                $d = $d->toArray();
+                if($competidores->count() > 1){
+                    $arr_g = [1,2,3];
+                    $arr = [];
+                    foreach ($arr_g as $kg => $vg) {
+                        foreach ($d as $key => $value) {
+                            if($vg==1){
+                                //Pegando o 1 ganhador
+                                if($key==0 && $value['superado']=='n'){
+                                    $arr[$vg] = $value;
+                                    if($this->is_paid($leilao_id)){
+                                        $arr[$vg]['color'] = 'success';
+                                    }else{
+                                        $arr[$vg]['color'] = 'danger';
+                                    }
+
+                                }
+                            }
+                            if($vg==2){
+                                //Pegando o 2 ganhador
+                                if(!isset($arr[$vg]) && isset($arr[1]['author']) && $value['author'] != $arr[1]['author']){
+                                    $arr[$vg] = $value;
+                                    $arr[$vg]['color'] = 'info';
+                                }
+                            }
+                            if($vg==3){
+                                //Pegando o 3 ganhador
+                                if(!isset($arr[$vg]) && isset($arr[2]['author']) && ($value['author'] != $arr[1]['author'] && $value['author'] != $arr[2]['author'])){
+                                    $arr[$vg] = $value;
+                                    $arr[$vg]['color'] = 'warning';
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    foreach ($d as $key => $value) {
+                        if($key==0 && $value['superado']=='n'){
+                            $arr[1] = $value;
+                        }
+                    }
+                }
+                $ret['ganhadores'] = $arr;
+            }
+            $ret['d'] = $d;
+        }
+        // dd($ret);
         return $ret;
     }
 }

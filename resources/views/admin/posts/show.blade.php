@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', $title)
 
 @section('content_header')
     <h3>{{$titulo}}</h3>
@@ -9,7 +9,7 @@
 <div class="row">
     <div class="col-md-12 mens">
     </div>
-    <div class="col-md-12">
+    <div class="{{$config['class_card1']}}">
         <div class="card card-primary card-outline">
             <div class="card-header">
                 <h3 class="card-title">{{__('Informações')}}</h3>
@@ -27,7 +27,20 @@
                 ])}}
             </div>
         </div>
+        @if (isset($config['route']) && ($r=$config['route']))
+            {{-- @if ($r=='beneficiarios')
+                @include('beneficiarios.list_cad_social')
+            @endif --}}
+        @endif
         @include('qlib.show_files')
+    </div>
+    <div class="{{$config['class_card2']}} mt-0 mb-5 d-print-none">
+        @if ($routa=='leiloes_adm')
+            @include('admin.leilao.card_lances')
+        @endif
+        @if(isset($config['eventos']) && is_object($config['eventos']))
+            @include('qlib.eventos.lista_eventos',['eventos'=>$config['eventos']])
+        @endif
     </div>
 </div>
 

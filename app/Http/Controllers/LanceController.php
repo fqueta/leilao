@@ -560,8 +560,18 @@ class LanceController extends Controller
      */
     public function ultimo_lance($leilao_id=false,$exibe_data=false){
         $ret = 0;
-        $l = lance::where('leilao_id',$leilao_id)->where('type','lance')->where('excluido','n')->orderBy('id', 'desc')->first();
+        $lc = new LeilaoController;
+        $id_lance=false;
+        if($id_lance=Qlib::get_postmeta($leilao_id,$lc->c_meta_lance_vencedor)){
+            $l = lance::where('id',$id_lance)->where('excluido','n')->orderBy('id', 'desc')->first();
+        }else{
+            $l = lance::where('leilao_id',$leilao_id)->where('type','lance')->where('excluido','n')->orderBy('id', 'desc')->first();
+        }
         if($l){
+            //Gravar id do lance
+            if(isset($l['id']) && $l['id'] && !$id_lance){
+                $ret = Qlib::update_postmeta($leilao_id, $lc->c_meta_lance_vencedor,$l['id']);
+            }
             if($exibe_data){
                 if(isset($l['author']) && $l['author']!=''){
                     $l['nome'] = Qlib::buscaValorDb0('users','id',$l['author'],'name');

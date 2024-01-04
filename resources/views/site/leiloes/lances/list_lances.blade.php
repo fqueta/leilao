@@ -117,7 +117,13 @@
                             {{$vll->data}}
                         </td>
                         <td class="text-center">
+                            @can('is_admin2')
+                                <a href="{{url('/admin/users/'.@$vll->autor.'/show')}}?redirect={{route('leiloes_adm.show',['id'=>@$vll->leilao_id])}}" class="underline">
+                                    {{@$vll->name}}
+                                </a>
+                            @else
                             {{App\Qlib\Qlib::criptString(@$vll->name)}}
+                            @endcan
                         </td>
                         <td class="td-lance">
                             {{App\Qlib\Qlib::valor_moeda($vll->valor_lance,'R$ ')}} {!!$lance_automatico!!}
