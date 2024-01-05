@@ -13,7 +13,7 @@ return [
     |
     */
     'dominio' => 'https://leilao.aeroclubejf.com.br/',
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'name' => env('APP_NAME', 'L ACJF'),
 
     /*
