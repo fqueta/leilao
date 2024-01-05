@@ -2833,11 +2833,6 @@ function tornar_vencedor(lance_id){
             try {
                 $('.mens').html(res.mens);
                 $('#m-tornar-vencedor').modal('hide');
-                // if(res.exec){
-                //     var url = '/admin/leiloes_adm/'+lid+'/edit?redirect='+domain+'/admin';
-                //     $('#preload').fadeIn();
-                //     window.location = url;
-                // }
             } catch (error) {
                 console.log(error);
             }
