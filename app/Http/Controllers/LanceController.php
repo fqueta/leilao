@@ -584,6 +584,67 @@ class LanceController extends Controller
         return $ret;
     }
     /**
+     * Metodo para tornar um lance vencedor do leilao ignorando o ultimo lance dado
+     * é usando no caso que administrador querer passar o direito de compra para outro cliente que deu lance
+     * @param integer $lance_id
+     * @return integer $ret
+     */
+    public function tornar_vencedor(Request $request){
+        $ret['exec'] = false;
+        if(!$request->has('lance_id')){
+            $ret['mens'] = Qlib::formatMensagem0('Lance não informado','danger','50000');
+            return $ret;
+        }
+        $lance_id = $request->get('lance_id');
+        $notify = $request->get('notify');
+        //Localizar o lance
+        $dla = Lance::find($lance_id);
+        $ret['dla'] = $dla;
+        $lc = new LeilaoController;
+        $bl = new BlacklistController;
+        //verifica se o lance é legitimo
+        if(isset($dla['valor_lance']) && $dla['valor_lance'] > 0 && isset($dla['excluido']) && $dla['excluido']=='n'){
+            $leilao_id = isset($dla['leilao_id'])?$dla['leilao_id']:null;
+            //varifica  é o atual ganhador
+            if($id_lance_vencedor=Qlib::get_postmeta($leilao_id,$lc->c_meta_lance_vencedor,true)){
+                $ret['ganhador_atual']=$id_lance_vencedor;
+                //varifica se o dono deste lance ja é o atual ganhador
+                if($id_lance_vencedor==$lance_id){
+                    $ret['mens'] = Qlib::formatMensagem0('Este cliente já é o ganhador, por favor selecione outro','warning','50000');
+                    return $ret;
+                }else{
+                    $ret['leilao_id'] = $leilao_id;
+                    //Novo ganhador
+                    $id_ganhador = @$dla['author'];
+                    if($id_ganhador){
+                        $user = User::find($id_ganhador);
+                        //Verificar se ele está no blacklist
+                        if($bl->is_blacklist($id_ganhador)){
+                            $ret['mens'] = Qlib::formatMensagem0('Usuário <b>'.@$user['name'].'</b> está no <b>Blacklist</b> por isso não pode receber a preferência de pagamento','danger','90000');
+                            return $ret;
+                        }
+                        //Marcar como vencedor
+                        $exec = Qlib::update_postmeta($leilao_id,$lc->c_meta_lance_vencedor,$lance_id);
+                        $ret['exec'] = $exec;
+                        if($exec){
+                            $ret['mens'] = Qlib::formatMensagem0('Preferência de pagamanto transferida com sucesso para <b>'.@$user['name'].'</b>!','success','50000');
+                            if($notify=='true'){
+                                //remover marcação de notificação anterior
+                                $meta_notific = 'notifica_termino_leilao_ganhador';
+                                $ret['remove_notific'] = Qlib::update_postmeta($leilao_id,$meta_notific,'n');
+                                //Notificar o cliente caso seja permitido
+                                $ret['notify'] = $lc->notifica_termino($leilao_id,'ganhador');
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        //retorna a resposta
+        return $ret;
+    }
+    /**
      * Metodo para retornar o proximo lance
      * @param integer $leilao_id,array $dl=dados do leilao, int $mult_incremento = se precisar saber de lances futuros
      * @return integer $ret

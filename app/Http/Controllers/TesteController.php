@@ -85,7 +85,7 @@ class TesteController extends Controller
         //     'description' =>'Não pagamento',
         //     'leilao_id' =>'65',
         // ]);
-        $ret = (new LeilaoController)->get_ranking(41);
+        // $ret = (new LeilaoController)->get_ranking(41);
         // $ret = (new LeilaoController)->finaliza_leilao(90);
         // $ret = (new LeilaoController)->situacao_html(54);
         // $ret = (new BlacklistController())->send_to_blacklist(false);
@@ -94,6 +94,11 @@ class TesteController extends Controller
         // $ret = (new LeilaoController())->finalizados_nao_pagos();
         // // $ret = (new BlacklistController())->is_blacklist(3);
         // $ret = (new BlacklistController())->get_blacklist();
+        // $leilao_id = 66;
+        // $meta_notific = 'notifica_termino_leilao_ganhador';
+        // $ret['remove_notific'] = Qlib::update_postmeta($leilao_id,$meta_notific,'n');
+        // //Notificar o cliente caso seja permitido
+        // $ret['notify'] = (new LeilaoController())->notifica_termino($leilao_id,'ganhador');
         dd($ret);
         // dd(NotificWinnerJob::dispatch());
         // session(['user'=>'s']);

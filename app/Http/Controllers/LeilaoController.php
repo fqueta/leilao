@@ -927,7 +927,7 @@ class LeilaoController extends Controller
                 $mensagem = '
                 <p>Seu leilão <b>{nome_leilao}</b> está finalizado.<br>{status_leilao}
                 ';
-            }elseif($tipo_responsavel='admin'){
+            }elseif($tipo_responsavel=='admin'){
                 $mensagem = '
                 <p>Leilão <b>{nome_leilao}</b> está finalizado.<br>{status_leilao}
                 ';
@@ -1856,7 +1856,13 @@ class LeilaoController extends Controller
                 }else{
                     foreach ($d as $key => $value) {
                         if($key==0 && $value['superado']=='n'){
-                            $arr[1] = $value;
+                            $vg = 1;
+                            $arr[$vg] = $value;
+                            if($this->is_paid($leilao_id)){
+                                $arr[$vg]['color'] = 'success';
+                            }else{
+                                $arr[$vg]['color'] = 'danger';
+                            }
                         }
                     }
                 }

@@ -114,6 +114,9 @@
                     @endphp
                     <tr class="">
                         <td>
+                            @can('is_dev')
+                                {{@$vll->id}} -
+                            @endcan
                             {{$vll->data}}
                         </td>
                         <td class="text-center">

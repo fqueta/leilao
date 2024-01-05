@@ -17,13 +17,16 @@
                             <table class="ranking table mt-0 mb-0">
                                 <thead>
                                     <tr>
-                                        <th colspan="3">
+                                        <th colspan="4">
                                             <h6> {{__('Ranking de ganhadores')}} </h6>
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($dados['ranking']['ganhadores'] as $kg=>$vg )
+                                        @php
+                                            $n = explode(' ',@$vg['name']);
+                                        @endphp
                                         <tr class="text-{{@$vg['color']}}">
                                             <td class="numero">
                                                 {{$kg}}°
@@ -31,14 +34,29 @@
                                             <td class="name">
                                                 @if (isset($vg['author']) && $vg['author']>1)
                                                     <a class="underline" title="{{__('Ver detalhes')}}" href="{{route('users.show',['id'=>$vg['author']])}}?redirect={{App\Qlib\Qlib::UrlAtual()}}">
-                                                        {{@$vg['name']}}
+                                                        {{@$n[0]}}
                                                     </a>
                                                 @else
-                                                    {{@$vg['name']}}
+                                                    {{@$n[0]}}
                                                 @endif
                                             </td>
                                             <td class="valor text-right">
                                                 {{App\Qlib\Qlib::valor_moeda(@$vg['valor_lance'])}}
+                                            </td>
+                                            <td>
+                                                <div class="dropdown show">
+                                                    <a class="btn btn-default dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                                    </a>
+
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                      <a class="dropdown-item" href="javascript:void(0);" onclick="contatar_ganhador(this)"><i class="fab fa-whatsapp"></i> Contatar</a>
+                                                      @if($kg>1)
+                                                          <a class="dropdown-item" href="javascript:void(0);" onclick="tornar_vencedor('{{$vg['id']}}')"> <i class="fas fa-gavel"></i> Marcar como ganhador</a>
+                                                      @endif
+                                                      {{-- <a class="dropdown-item" href="#">Something else here</a> --}}
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

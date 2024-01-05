@@ -2786,26 +2786,6 @@ function markAsRead(id){
 }
 function close_popup(){
     sessionStorage.setItem("close_popup", "s");
-    // getAjax({
-    //     url:'/ajax/session-m',
-    //     type: 'POST',
-    //     dataType: 'json',
-    //     csrf: true,
-    //     data:{
-    //         ac: 'put',
-    //         key: 'close_popup',
-    //         value: 's',
-    //     }
-    // },function(res){
-    //     $('#preload').fadeOut("fast");
-    //     $('.mes').html(res.mens);
-    //     if(res.exec){
-    //         $('#info-reserva').remove();
-    //     }
-    // },function(err){
-    //     $('#preload').fadeOut("fast");
-    //     console.log(err);
-    // });
 }
 function modalConfirm(mes,callB){
     if(window.confirm(mes)){
@@ -2813,23 +2793,11 @@ function modalConfirm(mes,callB){
     }
 }
 function reciclar(lid){
-    var m='Ao reciclar este leilão todos os lances serão apagados \n DESEJA CONTINUAR?';
-    // modalConfirm(m,
-    //     getAjax({
-    //         url:'/ajax/reciclar-leilao/'+lid,
-    //         type:'POST',
-    //         dataType: 'json',
-    //         csrf: true,
-    //     },function(res){
-    //         $('#preload').fadeOut("fast");
-    //         if(res.exec){
-    //             var url = '/admin/leiloes_adm/'+lid+'/edit?redirect='+domain+'/admin';
-    //             $('#preload').fadeIn();
-    //             window.location = url;
-    //         }
-    //     })
-    // );
-    if(window.confirm(m)){
+    var m='Ao reciclar este leilão todos os lances serão apagados <br> DESEJA CONTINUAR?';
+    alerta(m,'m-reciclar','Atenção');
+    var btn_prosseguir = '<button type="button" ac-reciclar class="btn btn-primary">Prosseguir <i class="fa fa-chevron-right"></i></button>';
+    $(btn_prosseguir).insertAfter('#m-reciclar .modal-footer button');
+    $('[ac-reciclar]').on('click', function(){
         getAjax({
             url:'/ajax/reciclar-leilao/'+lid,
             type:'POST',
@@ -2843,5 +2811,36 @@ function reciclar(lid){
                 window.location = url;
             }
         })
-    }
+    });
+}
+function tornar_vencedor(lance_id){
+    var m='<div class="text-justfy w-100">Ao marcar esse como vencedor, nesse caso a preferência de pagamento será deste cliente.<b>Caso ele não pague no periodo de 2 dias uteis ele será banido da plataforma</b></div> <div class="w-100 mt-3"> DESEJA CONTINUAR?</div><div class="w-100"><label for="notify"><input type="checkbox" name="notify" id="notify" checked /> Notificar o cliente que é ganhador</label></div>';
+    alerta(m,'m-tornar-vencedor','Atenção');
+    var btn_prosseguir = '<button type="button" ac-tornar-vencedor class="btn btn-primary">Prosseguir <i class="fa fa-chevron-right"></i></button>';
+    $(btn_prosseguir).insertAfter('#m-tornar-vencedor .modal-footer button');
+    $('[ac-tornar-vencedor]').on('click', function(){
+        getAjax({
+            url:'/ajax/tornar-vencedor/',
+            type:'POST',
+            dataType: 'json',
+            data:{
+                lance_id:lance_id,
+                notify:$('#notify').is(':checked'),
+            },
+            csrf: true,
+        },function(res){
+            $('#preload').fadeOut("fast");
+            try {
+                $('.mens').html(res.mens);
+                $('#m-tornar-vencedor').modal('hide');
+                // if(res.exec){
+                //     var url = '/admin/leiloes_adm/'+lid+'/edit?redirect='+domain+'/admin';
+                //     $('#preload').fadeIn();
+                //     window.location = url;
+                // }
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    });
 }
