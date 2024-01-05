@@ -2819,23 +2819,26 @@ function tornar_vencedor(lance_id){
     var btn_prosseguir = '<button type="button" ac-tornar-vencedor class="btn btn-primary">Prosseguir <i class="fa fa-chevron-right"></i></button>';
     $(btn_prosseguir).insertAfter('#m-tornar-vencedor .modal-footer button');
     $('[ac-tornar-vencedor]').on('click', function(){
-        getAjax({
-            url:'/ajax/tornar-vencedor/',
-            type:'POST',
-            dataType: 'json',
-            data:{
-                lance_id:lance_id,
-                notify:$('#notify').is(':checked'),
-            },
-            csrf: true,
-        },function(res){
-            $('#preload').fadeOut("fast");
-            try {
-                $('.mens').html(res.mens);
-                $('#m-tornar-vencedor').modal('hide');
-            } catch (error) {
-                console.log(error);
-            }
-        })
+        t_vencedor(lance_id);
     });
+}
+function t_vencedor(lance_id){
+    getAjax({
+        url:'/ajax/tornar-vencedor',
+        type:'POST',
+        dataType: 'json',
+        data:{
+            lance_id:lance_id,
+            notify:$('#notify').is(':checked'),
+        },
+        csrf: true,
+    },function(res){
+        $('#preload').fadeOut("fast");
+        try {
+            $('.mens').html(res.mens);
+            $('#m-tornar-vencedor').modal('hide');
+        } catch (error) {
+            console.log(error);
+        }
+    })
 }
