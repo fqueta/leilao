@@ -415,6 +415,9 @@ class LeilaoController extends Controller
         $ret['exec'] = false;
         $ret['termino'] = false;
         $ret['html'] = false;
+        $ret['time'] = false;
+        $ret['data'] = false;
+        $ret['color'] = 'text-success';
         $ret['situacao_leilao'] = false;
         if(!$dl && $leilao_id){
             $dl = Post::Find($leilao_id);
@@ -433,10 +436,21 @@ class LeilaoController extends Controller
                 $ret['exec'] = true;
                 $ret['situacao_leilao'] = $situacao_leilao;
                 $ret['termino'] = true;
+                $ret['time'] = Qlib::dataExibe(@$dl['config']['termino']);
                 $ret['html'] = 'Finalizado ('.Qlib::dataExibe(@$dl['config']['termino']).' '.@$dl['config']['hora_termino'].')';
+                $ret['quase_termino'] = Qlib::quase_termino($d1,$d2,3);
+                $ret['data0'] = Qlib::dataExibe(@$dl['config']['termino']);
+                $ret['hora'] = $dl['config']['hora_termino'];
+                $ret['data'] = Qlib::dataExibe(@$dl['config']['termino']).' às '.$dl['config']['hora_termino'];
             }else{
-                $termino = Qlib::diffDate2($d1,$d2,false,true);
+                $termino = Qlib::diffDate2($d1,$d2,false,true,true);
+                $ret['quase_termino'] = Qlib::quase_termino($d1,$d2,3);
                 $ret['html'] = $termino;
+                $ret['time'] = Qlib::diffDate2($d1,$d2,false,true);
+                $ret['data0'] = Qlib::dataExibe(@$dl['config']['termino']);
+                $ret['hora'] = $dl['config']['hora_termino'];
+                $ret['data'] = Qlib::dataExibe(@$dl['config']['termino']).' às '.$dl['config']['hora_termino'];
+                $ret['color'] = @$ret['quase_termino']['color'];
                 $ret['exec'] = true;
             }
 
@@ -444,7 +458,7 @@ class LeilaoController extends Controller
         return $ret;
     }
     /**
-     * Metodo para atualização a situalão de um lelilão de acorto com a necessidade
+     * Metodo para atualização a situalão de um leilão de acorto com a necessidade
      * @param integer $leilao_id, string $situacao
      */
     public function atualiza_situacao($leilao_id,$situacao){
@@ -657,12 +671,15 @@ class LeilaoController extends Controller
                             $dados[$kp] = $vp;
                             $src = Qlib::get_thumbnail_link($vp['ID']);
                             $dados[$kp]['src'] = $src;
+                            $dados[$kp]['proximo_lance'] = (new LanceController) ->proximo_lance($vp['ID'],$vp);
                             $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
                             $dados[$kp]['link_edit_admin'] = $this->get_link_edit_admin($vp['ID'],$vp);
                         }elseif(isset($vp['config']['contrato']) && !empty($vp['config']['contrato'])){
                             $dados[$kp] = $vp;
                             $src = Qlib::get_thumbnail_link($vp['ID']);
+                            $dados[$kp]['proximo_lance'] = (new LanceController) ->proximo_lance($vp['ID'],$vp);
                             // Qlib::lib_print($src);
+                            $dados[$kp]['link'] = Qlib::get_the_permalink($vp['ID'],$vp);
                             if(empty($src) && $vp['config']['contrato']){
                                 $id_contrato = Qlib::buscaValorDb0('posts','token',$vp['config']['contrato'],'ID');
                                 $src = Qlib::get_thumbnail_link($id_contrato);

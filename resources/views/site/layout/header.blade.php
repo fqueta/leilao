@@ -23,7 +23,6 @@
         width: 10%;
     }
 </style>
-<header id="header" class="fixed-top d-flex align-items-center header-transparent">
     <div class="container d-flex justify-content-between align-items-center">
 
       <div class="logo">
@@ -32,8 +31,8 @@
         <a href="{{url('/'.App\Qlib\Qlib::get_slug_post_by_id(37))}}"><img src="{{url('/vendor/adminlte/dist/img/logo-h.png')}}" alt="" class="img-fluid"></a>
       </div>
 
-      <nav id="navbar" class="navbar">
-        <ul>
+      <nav id="navbar" class="navbar navbar-expand-lg" data-bs-theme="dark">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             @if(is_array($menus))
                 @foreach ($menus as $km=>$vm )
                     @php
@@ -47,7 +46,7 @@
                             $comple_url = '';
                         }
                     @endphp
-                    <li><a class="{{$active}}" href="{{$comple_url.$vm['url']}}">{{$vm['description']}}</a></li>
+                    <li class="nav-item ms-3"><a class="{{$active}}" href="{{$comple_url.$vm['url']}}">{{$vm['description']}}</a></li>
                 @endforeach
           @endif
           @can('is_logado')
@@ -93,6 +92,9 @@
                 <li><a href="#">Deep Drop Down 5</a></li> --}}
                 </ul>
             </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
             <li><a href="{{url('/meu-cadastro')}}">Meu Cadastro</a></li>
             <li><a href="#">Meus pacotes</a></li>
             {{-- <li><a href="#">Drop Down 3</a></li>
@@ -121,8 +123,31 @@
             {{-- <li><a href="/cart"><i class="fas fa-cart-arrow-down"></i></a></li> --}}
 
           @else
-            <li><a class="btn btn-default btn-flat float-right" href="{{route('login')}}"><i class="fas fa-user"></i>&nbsp;Login</a></li>
-            <li><a class="btn btn-default btn-flat float-right" href="{{url('/user/create')}}"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li>
+          <li class="nav-item dropdown ms-3">
+                <a class="nav-link dropdown-toggle show" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+                    Minha conta
+                </a>
+                <ul class="dropdown-menu border-0 show" data-bs-popper="static">
+                    <li>
+                        <a class="dropdown-item" href="{{route('login')}}">
+                            <small><i class="fa fa-user"></i> Login</small>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{url('/user/create')}}">
+                            <small><i class="fa fa-address-card"></i> Cadastro</small>
+                        </a>
+                    </li>
+                    {{-- <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="#">
+                            <small><i class="fa-solid fa-right-from-bracket"></i> Sair</small>
+                        </a></li> --}}
+                </ul>
+            </li>
+            {{-- <li><a class="btn btn-default btn-flat float-right" href="{{route('login')}}"><i class="fas fa-user"></i>&nbsp;Login</a></li>
+            <li><a class="btn btn-default btn-flat float-right" href="{{url('/user/create')}}"><i class="fas fa-user"></i>&nbsp;Cadastrar</a></li> --}}
           @endcan
           {{-- <li><a class="btn btn-default btn-flat float-right" href="#"><i class="fas fa-search"></i></a></li> --}}
         </ul>
@@ -130,4 +155,3 @@
       </nav><!-- .navbar -->
 
     </div>
-  </header><!-- End Header -->

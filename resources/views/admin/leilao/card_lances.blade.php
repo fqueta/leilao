@@ -26,6 +26,16 @@
                                     @foreach ($dados['ranking']['ganhadores'] as $kg=>$vg )
                                         @php
                                             $n = explode(' ',@$vg['name']);
+                                            if(isset($vg['config']['ddi']) && !empty($vg['config']['ddi']) && isset($vg['config']['telefonezap']) && !empty($vg['config']['telefonezap'])){
+                                                // abrir janela para o envio da mensagem
+                                                $link_contato = '#';
+                                            }else{
+                                                if(isset($vg['author']) && !empty($vg['author'])){
+                                                    $link_contato = route('users.edit',['id'=>$vg['author']]).'?redirect='.App\Qlib\Qlib::UrlAtual();
+                                                }else{
+                                                    $link_contato = '#';
+                                                }
+                                            }
                                         @endphp
                                         <tr class="text-{{@$vg['color']}}">
                                             <td class="numero">
@@ -50,9 +60,9 @@
                                                     </a>
 
                                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                                      <a class="dropdown-item" href="javascript:void(0);" onclick="contatar_ganhador(this)"><i class="fab fa-whatsapp"></i> Contatar</a>
+                                                      <button data-valor="{{@$vg['valor_lance']}}" data-nome_leilao="{{@$dados['post_title']}}" class="dropdown-item" dta="{{App\Qlib\Qlib::encodeArray(@$vg)}}" type="button" href="{{$link_contato}}" onclick="contatar_ganhador(this)"><i class="fab fa-whatsapp"></i> Contatar</button>
                                                       @if($kg>1)
-                                                          <a class="dropdown-item" href="javascript:void(0);" onclick="tornar_vencedor('{{$vg['id']}}')"> <i class="fas fa-gavel"></i> Marcar como ganhador</a>
+                                                          <a class="dropdown-item" href="javascript:void(0)" onclick="tornar_vencedor('{{$vg['id']}}')"> <i class="fas fa-gavel"></i> Marcar como ganhador</a>
                                                       @endif
                                                       {{-- <a class="dropdown-item" href="#">Something else here</a> --}}
                                                     </div>

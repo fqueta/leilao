@@ -1052,11 +1052,33 @@ class Qlib
         // return floor( ( ( mktime(0, 0, 0, $d2[1], $d2[2], $d2[0]) - mktime(0, 0, 0, $d1[1], $d1[2], $d1[0] ) ) / $X ) );
     }
     /**
+     * Metodo para informar se o leilão está perto de termiar
+     * @param  $d1 data de fim datetime, $d2 data de hje datetime , $dias dias para o termino
+     * @return array $ret;
+     * @return string
+     */
+    static function quase_termino($d1, $d2=false,$dias=3) {
+        $d1 = new DateTime($d1);
+        $d2 = $d2 ? $d2 : Qlib::dataLocalDb();
+        $d2 = new DateTime($d2);
+
+        $data1  = $d1->format('Y-m-d H:i:s');
+        $data2  = $d2->format('Y-m-d H:i:s');
+        $intervalo = $d1->diff( $d2 );
+        $ret['color'] = 'text-success';
+        $ret['exec'] = false;
+        if($intervalo->d<$dias){
+            $ret['exec'] = true;
+            $ret['color'] = 'text-danger';
+        }
+        return $ret;
+    }
+    /**
      * Metodo para monstrar a diferença entre datas
      * @param  $d1 datetime, $d2 datetime
      * @return string
      */
-    static function diffDate2($d1, $d2,$label=false,$ab=false) {
+    static function diffDate2($d1, $d2,$label=false,$ab=false,$exibe_todo=false) {
         $ret = false;
         $d1 = new DateTime($d1);
         $d2 = new DateTime($d2);
@@ -1073,6 +1095,7 @@ class Qlib
             }
             if($intervalo->h){
                 $ret .= ", " . $intervalo->h . " h";
+                if($exibe_todo)
                 $ret .= ' '.Qlib::dataExibe($data1);
             }
             // if($intervalo->i){

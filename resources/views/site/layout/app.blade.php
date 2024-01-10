@@ -22,6 +22,7 @@
   <!-- Vendor CSS Files -->
   <link href="{{url('/')}}/assets/vendor/animate.css/animate.min.css" rel="stylesheet">
   <link href="{{url('/')}}/assets/vendor/aos/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{url('/css/style.css')}}?ver={{config('app.version')}}">
   <link href="{{url('/')}}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="{{url('/')}}/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="{{url('/')}}/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
@@ -40,18 +41,13 @@
 </head>
 
 <body>
-
+<header id="header" class="fixed-top d-flex align-items-center theme-bg-primary">
   @include('site.layout.header')
-  <!-- ======= Hero Section ======= -->
-  @yield('banner-topo')
-
-
-  <main id="main">
-    <!-- ======= Services Section ======= -->
+</header>
+<main id="main">
+    @yield('banner-topo')
     @yield('main')
-
-  </main><!-- End #main -->
-
+</main>
   @include('site.layout.footer')
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 

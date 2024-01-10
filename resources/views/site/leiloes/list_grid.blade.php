@@ -1,5 +1,5 @@
 
-<div class="row">
+<div class="items-list mb-4">
     @php
     $li = false;
     $class_lc = new App\Http\Controllers\LeilaoController;
@@ -14,6 +14,7 @@
                 $li .= view('site.leiloes.grid',[
                     'v'=>$v,
                     'info_termino'=>$info_termino['html'],
+                    'arr_termino'=>$info_termino
                 ]);
             @endphp
         @endforeach

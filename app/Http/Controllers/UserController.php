@@ -171,13 +171,23 @@ class UserController extends Controller
             $displayPf = '';
             $displayPj = 'd-none';
         }
+        $telddi = $this->ger_select_ddi([
+            'label' => 'Celular',
+            'dados' => $dados,
+        ]);
+        $ddi = isset($dados['config']['ddi']) ? $dados['config']['ddi'] : '';
+        $telefonezap = isset($dados['config']['telefonezap']) ? $dados['config']['telefonezap'] : '';
+
+        $telddi_show = '<div class="col-12"><label>Celular:</label> '.$ddi.''.$telefonezap.'</div>';
+
         $ret = [
             'id'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Informe os dados').'</h6><hr class="mt-0">','script_show'=>''],
             'name'=>['label'=>'Nome completo','active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'12'],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
-            'config[celular]'=>['label'=>'Telefone celular','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
-            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'6'],
+            'telddi'=>['label'=>'Telefone com ddi','active'=>false,'tam'=>'9','script'=>$telddi,'script_show'=>$telddi_show,'type'=>'html_script','class_div'=>''],
+            'config[Telefone]'=>['label'=>'Telefone','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
+            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'9'],
             'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
             'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Documentos').'</h6><hr class="mt-0">','script_show'=>''],
             'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3','value'=>@$_GET['cpf']],
@@ -739,7 +749,7 @@ class UserController extends Controller
                 'route'=>$this->routa,
                 'id'=>$id,
             ];
-            $campos = $this->campos();
+            $campos = $this->campos($dados[0]);
             if($local=='sistema.perfil.edit'){
                 $campos['ativo']['type']='hidden';
             }
@@ -1217,6 +1227,54 @@ class UserController extends Controller
         return $d;
 
     }
-
+    //Metodo para montar um array contendo os ddi que estão na api do aeroclubejf
+    public function get_ddi(){
+        $ret = false;
+        $link_ddi = 'https://api.aeroclubejf.com.br/api/ddi';
+		$js_ddi = file_get_contents($link_ddi);
+		$ret = Qlib::lib_json_array($js_ddi);
+        return $ret;
+    }
+    /**
+     * Metodo para gerar um select de ddi
+     * @return string $input_ddi em html
+     */
+    public function ger_select_ddi($config=false){
+        $arr_ddi = $this->get_ddi();
+        $label = isset($config['label']) ? $config['label'] : '';
+        $dados = isset($config['dados']) ? $config['dados'] : [];
+        $ddi = isset($dados['config']['ddi']) ? $dados['config']['ddi'] : 55;
+        $telefonezap = isset($dados['config']['telefonezap']) ? $dados['config']['telefonezap'] : '';
+        $tmsel1 = '<select name="{name}" class="{class}" {event} id="{id}">{option}</select>';
+		$tmsel2 = '<option value="{value}" {selected}>{option_label}</option>';
+        $class_form = 'form-control';
+		if($arr_ddi && is_array($arr_ddi)){
+            // self::lib_print($arr_ddi);
+            if($tmsel1 && $tmsel2){
+                $opt = false;
+                foreach ($arr_ddi as $ki => $vi) {
+                    $opt .= str_replace('{value}',$vi['ddi'],$tmsel2);
+                    $option_label = $vi['pais'].' +'.$vi['ddi'];
+                    $selected = false;
+                    if($vi['ddi']==$ddi){
+                        $selected = 'selected';
+                    }
+                    $opt = str_replace('{option_label}',$option_label,$opt);
+                    $opt = str_replace('{selected}',$selected,$opt);
+                }
+            }
+            $input_zap = str_replace('{option}',$opt,$tmsel1);
+            $input_zap = str_replace('{name}','config[ddi]',$input_zap);
+            $input_zap = str_replace('{id}','ddi',$input_zap);
+            $cont_tel = '<input type="tel" value="'.$telefonezap.'" name="config[telefonezap]" required onblur="mask(this,clientes_mascaraTelefone);" onkeypress="mask(this,clientes_mascaraTelefone);" class="form-control" placeholder="Seu whatsapp" />';
+            $tms = '<div class="row"><div class="col-12"><label>'.$label.'</label></div><div class="col-3 pr-0">{cont_ddi}</div><div class="col-9 pl-0">{cont_tel}</div></div>';
+            $input_zap = str_replace('{cont_ddi}',$input_zap,$tms);
+            $input_zap = str_replace('{cont_tel}',$cont_tel,$input_zap);
+            $input_zap = str_replace('{class}',$class_form,$input_zap);
+            $input_zap = str_replace('{event}','',$input_zap);
+        }else{
+            $input_zap = false;
+        }
+        return $input_zap;
+    }
 }
-
