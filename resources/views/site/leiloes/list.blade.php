@@ -74,10 +74,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
     </div>
 </section>
 @else
-@endif
-<div class="row">
-    <div class="col-md-12" id="lista">
-        @if($seg1==$urlB && !$seg2)
+@if($seg1==$urlB && !$seg2)
 
 
         @elseif($seg1==$urlB && $seg2)
@@ -124,9 +121,13 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                 </div>
             </div>
         @endif
+@endif
+{{-- <div class="row">
+    <div class="col-md-12" id="lista">
+
 
     </div>
-</div>
+</div> --}}
 <script>
     $(function(){
         $('[exportar-filter]').on('click',function(e){
