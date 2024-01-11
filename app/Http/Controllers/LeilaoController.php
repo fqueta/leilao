@@ -715,7 +715,6 @@ class LeilaoController extends Controller
         ];
         //REGISTRAR EVENTOS
         // (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
-
         return view('site.leiloes.list',$ret);
     }
     /**

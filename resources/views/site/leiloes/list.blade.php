@@ -13,71 +13,69 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
 </style>
  <!-- Content -->
  @if($seg1==$urlB && !$seg2)
- <section class="bg-video">
-    <div class="container">
-        <div class="row justify-content-center py-5">
-            <div class="col-12 col-lg-6">
-                <h3 class="text-center mb-4"><b>Como funciona:</b></h3>
-                <a class="venobox youtube-video" data-autoplay="true" data-vbtype="video"
-                    href="https://www.youtube.com/watch?v=BZAN-i_o8nA&t=5s">
-                    <i class="fa fa-play"></i>
-                    <div class="youtube-video-overlay rounded"></div>
-                    <img class="rounded" src="{{url('/images/leilao-aeroclube-de-juiz-de-fora.jpg')}}" alt="">
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-<section class="bg-light py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <div class="search-block rounded mb-5 p-4">
-                    <form action="{{url('/leiloes-publicos')}}">
-                        <div class="input-group">
-                            <input type="text" name="filter[post_title]" value="{{@$_GET['filter']['post_title']}}" class="form-control" placeholder="{{__('Buscar leilões')}}"
-                            aria-label="{{__('Buscar leilões')}}" aria-describedby="basic-addon2">
-                            <span class="input-group-btn" id="basic-addon2">
-                                <button id="btn-pesq-jogo" class="btn btn-search" type="submit"><i class="fa fa-search"></i></button>
-                            </span>
-                            @can('is_customer_logado')
-                                <span class="input-group-text" id="basic-addon2">
-                                        <a href="{{url('/leilao-create')}}" class="btn btn-success fa fa-plus btn-labeled mar-top">{{__('Criar um Leilão')}}</a>
-                                </span>
-                            @endcan
-                        </div>
-                    </form>
+    <section class="bg-video">
+        <div class="container">
+            <div class="row justify-content-center py-5">
+                <div class="col-12 col-lg-6">
+                    <h3 class="text-center mb-4"><b>Como funciona:</b></h3>
+                    <a class="venobox youtube-video" data-autoplay="true" data-vbtype="video"
+                        href="https://www.youtube.com/watch?v=BZAN-i_o8nA&t=5s">
+                        <i class="fa fa-play"></i>
+                        <div class="youtube-video-overlay rounded"></div>
+                        <img class="rounded" src="{{url('/images/leilao-aeroclube-de-juiz-de-fora.jpg')}}" alt="">
+                    </a>
                 </div>
-                <h2 class="title-page text-center mb-5">Leilões disponíveis</h2>
             </div>
         </div>
+    </section>
+    {{dd($seg2)}}
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="search-block rounded mb-5 p-4">
+                        <form action="{{url('/leiloes-publicos')}}">
+                            <div class="input-group">
+                                <input type="text" name="filter[post_title]" value="{{@$_GET['filter']['post_title']}}" class="form-control" placeholder="{{__('Buscar leilões')}}"
+                                aria-label="{{__('Buscar leilões')}}" aria-describedby="basic-addon2">
+                                <span class="input-group-btn" id="basic-addon2">
+                                    <button id="btn-pesq-jogo" class="btn btn-search" type="submit"><i class="fa fa-search"></i></button>
+                                </span>
+                                @can('is_customer_logado')
+                                    <span class="input-group-text" id="basic-addon2">
+                                            <a href="{{url('/leilao-create')}}" class="btn btn-success fa fa-plus btn-labeled mar-top">{{__('Criar um Leilão')}}</a>
+                                    </span>
+                                @endcan
+                            </div>
+                        </form>
+                    </div>
+                    <h2 class="title-page text-center mb-5">Leilões disponíveis</h2>
+                </div>
+            </div>
 
-            @php
-            //listar leilões para o plublico
-                $ret = view('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config]);
-                echo $ret;
-            @endphp
+                @php
+                //listar leilões para o plublico
+                    $ret = view('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config]);
+                    echo $ret;
+                @endphp
 
-        {{-- <div class="items-nav d-flex justify-content-center">
-            <nav aria-label="Navegação de leilões">
-                <ul class="pagination">
-                    <li class="page-item"><a class="page-link" href="#"><i class="fa fa-chevron-left"></i></a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#"><i class="fa fa-chevron-right"></i></a>
-                    </li>
-                </ul>
-            </nav>
-        </div> --}}
-    </div>
-</section>
+            {{-- <div class="items-nav d-flex justify-content-center">
+                <nav aria-label="Navegação de leilões">
+                    <ul class="pagination">
+                        <li class="page-item"><a class="page-link" href="#"><i class="fa fa-chevron-left"></i></a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#"><i class="fa fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div> --}}
+        </div>
+    </section>
 @else
-@if($seg1==$urlB && !$seg2)
-
-
-        @elseif($seg1==$urlB && $seg2)
+        @if($seg1==$urlB && $seg2)
             @php
             //Detalhes do leilao
                 $ret = view('site.leiloes.detalhes',['dados'=>@$dados,'config'=>$config]);
