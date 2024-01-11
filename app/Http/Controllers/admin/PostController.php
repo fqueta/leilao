@@ -653,7 +653,7 @@ class PostController extends Controller
                 'script_show'=>'admin.posts.link_view',
                 'dados'=>$data,
             ],
-            'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'text','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             'post_title'=>['label'=>'Nome','active'=>true,'placeholder'=>'Ex.: Nome da página ','type'=>'text','exibe_busca'=>'d-block','event'=>'onkeyup=lib_typeSlug(this)','tam'=>'12'],
             'config[permission][]'=>[
                 'label'=>'Permissão de visualização (Visível para todos se não selecionar)',

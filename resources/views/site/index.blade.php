@@ -7,12 +7,13 @@
     $slug2 = isset($dados['slug2']) ? $dados['slug2'] : $seg2;
     $title = isset($dados['post_title']) ? $dados['post_title'] : false;
     $main = (new App\Http\Controllers\siteController)->get_main_post($post_id);
+    $link_edit = App\Qlib\Qlib::get_link_edit_admin($post_id,$_REQUEST);
 @endphp
 @extends('site.layout.app')
 @section('title')
     {{$title}}
 @stop
-{{-- @section('banner-topo')
+@section('banner-topo')
     @if ($slug=='home')
         @include('site.layout.banner-home')
     @elseif ($slug=='leiloes-publicos')
@@ -23,14 +24,31 @@
     @else
         @include('site.layout.banner-sec')
     @endif
-@stop --}}
+@stop
 @section('main')
     @if ($slug=='home')
+    @elseif ($slug=='leiloes-publicos')
+        @include('site.layout.main')
     @elseif ($slug=='email')
         @include('site.layout.email')
     @else
-        @include('site.layout.main')
+        <section class="page-content">
+            <div class="container py-5">
+                @include('site.layout.main')
+            </div>
+        </section>
     @endif
+    @can('is_admin')
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col text-end py-4 ">
+                        <a href="{{@$link_edit}}" class="btn btn-outline-secondary"><i class="fas fa-pen" aria-hidden="true"></i> {{__('Editar')}} <i class="fas fa-chevron-right    "></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endcan
 @stop
 @section('css')
     <link rel="stylesheet" href="{{url('/')}}/css/select2.css">

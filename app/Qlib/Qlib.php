@@ -1477,4 +1477,14 @@ class Qlib
         $url_atual = "http" . (isset($_SERVER['HTTPS']) ? (($_SERVER['HTTPS']=="on") ? "s" : "") : "") . "://" . "$_SERVER[HTTP_HOST]";
         return $url_atual;
     }
+    /**
+     * Metodo para retornar um link de edição no painel adiom do post
+     */
+    static function get_link_edit_admin($post_id,$post=false,$slug='paginas'){
+        if(!$post && $post_id){
+            $post = post::Find($post_id);
+        }
+        $ret = config('app.url').'/admin/'.$slug.'/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
+        return $ret;
+    }
 }
