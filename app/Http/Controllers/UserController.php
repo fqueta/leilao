@@ -748,6 +748,7 @@ class UserController extends Controller
                 'frm_id'=>'frm-users',
                 'route'=>$this->routa,
                 'id'=>$id,
+                'local'=>$local,
             ];
             $campos = $this->campos($dados[0]);
             if($local=='sistema.perfil.edit'){
