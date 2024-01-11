@@ -43,7 +43,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col text-end py-4 ">
-                        <a href="{{@$link_edit}}" class="btn btn-outline-secondary"><i class="fas fa-pen" aria-hidden="true"></i> {{__('Editar')}} <i class="fas fa-chevron-right    "></i></a>
+                        <a href="{{@$link_edit}}" title="{{__('Editar a página')}}" class="btn btn-outline-secondary"><i class="fas fa-pen" aria-hidden="true"></i> {{__('Editar')}} <i class="fas fa-chevron-right    "></i></a>
                     </div>
                 </div>
             </div>
