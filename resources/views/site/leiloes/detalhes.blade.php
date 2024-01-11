@@ -1,10 +1,17 @@
 @php
+    global $post;
     $contrato = isset($dados['nome_contrato']) ? $dados['nome_contrato'] : '';
     $finalizado = isset($dados['finalizado']) ? $dados['finalizado'] : false;
+    $thumb_page = App\Qlib\Qlib::get_thumbnail_link(@$post['ID']);
 @endphp
 @section('title')
 {{$config['title']}}
 @endsection
+<style>
+    .banner-page{
+        background-image: url("{{$thumb_page}}");
+    }
+</style>
 <section class="banner-page">
     <div class="container">
         <div class="row py-5">

@@ -15,8 +15,10 @@
 @section('banner-topo')
     @if ($slug=='home')
         @include('site.layout.banner-home')
-    @elseif ($slug=='leiloes-publicos' && $slug2==null)
-        @include('site.layout.banner-home')
+    @elseif ($slug=='leiloes-publicos')
+        @if ($slug2==null)
+            @include('site.layout.banner-home')
+        @endif
     @else
         @include('site.layout.banner-sec')
     @endif
