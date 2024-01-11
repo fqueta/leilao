@@ -28,7 +28,6 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
             </div>
         </div>
     </section>
-    {{dd($seg2)}}
     <section class="bg-light py-5">
         <div class="container">
             <div class="row">
@@ -74,6 +73,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
             </div> --}}
         </div>
     </section>
+    {{dd($seg2)}}
 @else
         @if($seg1==$urlB && $seg2)
             @php
