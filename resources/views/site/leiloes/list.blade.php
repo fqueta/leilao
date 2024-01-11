@@ -99,12 +99,12 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                     <h2 class="title-page text-center mb-5">Leilões disponíveis</h2>
                 </div>
             </div>
-
-                @php
+            @include('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config])
+                {{-- @php
                 //listar leilões para o plublico
                     $ret = view('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config]);
                     echo $ret;
-                @endphp
+                @endphp --}}
 
             {{-- <div class="items-nav d-flex justify-content-center">
                 <nav aria-label="Navegação de leilões">
