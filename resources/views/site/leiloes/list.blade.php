@@ -2,7 +2,7 @@
 $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
 $seg1 = request()->segment(1); //link da página em questão
 $seg2 = request()->segment(2); //link da página em questão
-$urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
+$urlB = 'leiloes-publicos';//App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
 // dd($dados1);
 @endphp
 <style>
@@ -18,7 +18,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
             background-image: url('{{App\Qlib\Qlib::get_thumbnail_link(@$post['ID'])}}');
         }
     </style>
-    <section class="main-banner" style="">
+    <section class="main-banner">
         <div class="main-banner-content container">
             <div class="row pt-5">
                 <div class="col-12 col-lg-4 py-5 text-center text-lg-start">
@@ -99,7 +99,6 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                     <h2 class="title-page text-center mb-5">Leilões disponíveis</h2>
                 </div>
             </div>
-            {{-- @include('site.leiloes.list_grid',['dados'=>@$dados,'config'=>$config]) --}}
             <div class="items-list mb-4">
                 @php
                 $li = false;
@@ -112,16 +111,21 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                             // $v['link'] = App\Qlib\Qlib::get_the_permalink($v['ID'],$v);
                             // $v['link_edit_admin'] = (new App\Http\Controllers\LeilaoController)->get_link_edit_admin($v['ID'],$v);
                             $info_termino = $class_lc->info_termino($v['ID']);
-                            $li .= view('site.leiloes.grid',[
-                                'v'=>$v,
-                                'info_termino'=>$info_termino['html'],
-                                'arr_termino'=>$info_termino
-                            ]);
+                            // $li .= view('site.leiloes.grid',[
+                            //     'v'=>$v,
+                            //     'info_termino'=>$info_termino['html'],
+                            //     'arr_termino'=>$info_termino
+                            // ]);
                         @endphp
+                        @include('site.leiloes.grid',[
+                            'v'=>$v,
+                            'info_termino'=>$info_termino['html'],
+                            'arr_termino'=>$info_termino
+                        ])
                     @endforeach
-                    @php
+                    {{-- @php
                         echo $li;
-                    @endphp
+                    @endphp --}}
                 @endif
             </div>
 
@@ -143,11 +147,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
     </section>
 @else
         @if($seg1==$urlB && $seg2)
-            @php
-            //Detalhes do leilao
-                $ret = view('site.leiloes.detalhes',['dados'=>@$dados,'config'=>$config]);
-                echo $ret;
-            @endphp
+            @include('site.leiloes.detalhes',['dados'=>@$dados,'config'=>$config])
         @else
             @include('site.leiloes.list_leiloes_ganhos')
             <div class="card">
@@ -187,12 +187,6 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
             </div>
         @endif
 @endif
-{{-- <div class="row">
-    <div class="col-md-12" id="lista">
-
-
-    </div>
-</div> --}}
 <script>
     $(function(){
         $('[exportar-filter]').on('click',function(e){
