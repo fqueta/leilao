@@ -12,19 +12,18 @@
 @section('title')
     {{$title}}
 @stop
-@section('banner-topo')
+{{-- @section('banner-topo')
     @if ($slug=='home')
         @include('site.layout.banner-home')
     @elseif ($slug=='leiloes-publicos')
 
         @if ($slug2==null)
-            {{-- @include('site.layout.banner-home') --}}
+            @include('site.layout.banner-home')
         @endif
     @else
-    {{dd($slug)}}
         @include('site.layout.banner-sec')
     @endif
-@stop
+@stop --}}
 @section('main')
     @if ($slug=='home')
     @elseif ($slug=='email')
