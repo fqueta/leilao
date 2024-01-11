@@ -16,6 +16,7 @@
     @if ($slug=='home')
         @include('site.layout.banner-home')
     @elseif ($slug=='leiloes-publicos')
+        {{dd($slug)}}
         @if ($slug2==null)
             {{-- @include('site.layout.banner-home') --}}
         @endif
