@@ -2,7 +2,7 @@
 $post = isset($_REQUEST['post']) ? $_REQUEST['post'] : false;
 $seg1 = request()->segment(1); //link da página em questão
 $seg2 = request()->segment(2); //link da página em questão
-$urlB = 'leiloes-publicos';//App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
+$urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de leiloes no site.
 // dd($dados1);
 @endphp
 <style>
@@ -81,7 +81,7 @@ $urlB = 'leiloes-publicos';//App\Qlib\Qlib::get_slug_post_by_id(37); //link da p
             <div class="row">
                 <div class="col">
                     <div class="search-block rounded mb-5 p-4">
-                        <form action="{{url('/leiloes-publicos')}}">
+                        <form action="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">
                             <div class="input-group">
                                 <input type="text" name="filter[post_title]" value="{{@$_GET['filter']['post_title']}}" class="form-control" placeholder="{{__('Buscar leilões')}}"
                                 aria-label="{{__('Buscar leilões')}}" aria-describedby="basic-addon2">
@@ -90,7 +90,7 @@ $urlB = 'leiloes-publicos';//App\Qlib\Qlib::get_slug_post_by_id(37); //link da p
                                 </span>
                                 @can('is_customer_logado')
                                     <span class="input-group-text" id="basic-addon2">
-                                            <a href="{{url('/leilao-create')}}" class="btn btn-success fa fa-plus btn-labeled mar-top">{{__('Criar um Leilão')}}</a>
+                                            <a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(2)}}" class="btn btn-success fa fa-plus btn-labeled mar-top">{{__('Criar um Leilão')}}</a>
                                     </span>
                                 @endcan
                             </div>

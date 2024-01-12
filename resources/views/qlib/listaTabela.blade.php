@@ -48,7 +48,6 @@
                         <th style="{{ @$vd['style'] }}">{{$vh['label']}}</th>
                     @endif
                 @endforeach
-
             @else
                 <th>#</th>
                 <th>Nome</th>
@@ -76,6 +75,10 @@
                     $linkShow = route($routa.'.'.$rlink,['id'=>$val->id]). '?redirect='.$redirect.'idCad='.$val->id;
                 }
                 $linkDbckp = $linkShow;
+                $link_edit = route($routa.'.edit',['id'=>$val->id]).'?redirect='.$redirect.'idCad='.$val->id;
+                if($frontend){
+                    $link_edit = App\Qlib\Qlib::get_slug_post_by_id(21).'/'.$val->token;
+                }
             @endphp
 
             <tr style="cursor: pointer" ondblclick="window.location='{{ $linkDbckp}}'"  id="tr_{{$val->id}}" class="@if (isset($_GET['idCad']) && $_GET['idCad']==$val->id) table-info @endif" title="DÊ DOIS CLIQUES PARA ABRIR">
@@ -83,36 +86,42 @@
                         <input type="checkbox" class="checkbox" onclick="color_select1_0(this.checked,this.value);" value="{{$val->id}}" name="check_{{$val->id}}" id="check_{{$val->id}}">
                     </td>
                     <td class="text-right d-flex d-print-none">
-                        @can('update',$routa)
-                            @if ($routa=='leiloes_adm' || $routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros')
-                                <a href="{{ $linkShow }}" title="visualizar" class="btn btn-sm btn-outline-secondary mr-2">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            @endif
-                            @php
-                                $link_edit = route($routa.'.edit',['id'=>$val->id]).'?redirect='.$redirect.'idCad='.$val->id;
-                                if($frontend){
-                                    $link_edit = App\Qlib\Qlib::get_slug_post_by_id(21).'/'.$val->token;
-                                }
-                            @endphp
+                        @if ($frontend && isset($link_edit))
                             <a href=" {{ $link_edit }} " title="Editar" class="btn btn-sm btn-outline-secondary mr-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                                 <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
                                 <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
                                 </svg>
                             </a>
-                            @else
-                            @if ($routa=='leiloes' || $routa=='leiloes_adm')
-                                <a href=" {{ route($routa.'.show',['id'=>$val->id]) }} " title="visualizar" class="btn btn-sm btn-outline-secondary mr-2">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            @else
-                                <a href=" {{ route($routa.'.edit',['id'=>$val->id]) }} " class="btn btn-sm btn-outline-primary mr-2" title="Visualizar">
-                                    <i class="fas fa-search"></i>
-                                </a>
-                            @endif
+                        @else
+                            @can('update',$routa)
+                                @if ($routa=='leiloes_adm' || $routa=='users'||$routa=='beneficiarios'||$routa=='lotes'||$routa=='quadras'||$routa=='bairros')
+                                    <a href="{{ $linkShow }}" title="visualizar" class="btn btn-sm btn-outline-secondary mr-2">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                @endif
+                                @php
 
-                        @endcan
+                                @endphp
+                                <a href=" {{ $link_edit }} " title="Editar" class="btn btn-sm btn-outline-secondary mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                    </svg>
+                                </a>
+                                @else
+                                @if ($routa=='leiloes' || $routa=='leiloes_adm')
+                                    <a href=" {{ route($routa.'.show',['id'=>$val->id]) }} " title="visualizar" class="btn btn-sm btn-outline-secondary mr-2">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                @else
+                                    <a href=" {{ route($routa.'.edit',['id'=>$val->id]) }} " class="btn btn-sm btn-outline-primary mr-2" title="Visualizar">
+                                        <i class="fas fa-search"></i>
+                                    </a>
+                                @endif
+
+                            @endcan
+                        @endif
                         @can('delete',$routa)
                             <form id="frm-{{ $val->id }}" action="{{ route($routa.'.destroy',['id'=>$val->id]) }}" method="POST">
                                 @csrf

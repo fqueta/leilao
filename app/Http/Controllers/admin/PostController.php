@@ -1236,7 +1236,11 @@ class PostController extends Controller
         if(!empty($data)){
             $contrato = $lc->get_data_contrato(@$data['config']['contrato']);
             if(isset($contrato['post_title'])){
-                $data['post_title'] = $contrato['post_title'];
+                if(isset($contrato['config']['total_horas'])){
+                    $data['post_title'] = $contrato['config']['total_horas'].' '.__('horas de voo');
+                }else{
+                    $data['post_title'] = $contrato['post_title'];
+                }
             }
             $atualizar=Post::where('id',$id)->update($data);
             if($atualizar){

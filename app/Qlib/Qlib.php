@@ -1093,14 +1093,14 @@ class Qlib
             if($intervalo->y){
                 $ret .= " e " . $intervalo->y . " anos.";
             }
-            if($intervalo->h){
+            if(isset($intervalo->h)){
                 $ret .= ", " . $intervalo->h . " h";
                 if($exibe_todo)
                 $ret .= ' '.Qlib::dataExibe($data1);
             }
-            // if($intervalo->i){
-            //     $ret .= " e " . $intervalo->i . " minutos.";
-            // }
+            if($intervalo->i){
+                $ret .= " e " . $intervalo->i . " m";
+            }
 
         }else{
             $ret .= "$label" . $intervalo->d . " dias";

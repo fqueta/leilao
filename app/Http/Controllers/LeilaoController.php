@@ -453,7 +453,6 @@ class LeilaoController extends Controller
                 $ret['color'] = @$ret['quase_termino']['color'];
                 $ret['exec'] = true;
             }
-
         }
         return $ret;
     }
@@ -848,6 +847,7 @@ class LeilaoController extends Controller
 
         }
         $ret = $data;
+        // dd($ret);
         return $ret;
     }
     public static function arr_lances($leilao_id=false,$data=false,$total=10){
