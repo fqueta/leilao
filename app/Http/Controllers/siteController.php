@@ -63,7 +63,6 @@ class siteController extends Controller
                 }
             }
             if($ds->count()){
-
                 $dados=$ds[0];
                 $post = $dados;
                 if(isset($dados['config']['permission']) && $arr_perm = $dados['config']['permission']){
