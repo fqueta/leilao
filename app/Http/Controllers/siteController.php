@@ -53,7 +53,17 @@ class siteController extends Controller
             }else{
                 $menus = menu_site::where('permission','=','public')->where('actived','1')->get()->toArray();
             }
+            if(count($menus) > 0){
+                //Pegando a url da página
+                foreach ($menus as $km => $vm) {
+                    $url = Qlib::get_slug_post_by_id($vm['page_id']);
+                    if($url){
+                        $menus[$km]['url'] = $url;
+                    }
+                }
+            }
             if($ds->count()){
+
                 $dados=$ds[0];
                 $post = $dados;
                 if(isset($dados['config']['permission']) && $arr_perm = $dados['config']['permission']){

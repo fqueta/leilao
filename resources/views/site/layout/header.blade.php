@@ -26,8 +26,6 @@
     <div class="container d-flex justify-content-between align-items-center">
 
       <div class="logo">
-        {{-- <h1 class="text-light"><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}"><span>L.ACJF</span></a></h1> --}}
-        <!-- Uncomment below if you prefer to use an image logo -->
         <a href="{{url('/'.App\Qlib\Qlib::get_slug_post_by_id(37))}}"><img src="{{url('/vendor/adminlte/dist/img/logo-h.png')}}" alt="" class="img-fluid"></a>
       </div>
 
@@ -96,7 +94,7 @@
                 <hr class="dropdown-divider">
             </li>
             <li><a href="{{url('/meu-cadastro')}}">Meu Cadastro</a></li>
-            <li><a href="#">Meus pacotes</a></li>
+            {{-- <li><a href="#">Meus pacotes</a></li> --}}
             {{-- <li><a href="#">Drop Down 3</a></li>
             <li><a href="#">Drop Down 4</a></li> --}}
             <li class="user-footer">

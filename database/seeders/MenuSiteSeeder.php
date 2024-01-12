@@ -22,7 +22,7 @@ class MenuSiteSeeder extends Seeder
                 'actived'=>true,
                 'permission'=>'public',
                 'url'=>'https://aeroclubejf.com.br/',
-                'route'=>'',
+                'ordenar'=>1,
                 'page_id'=>0,
                 'pai'=>''
             ],
@@ -33,8 +33,8 @@ class MenuSiteSeeder extends Seeder
                 'actived'=>true,
                 'permission'=>'public',
                 'url'=>'leiloes-publicos',
-                'route'=>'',
-                'page_id'=>0,
+                'ordenar'=>2,
+                'page_id'=>37,
                 'pai'=>''
             ],
             [
@@ -44,8 +44,8 @@ class MenuSiteSeeder extends Seeder
                 'actived'=>true,
                 'permission'=>'private',
                 'url'=>'seguindo',
-                'route'=>'',
-                'page_id'=>0,
+                'ordenar'=>3,
+                'page_id'=>11,
                 'pai'=>''
             ],
             [
@@ -55,8 +55,19 @@ class MenuSiteSeeder extends Seeder
                 'actived'=>true,
                 'permission'=>'private',
                 'url'=>'lances-list',
-                'route'=>'',
+                'ordenar'=>4,
                 'page_id'=>0,
+                'pai'=>''
+            ],
+            [
+                'categoria'=>'',
+                'description'=>'Como Funciona',
+                'icon'=>'fa fa-book',
+                'actived'=>true,
+                'permission'=>'public',
+                'url'=>'',
+                'ordenar'=>5,
+                'page_id'=>4,
                 'pai'=>''
             ],
             [
@@ -66,7 +77,7 @@ class MenuSiteSeeder extends Seeder
                 'actived'=>true,
                 'permission'=>'public',
                 'url'=>'https://aeroclubejf.com.br/contato',
-                'route'=>'',
+                'ordenar'=>5,
                 'page_id'=>0,
                 'pai'=>''
             ],

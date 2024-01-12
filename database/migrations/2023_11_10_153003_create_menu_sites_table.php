@@ -22,7 +22,7 @@ class CreateMenuSitesTable extends Migration
             $table->integer('page_id')->nullable();
             $table->string('permission')->nullable();
             $table->string('pai')->nullable();
-            $table->string('route')->nullable();
+            $table->string('ordenar')->nullable();
             $table->string('icon')->nullable();
             $table->boolean('actived')->nullable();
         });
