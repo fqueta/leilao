@@ -23,7 +23,7 @@ $mes = isset($config['mes']) ? $config['mes'] : false;
         margin-top:10px;
     }
 </style>
-<div class="row mt-5">
+<div class="row">
     <div class="col-md-12 mens">
     </div>
     <div class="col-md-12">

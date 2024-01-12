@@ -92,6 +92,31 @@ class QoptionSeeder extends Seeder
                 ]),
             ],
             [
+                'nome'=>'Tipos de páginas',
+                'url'=>'tipos_paginas',
+                'valor'=>Qlib::lib_array_json([
+                    'principal'=>'Página principal',
+                    'secundaria'=>'Página secundária',
+                    'land_page'=>'Landing page',
+                    'html'=>'HTML',
+                    'leiloes_publicos'=>'Leilões públicos',
+                    'area_cliente'=>'Área do cliente',
+                ]),
+            ],
+            [
+                'nome'=>'Tipos de conteudo',
+                'url'=>'tipos_conteudos',
+                'valor'=>Qlib::lib_array_json([
+                    'artigo'=>'artigo',
+                    'banner'=>'Bnner',
+                    'galeria'=>'Galeria',
+                    'pdf'=>'PDF',
+                    'contratos'=>'Contratos',
+                    'galeria'=>'Galeria',
+                    'tags'=>'Tags',
+                ]),
+            ],
+            [
                 'nome'=>'Notificação de lance para seguidor',
                 'url'=>'notific_lance_seguidor',
                 'valor'=>'O leilão <b>{nome_leilao}</b> recebeu um lance ',

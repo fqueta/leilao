@@ -653,8 +653,23 @@ class PostController extends Controller
                 'script_show'=>'admin.posts.link_view',
                 'dados'=>$data,
             ],
-            'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'text','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            'config[tipo_pagina]'=>[
+                'label'=>'Tipo de página*',
+                'active'=>true,
+                'type'=>'select',
+                'arr_opc'=>Qlib::get_tipos('tipos_paginas'),'exibe_busca'=>'d-block',
+                'event'=>'required',
+                'tam'=>'4',
+                'exibe_busca'=>true,
+                'option_select'=>true,
+                'class'=>'',
+                'value'=>@$_GET['config']['tipo_pagina'],
+                'cp_busca'=>'config][tipo_pagina',
+            ],
+            'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'text','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'8'],
             'post_title'=>['label'=>'Nome','active'=>true,'placeholder'=>'Ex.: Nome da página ','type'=>'text','exibe_busca'=>'d-block','event'=>'onkeyup=lib_typeSlug(this)','tam'=>'12'],
+            'post_excerpt'=>['label'=>'Descriação curta','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..')],
+            'post_content'=>['label'=>'Conteudo','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
             'config[permission][]'=>[
                 'label'=>'Permissão de visualização (Visível para todos se não selecionar)',
                 'active'=>true,
@@ -664,8 +679,6 @@ class PostController extends Controller
                 'tam'=>'12',
                 'cp_busca'=>'config][permission'
             ],
-            'post_excerpt'=>['label'=>'Descriação curta','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..')],
-            'post_content'=>['label'=>'Conteudo','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
             'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
         ];
         return $ret;

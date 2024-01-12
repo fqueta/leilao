@@ -6,6 +6,7 @@
     $slug = isset($dados['post_name']) ? $dados['post_name'] : $seg1;
     $slug2 = isset($dados['slug2']) ? $dados['slug2'] : $seg2;
     $title = isset($dados['post_title']) ? $dados['post_title'] : false;
+    $tipo_pagina = isset($dados['config']['tipo_pagina']) ? $dados['config']['tipo_pagina'] : false;
     $main = (new App\Http\Controllers\siteController)->get_main_post($post_id);
     $link_edit = App\Qlib\Qlib::get_link_edit_admin($post_id,$_REQUEST);
 @endphp
@@ -14,29 +15,34 @@
     {{$title}}
 @stop
 @section('banner-topo')
-    @if ($slug=='home')
+    @if ($tipo_pagina=='principal')
         @include('site.layout.banner-home')
-    @elseif ($slug=='leiloes-publicos')
-
+    @elseif ($tipo_pagina=='leiloes_publicos')
         @if ($slug2==null)
             @include('site.layout.banner-home')
         @endif
+    @elseif ($tipo_pagina=='land_page')
+    @elseif ($tipo_pagina=='html')
+        @include('site.layout.banner-sec')
     @else
         @include('site.layout.banner-sec')
     @endif
 @stop
 @section('main')
-    @if ($slug=='home')
-    @elseif ($slug=='leiloes-publicos')
+    @if ($tipo_pagina=='principal')
+    @elseif ($tipo_pagina=='leiloes_publicos')
         @include('site.layout.main')
     @elseif ($slug=='email')
         @include('site.layout.email')
-    @else
+    @elseif ($tipo_pagina=='land_page')
+    @elseif ($tipo_pagina=='secundaria')
         <section class="page-content">
             <div class="container py-5">
                 @include('site.layout.main')
             </div>
         </section>
+    @else
+        @include('site.layout.main')
     @endif
     @can('is_admin')
         <section>

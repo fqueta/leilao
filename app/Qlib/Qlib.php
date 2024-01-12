@@ -1487,4 +1487,17 @@ class Qlib
         $ret = config('app.url').'/admin/'.$slug.'/'.$post_id.'/edit?redirect='.Qlib::UrlAtual().'';
         return $ret;
     }
+    /**
+     * Metodo retornar um array com os tipos de págnas e tipos de conteudos
+     * @param $type = tipos_paginas | tipos_conteudos
+     */
+    static function get_tipos($type='tipos_paginas'){
+        $json = self::qoption($type);
+        $ret = [];
+        if($json){
+            $ret = self::lib_json_array($json);
+        }
+        return $ret;
+    }
+
 }
