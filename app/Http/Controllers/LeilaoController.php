@@ -817,13 +817,13 @@ class LeilaoController extends Controller
                     //incremento
                     $inc = Qlib::precoBanco(@$data['config']['incremento']);
                     //verifica se é o primeiro lance valor de rescisão + incremento = valor do proximo lance
-                    if($pl==($vr+$inc)){
-                        $data['exibe_btn_comprar'] = true;
-                    }else{
+                    // if($pl==($vr+$inc)){
+                    //     $data['exibe_btn_comprar'] = true;
+                    // }else{
                         //Se proximo lance for menor que o valor de venda aparece o botão aparece de forma randomica
                         $value = rand(0,1) == 1;
                         $data['exibe_btn_comprar'] = $value;
-                    }
+                    //}
                 }else{
                     //Se proximo lance for menor que o valor de venda aparece o botão aparece de forma randomica
                     $value = rand(0,1) == 1;

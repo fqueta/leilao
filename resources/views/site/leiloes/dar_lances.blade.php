@@ -46,10 +46,10 @@
                     <p>{{__('Preço atual do pacote')}} {{$dados['valor_atual']}}</p>
                 @endif
             @endif
+            {{-- {{dd($dados)}} --}}
             @if(isset($dados['config']['valor_venda']) && @$dados['exibe_btn_comprar'] && !$finalizado)
                 <div class="cart-area">
-                    <p>{{__('Ou')}} <a class="btn btn-sm theme-btn-primary px-3" href="{{$dados['link_btn_comprar']}}"><i
-                                class="fa-solid fa-shopping-cart"></i> {{__('Compre já')}}</a> {{__('por')}}
+                    <p>{{__('Ou')}}  <button type="button" onclick="window.location='{{$dados['link_btn_comprar']}}'" class="btn btn-sm theme-btn-primary px-3"><i class="fa-solid fa-shopping-cart"></i> {{__('Compre já')}}</button> {{__('por')}}
                         <b>{{$dados['config']['valor_venda']}}</b>
                     </p>
                 </div>
