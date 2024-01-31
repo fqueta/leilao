@@ -1168,9 +1168,6 @@ class Qlib
      */
     static function update_postmeta($post_id,$meta_key=null,$meta_value=null)
     {
-        // $post_id = isset($config['post_id'])?$config['post_id']:false;
-        // $meta_key = isset($config['meta_key'])?$config['meta_key']:false;
-        // $meta_value = isset($config['meta_value'])?$config['meta_value']:false;
         $ret = false;
         $tab = 'postmeta';
         if($post_id&&$meta_key&&$meta_value){
