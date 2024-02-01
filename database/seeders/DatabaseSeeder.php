@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             // etapaSeeder::class,
             tagSeeder::class,
             MenuSeeder::class,
-            PermissionSeeder::class,
+            // PermissionSeeder::class,
             DocumentoSeeder::class,
             QoptionSeeder::class,
             //BeneficiarioSeeder::class,

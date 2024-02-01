@@ -15,7 +15,7 @@
                         @if(@$dados['leilao']['ID'])
                             <div class="col-md-12 text-left mb-4">
                                 <p class="card-text">
-                                    {{__('Contrato integrado no leilão')}}: <a style="text-decoration:underline;" href="https://leilao.aeroclubejf.com.br/admin/leiloes_adm/{{@$dados['leilao']['ID']}}/edit?redirect=https://leilao.aeroclubejf.com.br/admin/leiloes_adm?idCad={{@$dados['leilao']['ID']}}">{{@$dados['leilao']['post_title']}}</a>
+                                    {{__('Contrato integrado no leilão')}}: <a style="text-decoration:underline;" href="{{url('/admin')}}/leiloes_adm/{{@$dados['leilao']['ID']}}/edit?redirect={{url('/admin')}}/leiloes_adm?idCad={{@$dados['leilao']['ID']}}">{{@$dados['leilao']['post_title']}}</a>
                                 </p>
                             </div>
                         @else
