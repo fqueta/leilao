@@ -121,6 +121,16 @@ class QoptionSeeder extends Seeder
                 'url'=>'notific_lance_seguidor',
                 'valor'=>'O leilão <b>{nome_leilao}</b> recebeu um lance ',
             ],
+            [
+                'nome'=>'Duração máxima do leilao',
+                'url'=>'duracao_max_leilao',
+                'valor'=>'15',
+            ],
+            [
+                'nome'=>'Notiificar usuário sobre cadastro na plataforma',
+                'url'=>'notific_new_user_add',
+                'valor'=>'s',
+            ],
         ]);
     }
 }

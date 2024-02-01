@@ -15,7 +15,7 @@ return [
     'dominio' => 'https://leiloair.com.br/',
     'version' => '1.0.1',
     'name' => env('APP_NAME', 'Leiloair'),
-
+    'last_update' => '01/02/2024',
     /*
     |--------------------------------------------------------------------------
     | Application Environment

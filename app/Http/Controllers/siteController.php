@@ -117,6 +117,9 @@ class siteController extends Controller
                 }elseif($this->sec1==Qlib::get_slug_post_by_id(12)){
                     //leiloes-list
                     $arr_shortC['list_leilao'] = $lc->list_leilao($post_id,$dados);
+                }elseif($this->sec1==Qlib::get_slug_post_by_id(18)){
+                    //contato
+                    $arr_shortC['form_contato'] = $this->form_contato($post_id,$dados);
                 }else{
                     $arr_shortC = [
                         'form_leilao' => $lc->form_leilao($post_id,$dados),
@@ -142,5 +145,12 @@ class siteController extends Controller
             }
         }
         return $ret;
+    }
+    /**
+     * Montar o formulario de contato
+     */
+    public function form_contato($post_id,$dados=false){
+        // $campos =
+        return view('site.form_contato',['id'=>$post_id, 'dados'=>$dados]);
     }
 }

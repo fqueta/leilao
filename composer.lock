@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "48921b2a789297cc3fd5944d2eb01e7d",
+    "content-hash": "097182be644a74e45279892c2349993c",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -2652,26 +2652,36 @@
         },
         {
             "name": "orangehill/iseed",
-            "version": "v2.2",
+            "version": "v3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orangehill/iseed.git",
-                "reference": "e94c5a05742ff5e29ddf34a27fcfddbec7712fd4"
+                "reference": "92b98c8bda6280afa0fac016b1b49caf6f57f18d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/orangehill/iseed/zipball/e94c5a05742ff5e29ddf34a27fcfddbec7712fd4",
-                "reference": "e94c5a05742ff5e29ddf34a27fcfddbec7712fd4",
+                "url": "https://api.github.com/repos/orangehill/iseed/zipball/92b98c8bda6280afa0fac016b1b49caf6f57f18d",
+                "reference": "92b98c8bda6280afa0fac016b1b49caf6f57f18d",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4.0"
+                "illuminate/support": "~5.5.0|~5.6.0|~5.7.0|~5.8.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "php": "^7.2|^8.0.2"
             },
             "require-dev": {
-                "illuminate/filesystem": "5.x",
-                "mockery/mockery": "dev-master"
+                "illuminate/filesystem": "~5.5.0|~5.6.0|~5.7.0|~5.8.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "laravel/framework": "~5.5.0|~5.6.0|~5.7.0|~5.8.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "mockery/mockery": "^1.0.0",
+                "phpunit/phpunit": "^8.0"
             },
             "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Orangehill\\Iseed\\IseedServiceProvider"
+                    ]
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Orangehill\\Iseed": "src/"
@@ -2699,9 +2709,9 @@
             ],
             "support": {
                 "issues": "https://github.com/orangehill/iseed/issues",
-                "source": "https://github.com/orangehill/iseed/tree/master"
+                "source": "https://github.com/orangehill/iseed/tree/v3.0.3"
             },
-            "time": "2016-09-14T07:59:34+00:00"
+            "time": "2023-03-27T06:14:43+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",

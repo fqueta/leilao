@@ -61,9 +61,11 @@ class LeilaoController extends Controller
             $leilao_id = Qlib::buscaValorDb0('posts','token',$leilao_id,'ID');
             $dadosLeilao = Post::Find($leilao_id);
             // $dadosLeilao = $this->get_leilao($leilao_id);
-            if($dadosLeilao->count() > 0){
-                $dadosLeilao['id'] = $dadosLeilao['ID'];
-                $dadosLeilao = $dadosLeilao->toArray();
+            if($dadosLeilao){
+                if($dadosLeilao->count() > 0){
+                    $dadosLeilao['id'] = $dadosLeilao['ID'];
+                    $dadosLeilao = $dadosLeilao->toArray();
+                }
             }
             // dd($dadosLeilao);
         }else{
@@ -83,7 +85,7 @@ class LeilaoController extends Controller
             'view'=>'site.leiloes',
             'file_submit'=>'site.leiloes.js_submit',
             'arquivos'=>'jpeg,jpg,png',
-            'redirect'=>url('/'.Qlib::get_slug_post_by_id(18)),
+            'redirect'=>url('/'.Qlib::get_slug_post_by_id(12)),
             'title'=>$title,
             'titulo'=>$titulo,
         ];
@@ -723,7 +725,8 @@ class LeilaoController extends Controller
     public function get_leilao($leilao_id=false,$data=false,$config=[]){
         $ret = false;
         if(!$data && $leilao_id){
-            $data = Post::where('ID','=',$leilao_id)->where('post_status', '=', 'publish')->get()->toArray();// Post::Find($leilao_id);
+            // $data = Post::where('ID','=',$leilao_id)->where('post_status', '=', 'publish')->get()->toArray();// Post::Find($leilao_id);
+            $data = Post::where('ID','=',$leilao_id)->get()->toArray();// Post::Find($leilao_id);
             if(isset($data[0])){
                 $data = $data[0];
             }

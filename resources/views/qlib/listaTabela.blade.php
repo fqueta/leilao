@@ -68,7 +68,7 @@
                     $rlink = 'show';
                 }
                 if($routa=='leiloes'){
-                    $linkShow = url('/').'/'.App\Qlib\Qlib::get_slug_post_by_id('21').'/'.$val->token;
+                    $linkShow = url('/').'/'.App\Qlib\Qlib::get_slug_post_by_id(13).'/'.$val->token;
                 }elseif($routa=='lances'){
                     $linkShow = false;
                 }else{
@@ -77,7 +77,7 @@
                 $linkDbckp = $linkShow;
                 $link_edit = route($routa.'.edit',['id'=>$val->id]).'?redirect='.$redirect.'idCad='.$val->id;
                 if($frontend){
-                    $link_edit = App\Qlib\Qlib::get_slug_post_by_id(21).'/'.$val->token;
+                    $link_edit = App\Qlib\Qlib::get_slug_post_by_id(13).'/'.$val->token;
                 }
             @endphp
 

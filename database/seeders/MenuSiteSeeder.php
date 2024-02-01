@@ -21,7 +21,7 @@ class MenuSiteSeeder extends Seeder
                 'icon'=>'fa fa-home',
                 'actived'=>true,
                 'permission'=>'public',
-                'url'=>'https://aeroclubejf.com.br/',
+                'url'=>'/',
                 'ordenar'=>1,
                 'page_id'=>0,
                 'pai'=>''
@@ -76,7 +76,7 @@ class MenuSiteSeeder extends Seeder
                 'icon'=>'fa fa-contacts',
                 'actived'=>true,
                 'permission'=>'public',
-                'url'=>'https://aeroclubejf.com.br/contato',
+                'url'=>'/contato',
                 'ordenar'=>5,
                 'page_id'=>0,
                 'pai'=>''

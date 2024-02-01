@@ -1086,13 +1086,13 @@ class Qlib
         $data2  = $d2->format('Y-m-d H:i:s');
         $intervalo = $d1->diff( $d2 );
         if($ab){
-            $ret .= "$label" . $intervalo->d . " d";
-            if($intervalo->m){
-                $ret .= " e " . $intervalo->m . " meses";
-            }
             if($intervalo->y){
-                $ret .= " e " . $intervalo->y . " anos.";
+                $ret .=  $intervalo->y . " A,";
             }
+            if($intervalo->m){
+                $ret .= $intervalo->m . " M,";
+            }
+            $ret .= "$label" . $intervalo->d . " d";
             if(isset($intervalo->h)){
                 $ret .= ", " . $intervalo->h . " h";
                 if($exibe_todo)
@@ -1102,6 +1102,7 @@ class Qlib
                 $ret .= " e " . $intervalo->i . " m";
             }
 
+            // dd($intervalo->interval);
         }else{
             $ret .= "$label" . $intervalo->d . " dias";
             if($intervalo->m){

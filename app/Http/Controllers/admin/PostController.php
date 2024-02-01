@@ -451,6 +451,8 @@ class PostController extends Controller
             if(isset($user->id))
                 $arr_itens = $lc->array_contratos($user->id);
         }
+        $duracao_max_leilao = Qlib::qoption('duracao_max_leilao')?Qlib::qoption('duracao_max_leilao'):15;
+        $max_data = Qlib::CalcularVencimento2(date('d/m/Y'),$duracao_max_leilao,'Y-m-d');
         $ret = [
             'sep1'=>['label'=>'Dados do Leilão','active'=>false,'tam'=>'12','script'=>'<h5 class="pt-1 text-light">'.__('Dados do Leilão').'</h5>','type'=>'html_script','class_div'=>'bg-secondary'],
             'ID'=>['label'=>'Id','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
@@ -521,7 +523,7 @@ class PostController extends Controller
             'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
             'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'hidden_text','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'','placeholder'=>__('Escreva seu conteúdo aqui..'),'value'=>@$data['post_content']],
             'infoPag'=>['label'=>'Formas de Pagamento','active'=>false,'tam'=>'12','script'=>'<h6 class="mt-2">Formas de pagamento</h6><p><label class="pt-1" for="fp"> <input id="fp" class="mr-2" type="checkbox" disabled checked />&nbsp;'.__('Cartão e Pix').' <i class="fa fa-question-circle" data-toggle="tooltip" title="'.__('Permitir usuário realizar o pagamento via '.config('app.name').'STORE na '.config('app.name').'. Quando o usuário realizar pagamento por essa opção, será gerado um pedido no site com todas as funcionalidades da ').config('app.name').'"></i></label>','type'=>'html_script','class_div'=>''],
-            'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-none','event'=>'required min='.date('Y-m-d').'','tam'=>'6','cp_busca'=>'config][termino','title'=>''],
+            'config[termino]'=>['label'=>'Término','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-none','event'=>'required min='.date('Y-m-d').' max='.$max_data,'tam'=>'6','cp_busca'=>'config][termino','title'=>''],
             'config[hora_termino]'=>['label'=>'Hora','active'=>true,'placeholder'=>'','type'=>'time','exibe_busca'=>'d-none','event'=>'required','tam'=>'6','cp_busca'=>'config][hora_termino','title'=>'Hora de Termino'],
             'config[pode_lance]'=>[
                 'label'=>'Quem pode dar lances em seu leilão',

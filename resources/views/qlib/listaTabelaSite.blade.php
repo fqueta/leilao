@@ -22,7 +22,6 @@
         $redirect = route($redirect.'.index').$sb;
     }
 
-
 @endphp
 <style media="print">
     #DataTables_Table_0_wrapper .row:first-child{

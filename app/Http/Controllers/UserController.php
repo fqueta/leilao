@@ -592,7 +592,8 @@ class UserController extends Controller
         // dd($ret);
         if($ajax=='s'){
             //Envia notificação de cadastro
-            if(isset($salvar->id)){
+            // $notific_new_user_add = Qlib::qoption('notific_new_user_add')?Qlib::qoption('notific_new_user_add'):'s';
+            if(isset($salvar->id) && $this->notific_new_user()){
                 $user_cad = User::Find($salvar->id);
                 Notification::send($user_cad,new notificaNewUser($user_cad));
             }
@@ -1277,5 +1278,17 @@ class UserController extends Controller
             $input_zap = false;
         }
         return $input_zap;
+    }
+    /**
+     * verifica se o sistema está cunfigurado para o usuario receber notificação de cadastro de nova conta
+     * @return boolean true|false
+     */
+    public function notific_new_user(){
+        $notific_new_user_add = Qlib::qoption('notific_new_user_add')?Qlib::qoption('notific_new_user_add'):'s';
+        if($notific_new_user_add=='s'){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

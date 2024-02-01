@@ -32,5 +32,7 @@ class DatabaseSeeder extends Seeder
             //BeneficiarioSeeder::class,
         ]);
 
+        $this->call(PostsTableSeeder::class);
+        $this->call(PermissionsTableSeeder::class);
     }
 }
