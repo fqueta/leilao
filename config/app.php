@@ -12,9 +12,9 @@ return [
     | any other location as required by the application or its packages.
     |
     */
-    'dominio' => 'https://leilao.aeroclubejf.com.br/',
+    'dominio' => 'https://leiloair.com.br/',
     'version' => '1.0.1',
-    'name' => env('APP_NAME', 'L ACJF'),
+    'name' => env('APP_NAME', 'Leiloair'),
 
     /*
     |--------------------------------------------------------------------------

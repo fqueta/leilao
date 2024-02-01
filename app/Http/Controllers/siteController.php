@@ -112,13 +112,14 @@ class siteController extends Controller
                     //leiloes-publicos
                     $arr_shortC['leiloes_publicos'] = $lc->leiloes_publicos($post_id,$dados);
                 }elseif($this->sec1=='payment'){
-                    //leiloes-publicos
+                    //payment
                     $arr_shortC['payment'] = $pa->form($post_id,$dados);
-
+                }elseif($this->sec1==Qlib::get_slug_post_by_id(12)){
+                    //leiloes-list
+                    $arr_shortC['list_leilao'] = $lc->list_leilao($post_id,$dados);
                 }else{
                     $arr_shortC = [
                         'form_leilao' => $lc->form_leilao($post_id,$dados),
-                        'list_leilao' => $lc->list_leilao($post_id,$dados),
                         'list_lances' => $lac->list_lances($post_id,$dados),
                         'list_lance_user' => $lac->list_lance_user(), //Lista os lances do usuario no frontend
                         // 'leiloes_publicos' => $lc->leiloes_publicos($post_id,$dados),

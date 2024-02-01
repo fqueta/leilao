@@ -14,7 +14,7 @@ $config = [
     |
     */
 
-    'title' => 'Data Brasil 1.0',
+    'title' => 'Leloair',
     'title_prefix' => '',
     'title_postfix' => '',
 

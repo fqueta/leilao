@@ -83,7 +83,7 @@
             <li class="dropdown"><a href="#"> <span>Gerenciar leilões</span> <i class="bi bi-chevron-right"></i> </a>
                 <ul>
                 <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(2)}}">{{__('Cadastrar leilão')}}</a></li>
-                <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(18)}}">{{__('Meus leilões')}}</a></li>
+                <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(12)}}">{{__('Meus leilões')}}</a></li>
                 <li><a href="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(3)}}">{{__('Meus lances')}}</a></li>
                 {{-- <li><a href="#">Deep Drop Down 3</a></li>
                 <li><a href="#">Deep Drop Down 4</a></li>
