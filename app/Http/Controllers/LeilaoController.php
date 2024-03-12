@@ -853,9 +853,9 @@ class LeilaoController extends Controller
         // dd($ret);
         return $ret;
     }
-    public static function arr_lances($leilao_id=false,$data=false,$total=10){
+    public function arr_lances($leilao_id=false,$data=false,$total=10){
         $ret = [];
-        $dl = self::get_leilao($leilao_id,$data);
+        $dl = $this->get_leilao($leilao_id,$data);
         $campo_valor = 'valor_r';
         if(isset($dl['config']['incremento']) && isset($dl['config'][$campo_valor])){
             $inc=Qlib::precoBanco($dl['config']['incremento']);

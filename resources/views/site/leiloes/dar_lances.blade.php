@@ -34,7 +34,7 @@
                 echo $mensLog;
             @endphp
             <p class="text-muted">
-                {!!App\Http\Controllers\LanceController::info_reserva($dados['ID'])!!}
+                {!!(new App\Http\Controllers\LanceController)->info_reserva($dados['ID'])!!}
             </p>
             <p class="text-muted"><small><b>Obs: *</b> {{__('Valores acima do valor mínimo de lance entrarão
                     como valor de
