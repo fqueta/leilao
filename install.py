@@ -1,10 +1,10 @@
 import os
-link_git = "https://github.com/fqueta/relatorios.git"
-path = "/home/maisaqu/public_html"
-usuario = "maisaqu"
-dir = "relatorios"
+link_git = "https://github.com/fqueta/leilao.git"
+path = "/home/leloair/public_html"
+usuario = "leloair"
+dir = "sys"
 nome_dir = path+"/"+dir
-nome_link = "rc"
+nome_link = "leilao"
 dow = "cd "+path+" && rm -rf "+dir+" && git clone "+link_git
 composer = "cd "+nome_dir+" && composer install -o --no-dev && cp .env.example .env"
 permissao = "chmod 755 "+dir+" && find * -type d -exec chmod 755 {} \; && find * -type f -exec chmod 644 {} \;"
