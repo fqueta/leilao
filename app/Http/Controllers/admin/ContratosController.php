@@ -112,6 +112,7 @@ class ContratosController extends Controller
         $ret['mens']=false;
         $arr_resp = Qlib::lib_json_array($json);
         if(isset($arr_resp['rescisao']['numero']) && $arr_resp['rescisao']['numero'] && isset($arr_resp['Cpf']) && isset($arr_resp['Email'])){
+            $ret['data'] = $json;
             // $ret['d'] = $arr_resp;
             //Verificar se o cliente está cadastrado atraves do email o cpf informado
             $verf_cad = User::orWhere('email',$arr_resp['Email'])->orWhere('cpf',$arr_resp['Cpf'])->get();
