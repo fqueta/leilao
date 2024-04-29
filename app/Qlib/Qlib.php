@@ -1497,5 +1497,16 @@ class Qlib
         }
         return $ret;
     }
+    /**
+     * Metodo para verificar se estamos do ambiente do admin
+     */
+    static function is_admin(){
+        $sec1=request()->segment(1);
+        if($sec1=='admin'){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
 }

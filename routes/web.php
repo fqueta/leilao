@@ -227,3 +227,4 @@ Route::post('/payment',[PaymentController::class,'init'])->name('payment');
 
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');
+Route::get('/{slug}/{id}/{sec}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index3');

@@ -44,7 +44,7 @@
 <header id="header" class="fixed-top d-flex align-items-center theme-bg-primary">
   @include('site.layout.header')
 </header>
-<main id="main">
+<main id="main" class="pb-2">
     @yield('banner-topo')
     @yield('main')
 </main>

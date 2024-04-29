@@ -2215,6 +2215,7 @@ function selectTipoUser(tipo){
         var lab_cpf = 'CPF *';
         url = url.replace('/pj','/'+tipo);
         $('[name="cpf"]').inputmask('999.999.999-99');
+        $('[div-id="email"]').removeClass('col-md-9').addClass('col-md-6');
     }
     if(tipo=='pj'){
         url = url.replace('/pf','/'+tipo);
@@ -2222,10 +2223,11 @@ function selectTipoUser(tipo){
         $('.div-pj').addClass('d-block').removeClass('d-none');
         var lab_nome = 'Nome do responsável *';
         var lab_cpf = 'CPF do responsável*';
+        $('[div-id="email"]').removeClass('col-md-6').addClass('col-md-9');
         //$('[name="cpf"]').inputmask('999.999.999/9999-99');
     }
     window.history.pushState("object", "Title", url);
-    $('[for="nome"]').html(lab_nome);
+    $('[for="name"]').html(lab_nome);
     $('[for="cpf"]').html(lab_cpf);
 }
 function exibeCategoria(obj){

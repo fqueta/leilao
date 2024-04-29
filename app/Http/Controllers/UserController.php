@@ -154,20 +154,27 @@ class UserController extends Controller
         if(isset($dados['tipo_pessoa']) && $dados['tipo_pessoa']){
             $_GET['tipo'] = $dados['tipo_pessoa'];
         }
-        $sec = isset($_GET['tipo'])?$_GET['tipo']:'pf';
+        if(Qlib::is_backend()){
+            $sec = isset($_GET['tipo'])?$_GET['tipo']:'pf';
+        }else{
+            $sec=request()->segment(3);
+        }
         if($sec=='pf'){
             $lab_nome = 'Nome completo *';
             $lab_cpf = 'CPF *';
             $displayPf = '';
             $displayPj = 'd-none';
+            $larg_email = 6;
         }elseif($sec=='pj'){
             $lab_nome = 'Nome do responsável *';
             $lab_cpf = 'CPF do responsável*';
             $displayPf = 'd-none';
             $displayPj = '';
+            $larg_email = 9;
         }else{
             $lab_nome = 'Nome completo *';
             $lab_cpf = 'CPF *';
+            $larg_email = 6;
             $displayPf = '';
             $displayPj = 'd-none';
         }
@@ -183,21 +190,34 @@ class UserController extends Controller
         $ret = [
             'id'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'sep0'=>['label'=>'informações','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Informe os dados').'</h6><hr class="mt-0">','script_show'=>''],
-            'name'=>['label'=>'Nome completo','active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'12'],
+            'tipo_pessoa'=>[
+                'label'=>'Pessoa*',
+                'active'=>true,
+                'type'=>'select',
+                'arr_opc'=>['pf'=>'Pessoa Física','pj'=>'Pessoa Jurídica'],'exibe_busca'=>'d-block',
+                'event'=>'onchange=selectTipoUser(this.value)',
+                'tam'=>'12',
+            ],
+            'name'=>['label'=>$lab_nome,'active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'12'],
+            // 'nome'=>['label'=>$lab_nome,'active'=>true,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'9','placeholder'=>''],
+            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf','tam'=>'3'],
+            'cnpj'=>['label'=>'CNPJ *','active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cnpj required','tam'=>'3','class_div'=>'div-pj '.$displayPj],
+            'razao'=>['label'=>'Razão social *','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'3','placeholder'=>'','class_div'=>'div-pj '.$displayPj],
+            'config[nome_fantasia]'=>['label'=>'Nome fantasia','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'3','placeholder'=>'','class_div'=>'div-pj '.$displayPj,'cp_busca'=>'config][nome_fantasia'],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'telddi'=>['label'=>'Telefone com ddi','active'=>false,'tam'=>'9','script'=>$telddi,'script_show'=>$telddi_show,'type'=>'html_script','class_div'=>''],
             'config[Telefone]'=>['label'=>'Telefone','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
-            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'9'],
+            'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>$larg_email],
             'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
             'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Documentos').'</h6><hr class="mt-0">','script_show'=>''],
             'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3','value'=>@$_GET['cpf']],
             'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3','cp_busca'=>'config][cep'],
-            'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'6','cp_busca'=>'config][endereco'],
+            'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'7','cp_busca'=>'config][endereco'],
             'config[numero]'=>['label'=>'Numero','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'numero=cep','tam'=>'2','cp_busca'=>'config][numero'],
-            'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'5','cp_busca'=>'config][complemento'],
-            'config[bairro]'=>['label'=>'Bairro','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'bairro=cep','tam'=>'5','cp_busca'=>'config][bairro'],
-            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'10','cp_busca'=>'config][cidade'],
+            'config[complemento]'=>['label'=>'Complemento','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'3','cp_busca'=>'config][complemento'],
+            'config[bairro]'=>['label'=>'Bairro','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'bairro=cep','tam'=>'3','cp_busca'=>'config][bairro'],
+            'config[cidade]'=>['label'=>'Cidade','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'cidade=cep','tam'=>'4','cp_busca'=>'config][cidade'],
             'config[uf]'=>['label'=>'UF','active'=>false,'js'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','cp_busca'=>'config][uf'],
             'sep2c'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'id_permission'=>[
@@ -276,6 +296,11 @@ class UserController extends Controller
         }
         if(Qlib::is_frontend()){
             unset($ret['sep2c'],$ret['ativo'],$ret['id_permission']);
+            //determinar o tipo de pessoa pela url
+            $ret['tipo_pessoa']['type'] = 'hidden';
+            if($sec){
+                $ret['tipo_pessoa']['value'] = $sec;
+            }
             $ret['sep3']=[
                 'label'=>'Termos',
                 'active'=>false,
@@ -563,6 +588,10 @@ class UserController extends Controller
         //     return $ret;
         // }
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
+        $dados['tipo_pessoa'] = isset($dados['tipo_pessoa'])?$dados['tipo_pessoa']:'pf';
+        if(empty($dados['tipo_pessoa'])){
+            $dados['tipo_pessoa'] = 'pf';
+        }
         $dados['ativo'] = isset($dados['ativo'])?$dados['ativo']:'s';
         $dados['id_permission'] = isset($dados['id_permission'])?$dados['id_permission']:5;
         if(isset($dados['password']) && !empty($dados['password'])){
@@ -1057,7 +1086,7 @@ class UserController extends Controller
             $ac = 'cad';
             $dadosmeu_cadastro = false;
         }
-        // $seg2 = request()->segment(2);
+        $seg3 = request()->segment(3);
         // $meu_cadastro_id = $meu_cadastro_id ? $meu_cadastro_id : $seg2;
 
         if(!$dados && $post_id){
@@ -1065,6 +1094,13 @@ class UserController extends Controller
             $dados = Post::Find($post_id);
         }
         $title = __('Meu Cadastro');
+        $redirect = url('/');
+        if($seg3=='pj'){
+            $title .= ' '.__('de Escola');
+        }elseif($seg3=='pf'){
+            $title .= ' '.__('de Aluno');
+            // $redirect = url('/');
+        }
         $titulo = $title;
         $config = [
             'ac'=>$ac,
@@ -1073,7 +1109,7 @@ class UserController extends Controller
             'view'=>'site.index',
             'file_submit'=>'site.js_submit',
             'arquivos'=>'jpeg,jpg,png',
-            'redirect'=>Qlib::get_slug_post_by_id(1),
+            'redirect'=>$redirect,
             'title'=>$title,
             'titulo'=>$titulo,
         ];
@@ -1104,6 +1140,33 @@ class UserController extends Controller
         return view('site.user.edit',$ret);
     }
     /**
+     * Metodo para chamar a viw de seleção de tipo de usuario que se cadaastra no site
+     */
+    public function painel_select_user_site($post_id=false,$dados=false){
+        if(!$dados && $post_id){
+
+            $dados = Post::Find($post_id);
+        }
+        $title = __('Selecione seu perfil de usuário');
+        $titulo = $title;
+        $config['media'] = [
+            'files'=>'jpeg,jpg,png,pdf,PDF',
+            'select_files'=>'unique',
+            'field_media'=>'post_parent',
+            'post_parent'=>$post_id,
+        ];
+        $ret = [
+            // 'value'=>$dadosmeu_cadastro,
+            'config'=>$config,
+            'title'=>$title,
+            'titulo'=>$titulo,
+            // 'listFiles'=>$listFiles,
+            // 'campos'=>$campos,
+            'exec'=>true,
+        ];
+        return view('site.user.painel_select_user_site',$ret);
+    }
+    /**
      * Metodo para checar se o usuario verificou seu email
      */
     public function is_verified(){
@@ -1127,15 +1190,19 @@ class UserController extends Controller
     public function ger_user($id_pagina=false,$dp=false){
         $seg1 = request()->segment(1);
         $seg2 = request()->segment(2);
+        $seg3 = request()->segment(3);
         if(!$seg2){
             if(Qlib::isAdmin(3)){
                 return $this->get_users_site();
             }else{
                 return redirect()->to('/meu-cadastro');
             }
-        }elseif($seg2=='create'){
+        }elseif($seg2=='create' && $seg3!=null){
             //Criar usuario
             return $this->form_meu_cadastro($id_pagina,$dp);
+        }elseif($seg2=='create'){
+            //Exibir uma tela seleção de timpo de usuario
+            return $this->painel_select_user_site($id_pagina,$dp);
         }elseif($seg2=='edit'){
             //editar usuario
         }elseif($seg2=='show'){

@@ -111,9 +111,14 @@ class ContratosController extends Controller
         $ret['exec']=false;
         $ret['mens']=false;
         $arr_resp = Qlib::lib_json_array($json);
+        if(!isset($arr_resp['Cpf'])){
+            $ret['mens']='CPF não informado';
+            return $ret;
+        }
+        $ret['arr_resp'] = $arr_resp;
         if(isset($arr_resp['rescisao']['numero']) && $arr_resp['rescisao']['numero'] && isset($arr_resp['Cpf']) && isset($arr_resp['Email'])){
             $ret['data'] = $json;
-            // $ret['d'] = $arr_resp;
+            $ret['d'] = $arr_resp;
             //Verificar se o cliente está cadastrado atraves do email o cpf informado
             $verf_cad = User::orWhere('email',$arr_resp['Email'])->orWhere('cpf',$arr_resp['Cpf'])->get();
             $dcw = $arr_resp;
@@ -164,7 +169,6 @@ class ContratosController extends Controller
                     $user_cad = User::Find($salvar->id);
                     Notification::send($user_cad,new notificaNewUser($user_cad));
                     $ret = $this->add_contratos($id_cli,$dcw['token'],$dcw['rescisao']);
-
                 }
 
 
