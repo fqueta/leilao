@@ -196,6 +196,8 @@ Route::prefix('ajax')->group(function(){
     Route::post('/session-m',[App\Http\Controllers\admin\sessionController::class,'sessionManagerAction']);
     Route::post('/reciclar-leilao/{leilao_id}',[LeilaoController::class,'reciclar'])->name('leiloes.reciclar');
     Route::post('/tornar-vencedor',[LanceController::class,'tornar_vencedor'])->name('leiloes.tornar_vencedor');
+    // Route::post('/valida-escolas',[UserController::class,'valida_escola'])->name('user.valida_escola');
+    Route::post('/pre-cadastro-escola',[UserController::class,'pre_cadastro_escola'])->name('user.pre_cadastro_escola');
 });
 Route::prefix('notification')->group(function(){
     Route::get('/index',[App\Http\Controllers\NotificationController::class,'index'])->name('notification.index');
@@ -227,4 +229,4 @@ Route::post('/payment',[PaymentController::class,'init'])->name('payment');
 
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');
-Route::get('/{slug}/{id}/{sec}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index3');
+Route::get('/{slug}/{id}/{sec}/{token}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index3');

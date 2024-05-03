@@ -989,34 +989,43 @@ function submitFormularioCSRF(objForm,funCall,funError){
         }
     }
     var route = objForm.attr('action');
-    console.log(route);
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+    objForm.validate({
+        submitHandler: function(form) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: 'POST',
+                url: route,
+                data: objForm.serialize()+'&ajax=s',
+                dataType: 'json',
+                beforeSend: function(){
+                    $('#preload').fadeIn();
+                },
+                success: function (data) {
+                    $('#preload').fadeOut("fast");
+                    funCall(data);
+                },
+                error: function (data) {
+                    $('#preload').fadeOut("fast");
+                    try {
+                        console.log(data);
+                        if(data.responseJSON.errors){
+                            funError(data.responseJSON.errors);
+                        }else{
+                            lib_formatMensagem('.mens','Erro','danger');
+                        }
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
         }
     });
-    $.ajax({
-        type: 'POST',
-        url: route,
-        data: objForm.serialize()+'&ajax=s',
-        dataType: 'json',
-        beforeSend: function(){
-            $('#preload').fadeIn();
-        },
-        success: function (data) {
-            $('#preload').fadeOut("fast");
-            funCall(data);
-        },
-        error: function (data) {
-            $('#preload').fadeOut("fast");
-            if(data.responseJSON.errors){
-                funError(data.responseJSON.errors);
-                console.log(data.responseJSON.errors);
-            }else{
-                lib_formatMensagem('.mens','Erro','danger');
-            }
-        }
-    });
+    objForm.submit();
 }
 function lib_funError(res){
     var mens = '';
@@ -2883,4 +2892,38 @@ function contatar_ganhador(obj){
     } catch (error) {
         console.log(error);
     }
+}
+function primeira_etapa_cadastro_site(btn){
+    if(btn=='empresa'){
+        var msg = '<form id="pre-cadastro-escola" action="/ajax/pre-cadastro-escola"><div class="row"><div class="col-12"><label>Email</label><input type="email" required name="email" value="" class="form-control" placeholder="seu@email.com"  /></div><div class="col-12">Informe o CNPJ da sua instituição, credenciado na ANAC</div><div class="col-12"><input type="tel" required name="cnpj" value="" class="form-control" placeholder="CNPJ"  /></div></div></form>',btn_acao='<button type="button" onclick="submit_precadastro_site(\'pre-cadastro-escola\');" class="btn btn-primary">Avançar <i class="fa fa-arrow-right"></i></button>';
+        alerta5(msg,'modal-cad-empresa','Cadastro de escola',true);
+        $(btn_acao).insertAfter('#modal-cad-empresa .modal-footer button');
+        $('[name="cnpj"]').inputmask('99.999.999/9999-99');
+    }
+}
+function submit_precadastro_site(sel){
+    submitFormularioCSRF($('#'+sel),function(res){
+        try {
+            if(res.mens){
+                $('.mens').html(res.mens);
+            }
+            if(res.exec && res.redirect){
+                window.location=res.redirect;
+            }
+            if(res.code_mens=='enc'){
+                if(res.redirect=='self'){
+                    var red = urlAtual();
+                    window.location=red;
+                    console.log(red);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },function(e){
+        lib_funError(e);
+        if(e.cnpj[0]){
+            alert(e.cnpj[0]+'\nEm caso de dúvida entre em contato com o nosso suporte');
+        }
+    });
 }

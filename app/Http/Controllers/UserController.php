@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
 use App\Notifications\notificaNewUser;
+use App\Rules\RightCnpj;
 use Illuminate\Support\Facades\Notification;
 
 class UserController extends Controller
@@ -204,6 +205,7 @@ class UserController extends Controller
             'cnpj'=>['label'=>'CNPJ *','active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cnpj required','tam'=>'3','class_div'=>'div-pj '.$displayPj],
             'razao'=>['label'=>'Razão social *','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'3','placeholder'=>'','class_div'=>'div-pj '.$displayPj],
             'config[nome_fantasia]'=>['label'=>'Nome fantasia','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'3','placeholder'=>'','class_div'=>'div-pj '.$displayPj,'cp_busca'=>'config][nome_fantasia'],
+            'config[CodigoCiac]'=>['label'=>'CIAC','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','placeholder'=>'','class_div'=>'div-pj '.$displayPj,'cp_busca'=>'config][CodigoCiac'],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'telddi'=>['label'=>'Telefone com ddi','active'=>false,'tam'=>'9','script'=>$telddi,'script_show'=>$telddi_show,'type'=>'html_script','class_div'=>''],
             'config[Telefone]'=>['label'=>'Telefone','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
@@ -557,28 +559,37 @@ class UserController extends Controller
         $dados = $request->all();
         $origem = isset($dados['config']['origem']) ? $dados['config']['origem'] : false;
         $tag_origem = $origem;
+
         if($origem=='admin'){
             $validatedData = $request->validate([
                 'name' => ['required','string',new FullName],
                 'email' => ['required','string','unique:users'],
-                'cpf'   =>[new RightCpf,'required','unique:users']
+                'cpf'   =>[new RightCpf,'required','unique:users'],
             ],[
-                    'nome.required'=>__('O nome é obrigatório'),
-                    'nome.string'=>__('É necessário conter letras no nome'),
-                    'email.unique'=>__('E-mail já cadastrado'),
-                    'cpf.unique'=>__('CPF já cadastrado'),
+                'nome.required'=>__('O nome é obrigatório'),
+                'nome.string'=>__('É necessário conter letras no nome'),
+                'email.unique'=>__('E-mail já cadastrado'),
+                'cpf.unique'=>__('CPF já cadastrado'),
             ]);
         }else{
-            $validatedData = $request->validate([
-                'name' => ['required','string',new FullName],
-                'email' => ['required','string','unique:users'],
-                'cpf'   =>[new RightCpf,'required','unique:users']
-            ],[
-                    'nome.required'=>__('O nome é obrigatório'),
-                    'nome.string'=>__('É necessário conter letras no nome'),
-                    'email.unique'=>__('E-mail já cadastrado'),
-                    'cpf.unique'=>__('CPF já cadastrado'),
-            ]);
+            if($origem=='precadastro'){
+                $validatedData = $request->validate([
+                    'cnpj'   =>[new RightCnpj,'required','unique:users']
+                ],[
+                        'cnpj.unique'=>__('CNPJ já cadastrado'),
+                ]);
+            }else{
+                $validatedData = $request->validate([
+                    'name' => ['required','string',new FullName],
+                    'email' => ['required','string','unique:users'],
+                    'cpf'   =>[new RightCpf,'required','unique:users']
+                ],[
+                        'nome.required'=>__('O nome é obrigatório'),
+                        'nome.string'=>__('É necessário conter letras no nome'),
+                        'email.unique'=>__('E-mail já cadastrado'),
+                        'cpf.unique'=>__('CPF já cadastrado'),
+                ]);
+            }
         }
         // $vl = ob_get_clean();
         // dd($vl);
@@ -593,6 +604,7 @@ class UserController extends Controller
             $dados['tipo_pessoa'] = 'pf';
         }
         $dados['ativo'] = isset($dados['ativo'])?$dados['ativo']:'s';
+        $dados['token'] = isset($dados['token'])?$dados['token']:uniqid();
         $dados['id_permission'] = isset($dados['id_permission'])?$dados['id_permission']:5;
         if(isset($dados['password']) && !empty($dados['password'])){
             $dados['password'] = Hash::make($dados['password']);
@@ -601,13 +613,15 @@ class UserController extends Controller
                 unset($dados['password']);
             }
         }
+        $d = $dados;
+        unset($dados['meta']);
         $salvar = User::create($dados);
         $dados['id'] = $salvar->id;
         //Atualização de meta dados
         $s_me=false;
-        if(isset($dados['meta']) && is_array($dados['meta'])){
-            $dados['meta']['tag_origem'] = $tag_origem;
-            $s_me = $this->save_meta($salvar->id,$dados['meta']);
+        if(isset($d['meta']) && is_array($d['meta'])){
+            $d['meta']['tag_origem'] = $tag_origem;
+            $s_me = $this->save_meta($salvar->id,$d['meta']);
         }
         $route = $this->routa.'.index';
         $ret = [
@@ -618,7 +632,12 @@ class UserController extends Controller
             'exec'=>true,
             'dados'=>$dados
         ];
-        // dd($ret);
+        if($origem=='precadastro'){
+            if($salvar->id){
+                $ret['exec'] = true;
+            }
+            return $ret;
+        }
         if($ajax=='s'){
             //Envia notificação de cadastro
             // $notific_new_user_add = Qlib::qoption('notific_new_user_add')?Qlib::qoption('notific_new_user_add'):'s';
@@ -937,6 +956,9 @@ class UserController extends Controller
         if($user_id && is_array($metadata)){
             // dd($metadata,$user_id);
             foreach ($metadata as $k => $v) {
+                if(is_array($v)){
+                    $v = Qlib::lib_array_json($v);
+                }
                 if($k == 'termo' && $v=='s'){
                     //aceitação dos termos
                     $v = Qlib::lib_array_json([
@@ -1357,5 +1379,100 @@ class UserController extends Controller
         }else{
             return false;
         }
+    }
+    /**
+     * Metodo para validar a escola na anac atraves do cnpj
+     * @param string $cnpj
+     * @return array
+     */
+    public function valida_escola(Request $request){
+        if($request->has('cnpj')){
+            $cnpj = $request->get('cnpj');
+        }else{
+            return ['recordsTotal'=>0];
+        }
+        $curl = curl_init();
+        // $cnpj = str_replace('.','',$cnpj);
+        // $cnpj = str_replace('/','',$cnpj);
+        // $cnpj = str_replace('-','',$cnpj);
+        $cnpj = preg_replace('/[^0-9]/', '', (string) $cnpj);
+        $data = ['filtros.cnpj'=>$cnpj];
+        // dd($cnpj);
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://sistemas.anac.gov.br/RBAC141/(X(1)S(bzf31g5fwxb2u1ujulqstrcg))/ciac/GetCiacsList',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS =>Qlib::lib_array_json($data),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Cookie: TS01ef03de=016a5a6bebed3b8f740efb0b9d341ff728c6a72567f6b0a5da2c74e471d386524ba4d1c05f0b9b7c2559805ab1f2a9c0ba4f9ed6d2'
+            ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return Qlib::lib_json_array($response) ;
+    }
+    /**
+     * Metodo para gravar opre
+     */
+    public function pre_cadastro_escola(Request $request){
+        $ret['exec'] = false;
+        if($request->has('cnpj')){
+            $cnpj = $request->get('cnpj');
+            //verificar se o cadastro de um cnpj está incompleto.
+            $du = User::where('cnpj',$cnpj)->get();
+            if($du->count() > 0){
+                $dus = $du->toArray();$du=$dus[0];
+                //verificar se ja é um cadastro do sistema completo
+                if(isset($du['config']['origem']) && $du['config']['origem']=='precadastro'){
+                    //enviar para a proxima etapa de cadastro
+                    $ret['redirect'] = url('/user/create/pj/'.$du['token']);
+                    $ret['exec'] = true;
+                    return $ret;
+                }
+                //se for notificar para realizar login
+                // dd($du);
+            }
+            //Validar o cnpj
+            $validatedData = $request->validate([
+                'email' => ['required','string','unique:users'],
+                'cnpj'   =>[new RightCnpj,'required','unique:users']
+            ],[
+                'cnpj.unique'=>__('CNPJ já cadastrado'),
+                'email.unique'=>__('E-mail já cadastrado'),
+            ]);
+            // dd($request->all());
+            $resultado = Qlib::lib_json_array($this->valida_escola($request));
+            if(isset($resultado['recordsTotal']) && $resultado['recordsTotal']>0 && isset($resultado['data'])){
+                //salvar o precadastro com cnpj e o meta_user dados da validação
+                $request->merge([
+                    'config' => [
+                        'origem'=>'precadastro',
+                        'nome_fantasia'=>@$resultado['data'][0]['NomeFantasia'],
+                        'cidade'=>@$resultado['data'][0]['Cidade'],
+                        'uf'=>@$resultado['data'][0]['Estado'],
+                        'CodigoCiac'=>@$resultado['data'][0]['CodigoCiac'],
+                    ],
+                    'tipo_pessoa'=>'pj',
+                    'razao'=>@$resultado['data'][0]['RazaoSocial'],
+                    'meta'=>['validacao_anac'=>$resultado['data']]
+                ]);
+                // dd($request->all());
+                $salvar = $this->store($request);
+                if($salvar['exec'] && $salvar['idCad']){
+                    $token_user = Qlib::buscaValorDb0('users','id',$salvar['idCad'],'token');
+                    $ret['redirect'] = url('/user/create/pj/'.$token_user);
+                    $ret['exec'] = $salvar['exec'];
+                }
+                $ret['salvar'] = $salvar;
+            }
+            $ret['resultado'] = $resultado;
+        }
+        return $ret;
     }
 }
