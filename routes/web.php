@@ -209,6 +209,7 @@ Route::get('/email/verify', function () {
     return view('site.index');
 })->middleware('auth')->name('verification.notice');
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Support\Facades\URL;
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
@@ -230,3 +231,6 @@ Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->na
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');
 Route::get('/{slug}/{id}/{sec}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index3');
 Route::get('/{slug}/{id}/{sec}/{token}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index4');
+if (env('APP_ENV') === 'production') {
+    URL::forceSchema('https');
+}
