@@ -568,6 +568,7 @@ class LeilaoController extends Controller
             $_GET['filter']['ID'] = $seg2;
             $_GET['filter']['post_status'] = 'publish';
             $dlt = $this->get_leilao($seg2);
+            // dd($dlt);
             if(isset($dlt['post_status']) && $dlt['post_status']=='publish'){
                 $dl[0] = $dlt;
                 //Verificar se estão devidamente publicados
@@ -861,8 +862,18 @@ class LeilaoController extends Controller
             $inc=Qlib::precoBanco($dl['config']['incremento']);
             $li=Qlib::precoBanco($dl['config'][$campo_valor]);
             $l_at=(new LanceController)->ultimo_lance($leilao_id);//lance atual
-            if($l_at>0){
-                $li=$l_at+$inc;
+            // dump($li,$l_at,$inc);
+            $primeiro_lance_com_incremento = true;  // o sistema considera o primeiro lance como sendo o valor de rescisão + incremento
+            if($primeiro_lance_com_incremento){
+                if($l_at>0){
+                    $li=$l_at+$inc;
+                }else{
+                    $li=$li+$inc;
+                }
+            }else{
+                if($l_at>0){
+                    $li=$l_at+$inc;
+                }
             }
             if($inc>0 && $li>0){
                 $vl = $li;

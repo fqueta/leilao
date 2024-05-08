@@ -43,10 +43,6 @@ Route::fallback(function () {
 Auth::routes();
 Auth::routes(['register' => false]);
 Route::prefix('admin')->group(function(){
-    // Auth::routes();
-    // Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
-    // Route::post('login', 'Auth\LoginController@login');
-    // Route::post('logout', 'Auth\LoginController@logout')->name('logout');
     Route::prefix('quick-cad')->group(function(){
         Route::get('/leilao',[QuickCadController::class,'leilao'])->name('quick.add.leilao');
     });
@@ -189,6 +185,9 @@ Route::get('envio-mails',function(){
 Route::resource('lances','\App\Http\Controllers\LanceController',['parameters' => [
     'lances' => 'id'
 ]]);
+// Route::prefix('user')->group(function(){
+//     Route::get('/login',[App\Http\Controllers\UserController::class,'user_login_jwt'])->name('user.login.jwt');
+// });
 Route::prefix('ajax')->group(function(){
     Route::post('/excluir-reserva-lance',[App\Http\Controllers\LanceController::class,'excluir_reserva']);
     Route::post('/ger-seguidores',[App\Http\Controllers\LeilaoController::class,'ger_seguidores']);
@@ -229,4 +228,5 @@ Route::post('/payment',[PaymentController::class,'init'])->name('payment');
 
 Route::get('/{slug}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index');
 Route::get('/{slug}/{id}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index2');
-Route::get('/{slug}/{id}/{sec}/{token}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index3');
+Route::get('/{slug}/{id}/{sec}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index3');
+Route::get('/{slug}/{id}/{sec}/{token}', [App\Http\Controllers\siteController::class, 'index'])->name('site.index4');

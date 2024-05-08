@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\admin\EventController;
 use App\Http\Controllers\admin\QuickCadController;
-use App\Http\Controllers\Auth\RegisterController;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Models\_upload;
 use App\Models\Post;
@@ -16,13 +14,11 @@ use App\Rules\FullName;
 use App\Rules\RightCpf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
 use App\Notifications\notificaNewUser;
 use App\Rules\RightCnpj;
 use Illuminate\Support\Facades\Notification;
-
+use App\Http\Controllers\Auth\LoginController;
 class UserController extends Controller
 {
     protected $user;
@@ -201,18 +197,18 @@ class UserController extends Controller
             ],
             'name'=>['label'=>$lab_nome,'active'=>true,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>'12'],
             // 'nome'=>['label'=>$lab_nome,'active'=>true,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'9','placeholder'=>''],
-            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf','tam'=>'3'],
+            // 'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf','tam'=>'3'],
+            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3','value'=>@$_GET['cpf']],
             'cnpj'=>['label'=>'CNPJ *','active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cnpj required','tam'=>'3','class_div'=>'div-pj '.$displayPj],
             'razao'=>['label'=>'Razão social *','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'required','tam'=>'3','placeholder'=>'','class_div'=>'div-pj '.$displayPj],
             'config[nome_fantasia]'=>['label'=>'Nome fantasia','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'3','placeholder'=>'','class_div'=>'div-pj '.$displayPj,'cp_busca'=>'config][nome_fantasia'],
             'config[CodigoCiac]'=>['label'=>'CIAC','active'=>false,'type'=>'text','exibe_busca'=>'d-none','event'=>'','tam'=>'2','placeholder'=>'','class_div'=>'div-pj '.$displayPj,'cp_busca'=>'config][CodigoCiac'],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'telddi'=>['label'=>'Telefone com ddi','active'=>false,'tam'=>'9','script'=>$telddi,'script_show'=>$telddi_show,'type'=>'html_script','class_div'=>''],
-            'config[Telefone]'=>['label'=>'Telefone','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][celular'],
+            'config[Telefone]'=>['label'=>'Telefone','active'=>true,'type'=>'tel','tam'=>'3','exibe_busca'=>'d-block','event'=>'required onblur=mask(this,clientes_mascaraTelefone); onkeypress=mask(this,clientes_mascaraTelefone);','cp_busca'=>'config][Telefone'],
             'email'=>['label'=>'Email','active'=>true,'type'=>'text','exibe_busca'=>'d-block','event'=>'required','tam'=>$larg_email],
             'password'=>['label'=>'Senha','active'=>false,'type'=>'password','exibe_busca'=>'d-none','event'=>'','tam'=>'3'],
             'sep1'=>['label'=>'Documento','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Documentos').'</h6><hr class="mt-0">','script_show'=>''],
-            'cpf'=>['label'=>$lab_cpf,'active'=>false,'type'=>'tel','exibe_busca'=>'d-block','event'=>'mask-cpf required','tam'=>'3','value'=>@$_GET['cpf']],
             'sep1'=>['label'=>'Endereço','active'=>false,'type'=>'html_script','exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Configurações').'</h6><hr class="mt-0">','script_show'=>''],
             'config[cep]'=>['label'=>'CEP','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'mask-cep onchange=buscaCep1_0(this.value)','tam'=>'3','cp_busca'=>'config][cep'],
             'config[endereco]'=>['label'=>'Endereço','active'=>false,'placeholder'=>'','type'=>'text','exibe_busca'=>'d-block','event'=>'endereco=cep','tam'=>'7','cp_busca'=>'config][endereco'],
@@ -340,6 +336,7 @@ class UserController extends Controller
                 // $ret['email']['event'] = 'disabled';
             }
         }
+        // dd($ret);
         return $ret;
     }
     public function campos_bk2($dados=false,$local='index'){
@@ -641,7 +638,7 @@ class UserController extends Controller
         if($ajax=='s'){
             //Envia notificação de cadastro
             // $notific_new_user_add = Qlib::qoption('notific_new_user_add')?Qlib::qoption('notific_new_user_add'):'s';
-            if(isset($salvar->id) && $this->notific_new_user()){
+            if(isset($salvar->id) && $this->notific_new_user() && $origem != 'precadastro'){
                 $user_cad = User::Find($salvar->id);
                 Notification::send($user_cad,new notificaNewUser($user_cad));
             }
@@ -822,7 +819,21 @@ class UserController extends Controller
             return redirect()->route($routa.'.index',$ret);
         }
     }
+    /**
+     * Metodo para gerencia o login dos clientes
+     * @param ['email' => $email, 'password' => $password, 'ativo' => 's', 'excluido' => 'n']
+     * @return boolean true|false
+     */
+    public function login($dados){
+        $email = isset($dados['email']) ? $dados['email'] : false;
+        $password = isset($dados['password']) ? $dados['password'] : false;
 
+        if (Auth::attempt(['email' => $email, 'password' => $password, 'ativo' => 's', 'excluido' => 'n'])) {
+            return true;
+        }else{
+            return false;
+        }
+    }
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -833,6 +844,7 @@ class UserController extends Controller
 
         $data = [];
         $dados = $request->all();
+
         $meta = isset($dados['meta']) ? $dados['meta']:false;
         unset($dados['meta']);
         $ajax = isset($dados['ajax'])?$dados['ajax']:'n';
@@ -842,7 +854,7 @@ class UserController extends Controller
         if(!$dados['token'] || empty($dados['token'])){
             $dados['token'] = uniqid();
         }
-        //dd($dados);
+        //verifica se requisição esta vido do site e se a orgem do cadastro tbm
         foreach ($dados as $key => $value) {
             if($key!='_method'&&$key!='_token'&&$key!='ac'&&$key!='ajax'){
                 if($key=='data_batismo' || $key=='data_nasci'){
@@ -863,6 +875,7 @@ class UserController extends Controller
         }
         $data['autor'] = $userLogadon;
         if(isset($dados['config'])){
+            $arr_config = $dados['config'];
             $dados['config'] = Qlib::lib_array_json($dados['config']);
         }
         $atualizar=false;
@@ -899,6 +912,26 @@ class UserController extends Controller
                 //REGISTRAR EVENTOS
                 (new EventController)->listarEvent(['tab'=>$this->tab,'this'=>$this]);
             }
+            //verifica qual é a orgem
+            //se for do site e o cliente não estiver logado efetur login no sistema
+            // dump(Qlib::is_frontend(),$arr_config['origem']);
+            // dd($arr_config);
+            if(Qlib::is_frontend() && isset($arr_config['origem']) && $arr_config['origem']=='site'){
+                //verifica usuario atual está logado
+                if (!Auth::check()) {
+                    $user_cad = User::Find($id);
+                    // Notification::send($user_cad,new notificaNewUser($user_cad));
+                    //Efetuar login
+                    //adicionar redirec
+                    // dd($dados);
+                    if($this->login($dados)){
+                        $ret['redirect'] = url('/');
+                        $ret['return'] = $ret['redirect'];
+                    }
+                    // $ret['login'] = $this->login($request);
+                    // dump($ret);
+                }
+            }
         }else{
             $route = $this->routa.'.edit';
             $ret = [
@@ -908,6 +941,8 @@ class UserController extends Controller
                 'color'=>'danger',
             ];
         }
+
+
         if($ajax=='s'){
             $ret['return'] = route($route).'?idCad='.$id;
             return response()->json($ret);
@@ -1109,6 +1144,20 @@ class UserController extends Controller
             $dadosmeu_cadastro = false;
         }
         $seg3 = request()->segment(3);
+        $seg4 = request()->segment(4);
+        if($seg4 && $ac=='cad'){
+            //é porque o clientes não está com o cadastro completo
+            $dadosmeu_cadastro = User::where('token','=',$seg4)->get();
+            if($dadosmeu_cadastro->count() > 0){
+                //verifica se ele é um precadastro incompleto
+                $dcli = $dadosmeu_cadastro->toArray();
+                $ac = 'alt';
+                $dadosmeu_cadastro = $dcli[0];
+            }else{
+                return redirect('/user/create');
+                // dd($dadosmeu_cadastro->count());
+            }
+        }
         // $meu_cadastro_id = $meu_cadastro_id ? $meu_cadastro_id : $seg2;
 
         if(!$dados && $post_id){
@@ -1422,6 +1471,12 @@ class UserController extends Controller
      */
     public function pre_cadastro_escola(Request $request){
         $ret['exec'] = false;
+        //Somente usuarios não logados pode acessar essa ares
+        if (Auth::check()) {
+            $ret['mens'] = Qlib::formatMensagem0('Ação não permitida para usuários logados','danger');
+            return $ret;
+        }
+
         if($request->has('cnpj')){
             $cnpj = $request->get('cnpj');
             //verificar se o cadastro de um cnpj está incompleto.
@@ -1458,6 +1513,7 @@ class UserController extends Controller
                         'uf'=>@$resultado['data'][0]['Estado'],
                         'CodigoCiac'=>@$resultado['data'][0]['CodigoCiac'],
                     ],
+                    // 'cnpj'=>$cnpj,
                     'tipo_pessoa'=>'pj',
                     'razao'=>@$resultado['data'][0]['RazaoSocial'],
                     'meta'=>['validacao_anac'=>$resultado['data']]
@@ -1470,6 +1526,11 @@ class UserController extends Controller
                     $ret['exec'] = $salvar['exec'];
                 }
                 $ret['salvar'] = $salvar;
+            }else{
+                //informar que este CNPJ não está cadastrado na ANAC
+                // dump($resultado);
+                $ret['mens'] = Qlib::formatMensagem0('Este CNPJ não está cadastrado na ANAC','danger');
+                $ret['exec'] = false;
             }
             $ret['resultado'] = $resultado;
         }

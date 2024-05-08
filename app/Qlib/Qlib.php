@@ -986,17 +986,19 @@ class Qlib
     }
     static function is_backend(){
         $ret = false;
-        $urlAt = Qlib::UrlAtual();
-        if(strpos($urlAt,'/admin') !== false){
+        // $urlAt = Qlib::UrlAtual();
+        $seg1 = request()->segment(1);
+        if($seg1 == 'admin'){
             $ret = true;
         }
         return $ret;
     }
     static function is_frontend(){
-        $ret = true;
-        $urlAt = Qlib::UrlAtual();
-        if(strpos($urlAt,'/admin') == true){
-            $ret = false;
+        $ret = false;
+        // $urlAt = Qlib::UrlAtual();
+        $seg1 = request()->segment(1);
+        if($seg1 != 'admin'){
+            $ret = true;
         }
         return $ret;
     }

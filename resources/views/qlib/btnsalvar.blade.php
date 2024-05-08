@@ -40,15 +40,17 @@
                 $btnAlt=false;
                 $sec = request()->segment(1);
                 if($frontend){
+                    //Verifica se é precadastro
+                    $origem = isset($value['config']['origem']) ? $value['config']['origem'] : false;
                     $r_novo_cadastro = url('/').'/'.App\Qlib\Qlib::get_slug_post_by_id(2);
-                    if($sec==App\Qlib\Qlib::get_slug_post_by_id(14)){
+                    if($sec==App\Qlib\Qlib::get_slug_post_by_id(14) || $origem=='precadastro'){
                         if($redirect_base && isset($_GET['rbase'])){
                             $btnAlt='<button type="submit" btn="sair" class="btn btn-primary">'.__('Salvar').'</button>';
                         }else{
                             $btnAlt='<button type="submit" btn="permanecer" class="btn btn-primary">'.__('Salvar').'</button>';
                         }
-                        echo $btnAlt;
                     }
+                    echo $btnAlt;
                 }
             @endphp
             @can('create',$config['route'])

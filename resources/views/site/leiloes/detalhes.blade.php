@@ -12,6 +12,7 @@
         background-image: url("{{$thumb_page}}");
     }
 </style>
+{{-- {{dd($dados)}} --}}
 <section class="banner-page">
     <div class="container">
         <div class="row py-5">

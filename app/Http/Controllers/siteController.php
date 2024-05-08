@@ -43,9 +43,10 @@ class siteController extends Controller
             }
         }
         if($slug1){
-            if($slug1 == 'home'){
-                $url = url('/').'/'.Qlib::get_slug_post_by_id(37);
-                // return redirect()->to($url);
+            if($slug1 == 'home' || $slug1 == null){
+                // $url = url('/').'/'.Qlib::get_slug_post_by_id(37);
+                $url = 'https://aeroclubejf.com.br';
+                return redirect()->to($url);
             }
             $ds = Post::where('post_name', $slug1)->where('post_status', 'publish')->get();
             if(Auth::check()){

@@ -2895,7 +2895,7 @@ function contatar_ganhador(obj){
 }
 function primeira_etapa_cadastro_site(btn){
     if(btn=='empresa'){
-        var msg = '<form id="pre-cadastro-escola" action="/ajax/pre-cadastro-escola"><div class="row"><div class="col-12"><label>Email</label><input type="email" required name="email" value="" class="form-control" placeholder="seu@email.com"  /></div><div class="col-12">Informe o CNPJ da sua instituição, credenciado na ANAC</div><div class="col-12"><input type="tel" required name="cnpj" value="" class="form-control" placeholder="CNPJ"  /></div></div></form>',btn_acao='<button type="button" onclick="submit_precadastro_site(\'pre-cadastro-escola\');" class="btn btn-primary">Avançar <i class="fa fa-arrow-right"></i></button>';
+        var msg = '<form id="pre-cadastro-escola" action="/ajax/pre-cadastro-escola"><div class="row"><div class="col mens"></div><div class="col-12"><label>Email</label><input type="email" required name="email" value="" class="form-control" placeholder="seu@email.com"  /></div><div class="col-12">Informe o CNPJ da sua instituição, credenciado na ANAC</div><div class="col-12"><input type="tel" required name="cnpj" value="" class="form-control" placeholder="CNPJ"  /></div></div></form>',btn_acao='<button type="button" onclick="submit_precadastro_site(\'pre-cadastro-escola\');" class="btn btn-primary">Avançar <i class="fa fa-arrow-right"></i></button>';
         alerta5(msg,'modal-cad-empresa','Cadastro de escola',true);
         $(btn_acao).insertAfter('#modal-cad-empresa .modal-footer button');
         $('[name="cnpj"]').inputmask('99.999.999/9999-99');
@@ -2922,8 +2922,12 @@ function submit_precadastro_site(sel){
         }
     },function(e){
         lib_funError(e);
-        if(e.cnpj[0]){
-            alert(e.cnpj[0]+'\nEm caso de dúvida entre em contato com o nosso suporte');
+        try {
+            if(e.cnpj[0]){
+                alert(e.cnpj[0]+'\nEm caso de dúvida entre em contato com o nosso suporte');
+            }
+        } catch (error) {
+            console.log(error);
         }
     });
 }

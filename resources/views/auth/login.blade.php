@@ -17,7 +17,6 @@
     @php( $register_url = $register_url ? url($register_url) : '' )
     @php( $password_reset_url = $password_reset_url ? url($password_reset_url) : '' )
 @endif
-
 @section('auth_header', __('adminlte::adminlte.login_message'))
 
 @section('auth_body')
@@ -27,6 +26,9 @@
             <input type="hidden" name="r" id="r" value="{{$_GET['r']}}" />
         @endif
         {{-- Email field --}}
+        @if(Session::has('message'))
+            <p class="alert {{Session::get('alert-class')}}">{{ Session::get('message') }}</p>
+        @endif
         <div class="input-group mb-3">
             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                    value="{{ old('email') }}" placeholder="{{ __('adminlte::adminlte.email') }}" autofocus>

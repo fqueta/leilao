@@ -562,11 +562,16 @@ class LanceController extends Controller
         $ret = 0;
         $lc = new LeilaoController;
         $id_lance=false;
-        if($id_lance=Qlib::get_postmeta($leilao_id,$lc->c_meta_lance_vencedor)){
-            $l = lance::where('id',$id_lance)->where('excluido','n')->orderBy('id', 'desc')->first();
-        }else{
+        // dd($leilao_id);
+        // if($id_lance=Qlib::get_postmeta($leilao_id,$lc->c_meta_lance_vencedor)){
+        //     $l = lance::where('id',$id_lance)->where('excluido','n')->orderBy('id', 'desc')->first();
+        //     // if($leilao_id==58){
+        //     //     dump($exibe_data,$lc->c_meta_lance_vencedor,$l,$leilao_id,$ret);
+        //     // }
+        // }else{
             $l = lance::where('leilao_id',$leilao_id)->where('type','lance')->where('excluido','n')->orderBy('id', 'desc')->first();
-        }
+        // }
+
         if($l){
             //Gravar id do lance
             if(isset($l['id']) && $l['id'] && !$id_lance){
