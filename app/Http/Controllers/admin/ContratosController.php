@@ -20,7 +20,7 @@ class ContratosController extends Controller
     public function __construct()
     {
         $this->url_api = 'https://api.aeroclubejf.com.br/api/v1/';
-        $this->token_api = '1|ocd91y4UV1rXfOEbXVihJoLdmzfneralAQuifUjW';
+        $this->token_api = '2|kYpbzfJ4GQszMorDMXp5IXatuGvBvK5zB9bjak5C';
     }
     public function get_contratos_crm(){
 
