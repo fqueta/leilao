@@ -37,7 +37,7 @@ use Illuminate\Support\Str;
 Route::fallback(function () {
     return view('erro404');
 });
-if (env('APP_ENV') === 'production') {
+if (env('APP_ENV') == 'production') {
     URL::forceSchema('https');
 }
 
