@@ -26,7 +26,8 @@
     <div class="container d-flex justify-content-between align-items-center">
 
       <div class="logo">
-        <a href="{{url('/'.App\Qlib\Qlib::get_slug_post_by_id(37))}}"><img src="{{url('/vendor/adminlte/dist/img/logo-h.png')}}" alt="" class="img-fluid"></a>
+        {{-- <a href="{{url('/'.App\Qlib\Qlib::get_slug_post_by_id(37))}}"><img src="{{url('/vendor/adminlte/dist/img/logo-h.png')}}" alt="" class="img-fluid"></a> --}}
+        <a href="https://aeroclubejf.com.br"><img src="{{url('/vendor/adminlte/dist/img/logo-h.png')}}" alt="" class="img-fluid"></a>
       </div>
 
       <nav id="navbar" class="navbar navbar-expand-lg" data-bs-theme="dark">

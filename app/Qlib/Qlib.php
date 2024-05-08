@@ -1510,5 +1510,16 @@ class Qlib
             return false;
         }
     }
+    /**
+     * Metodo para identificar qual é o aplicativo se é o repasse ou o leilao;
+     */
+    static function is_repasses(){
+        $id_app = config('app.id_app');
+        if($id_app=='repasses'){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
 }

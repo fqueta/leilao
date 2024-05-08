@@ -1262,6 +1262,7 @@ class UserController extends Controller
         $seg1 = request()->segment(1);
         $seg2 = request()->segment(2);
         $seg3 = request()->segment(3);
+
         if(!$seg2){
             if(Qlib::isAdmin(3)){
                 return $this->get_users_site();
@@ -1273,7 +1274,11 @@ class UserController extends Controller
             return $this->form_meu_cadastro($id_pagina,$dp);
         }elseif($seg2=='create'){
             //Exibir uma tela seleção de timpo de usuario
-            return $this->painel_select_user_site($id_pagina,$dp);
+            if(Qlib::is_repasses()){
+                return $this->form_meu_cadastro($id_pagina,$dp);
+            }else{
+                return $this->painel_select_user_site($id_pagina,$dp);
+            }
         }elseif($seg2=='edit'){
             //editar usuario
         }elseif($seg2=='show'){

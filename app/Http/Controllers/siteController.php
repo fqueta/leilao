@@ -44,8 +44,8 @@ class siteController extends Controller
         }
         if($slug1){
             if($slug1 == 'home' || $slug1 == null){
-                // $url = url('/').'/'.Qlib::get_slug_post_by_id(37);
-                $url = 'https://aeroclubejf.com.br';
+                $url = url('/').'/'.Qlib::get_slug_post_by_id(37);
+                // $url = 'https://aeroclubejf.com.br';
                 return redirect()->to($url);
             }
             $ds = Post::where('post_name', $slug1)->where('post_status', 'publish')->get();
@@ -60,6 +60,11 @@ class siteController extends Controller
                     $url = Qlib::get_slug_post_by_id($vm['page_id']);
                     if($url){
                         $menus[$km]['url'] = $url;
+                    }
+                }
+                if(Qlib::is_repasses()){
+                    if(isset($menus[0]['url'])){
+                        $menus[0]['url'] = 'https://aeroclubejf.com.br';
                     }
                 }
             }
@@ -122,6 +127,7 @@ class siteController extends Controller
                     //contato
                     $arr_shortC['form_contato'] = $this->form_contato($post_id,$dados);
                 }else{
+                    //user
                     $arr_shortC = [
                         'form_leilao' => $lc->form_leilao($post_id,$dados),
                         'list_lances' => $lac->list_lances($post_id,$dados),
