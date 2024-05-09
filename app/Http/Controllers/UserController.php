@@ -335,6 +335,18 @@ class UserController extends Controller
                 //Desablitar a edição de email no frontend
                 // $ret['email']['event'] = 'disabled';
             }
+            //Impedir editção de email,cpf,
+            $cpf = isset($dados['cpf']) ? $dados['cpf'] : false;
+            $email = isset($dados['email']) ? $dados['email'] : false;
+            if($cpf){
+                $ret['cpf']['class_div'] = ' mt-4 pt-2 bg-secondary text-light';
+                $ret['cpf']['type'] = 'hidden_text';
+            }
+            if($email){
+                $ret['email']['class_div'] = ' mt-4 pt-2 bg-secondary text-light';
+                $ret['email']['type'] = 'hidden_text';
+            }
+            // dump($dados);
         }
         // dd($ret);
         return $ret;
@@ -1298,10 +1310,6 @@ class UserController extends Controller
         $ret = false;
         if($request){
             $ret = $this->authenticate($request);
-            // $email = isset($config['email'])?$config['email']:false;
-            // $pass = isset($config['password'])?$config['password']:false;
-            // if($email && $pass){
-            // }
         }
         return $ret;
     }
