@@ -54,7 +54,6 @@ class QuickCadController extends Controller
                 ]);
                 $next_page = route('quick.add.leilao').'?step=3&cfg='.Qlib::encodeArray($cfg);
 
-                // dd($cfg);
             }
         }
 

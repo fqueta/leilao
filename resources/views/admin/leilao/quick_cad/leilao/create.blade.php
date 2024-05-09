@@ -87,7 +87,8 @@
                                     @if(isset($config['arr_contratos']) && is_array($config['arr_contratos']))
                                         <select name="contrato" id="contrato" class="form-control">
                                             <option value="" selected>{{__('Selecione um contrato')}}</option>
-                                            <option value="cad"> {{('Cadastrar um contrato')}} </option>
+                                            <option value="cad" class="bg-secondary"> {{('Cadastrar um contrato')}} </option>
+                                            <option disabled>-------------</option>
                                             @foreach ($config['arr_contratos'] as $k=>$v )
                                                 <option value="{{$k}}" {{@$v['attr_option']}} >
                                                     {{$v['label']}}
