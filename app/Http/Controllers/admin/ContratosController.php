@@ -16,11 +16,13 @@ use Illuminate\Support\Str;
 class ContratosController extends Controller
 {
     private $url_api;
+    private $url_webhook;
     private $token_api;
     public function __construct()
     {
         $this->url_api = 'https://api.aeroclubejf.com.br/api/v1/';
-        $this->token_api = '2|kYpbzfJ4GQszMorDMXp5IXatuGvBvK5zB9bjak5C';
+        $this->url_webhook = 'https://api.aeroclubejf.com.br/api/webhook/';
+        $this->token_api = '3|XLKG1U2hRFprV2HzavpCZJ9kQ2AbsCx9O9uTAb23';
     }
     public function get_contratos_crm(){
 
