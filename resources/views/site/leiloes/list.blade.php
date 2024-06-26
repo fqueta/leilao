@@ -11,6 +11,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
         margin-top:10px;
     }
 </style>
+
  <!-- Content -->
  @if($seg1==$urlB && !$seg2)
     <style>
@@ -22,7 +23,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
         <div class="main-banner-content container">
             <div class="row pt-5">
                 <div class="col-12 col-lg-4 py-5 text-center text-lg-start">
-                    <h2>Bem vindo!</h2>
+                    <h2>Bem-vindo ao Leilão de Horas de Voo!</h2>
                     <p>
                         {!!$post['post_excerpt']!!}
                     </p>
@@ -40,21 +41,27 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                         <div class="info-card">
                             <i class="fa-solid fa-lock"></i>
                             <h4>Segurança</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eu ornare risus. Phasellus sed dolor mi. Donec laoreet convallis diam sed luctus.</p>
+                            <p>
+                                Nosso site garante total segurança e privacidade em todas as transações de leilão de horas de voo. Viaje tranquilo sabendo que seus dados e informações estão protegidos.
+                            </p>
                         </div>
                     </div>
                     <div class="col-12 col-md-4 middle-card">
                         <div class="info-card">
                             <i class="fa-solid fa-hand-holding-dollar"></i>
                             <h4>Economia</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eu ornare risus. Phasellus sed dolor mi. Donec laoreet convallis diam sed luctus.</p>
+                            <p>
+                                Economize mais voando: Aproveite a oportunidade de adquirir horas de voo a preços competitivos através de nossos leilões. Maximize seu orçamento e voe mais gastando menos.
+                            </p>
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
                         <div class="info-card">
                             <i class="fa-solid fa-scale-balanced"></i>
                             <h4>Transparência</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eu ornare risus. Phasellus sed dolor mi. Donec laoreet convallis diam sed luctus.</p>
+                            <p>
+                                Transparência total: Com nosso sistema de leilão, você tem visibilidade completa sobre todas as ofertas e lances. Nenhuma surpresa, apenas negociações claras e honestas.
+                            </p>
                         </div>
                     </div>
                 </div>
