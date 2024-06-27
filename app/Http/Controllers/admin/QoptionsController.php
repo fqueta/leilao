@@ -105,7 +105,7 @@ class QoptionsController extends Controller
     }
     public function campos(){
         $user = Auth::user();
-        return [
+        $ret = [
             'id'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'nome'=>['label'=>'Nome da opção','active'=>true,'placeholder'=>'Ex.: Nome servidor','type'=>'text','exibe_busca'=>'d-block','event'=>'','tam'=>'6'],
@@ -114,6 +114,11 @@ class QoptionsController extends Controller
             'obs'=>['label'=>'Observação','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12','class'=>''],
             'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'12','arr_opc'=>['s'=>'Sim','n'=>'Não']],
         ];
+        if($user['id_permission']>1){
+            $ret['url']['event'] = 'disabled';
+            // unset($user['url']);
+        }
+        return $ret;
     }
 
     public function index(User $user)

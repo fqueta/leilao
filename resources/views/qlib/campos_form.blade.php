@@ -145,10 +145,12 @@
     @elseif ($config['type']=='html')
         @php
            $config['script'] = isset($config['script'])?$config['script']:false;
+
         @endphp
         <div class="col-{{$config['col']}}-{{$config['tam']}} {{$config['class_div']}}" div-id="{{$config['campo']}}">
             @if ($config['script'])
                 @if(isset($config['dados']))
+                    {{-- {{dd($config['script'])}} --}}
                     @include($config['script'],['dados'=>$config['dados']])
                 @else
                     @include($config['script'])

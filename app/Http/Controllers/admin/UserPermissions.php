@@ -225,8 +225,7 @@ class UserPermissions extends Controller
         $id = $permission;
         $dados = Permission::where('id',$id)->get();
         $routa = 'permissions';
-
-        if(!empty($dados)){
+        if($dados->count()>0){
             $title = 'Editar Cadastro de permissions';
             $titulo = $title;
             $dados[0]['ac'] = 'alt';
@@ -244,7 +243,6 @@ class UserPermissions extends Controller
                 'id'=>$id,
             ];
             $arrMenus = $this->listMenusPermisson();
-
             $campos = $this->campos([
                 'id_menu'=>@$arrMenus,
             ]);
@@ -258,7 +256,6 @@ class UserPermissions extends Controller
                 'arrMenus'=>$arrMenus,
                 'exec'=>true,
             ];
-
             return view($routa.'.createedit',$ret);
         }else{
             $ret = [
