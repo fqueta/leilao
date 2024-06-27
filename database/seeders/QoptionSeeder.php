@@ -131,6 +131,26 @@ class QoptionSeeder extends Seeder
                 'url'=>'notific_new_user_add',
                 'valor'=>'s',
             ],
+            [
+                'nome'=>'Texto Card Segurança',
+                'url'=>'texto_card_seguranca',
+                'valor'=>'Nosso site garante total segurança e privacidade em todas as transações de leilão de horas de voo. Viaje tranquilo sabendo que seus dados e informações estão protegidos.',
+            ],
+            [
+                'nome'=>'Texto Card Economia',
+                'url'=>'texto_card_economia',
+                'valor'=>'Economize mais voando: Aproveite a oportunidade de adquirir horas de voo a preços competitivos através de nossos leilões. Maximize seu orçamento e voe mais gastando menos.',
+            ],
+            [
+                'nome'=>'Texto Card Transparência',
+                'url'=>'texto_card_transparencia',
+                'valor'=>'Transparência total: Com nosso sistema de leilão, você tem visibilidade completa sobre todas as ofertas e lances. Nenhuma surpresa, apenas negociações claras e honestas.',
+            ],
+            [
+                'nome'=>'Texto rodapé',
+                'url'=>'texto_rodape',
+                'valor'=>'O Aeroclube de Juiz de Fora é uma das escolas de aviação civil mais tradicionais do Brasil e, desde 1938, já formou mais de 12 mil pilotos.',
+            ],
         ]);
     }
 }

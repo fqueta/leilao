@@ -367,6 +367,67 @@ class PostController extends Controller
         }
         return $ret;
     }
+    public function campos_componentes($post_id=false){
+        $hidden_editor = '';
+        if(Qlib::qoption('editor_padrao')=='laraberg'){
+            $hidden_editor = 'hidden';
+        }
+        if($post_id){
+            $data = Post::Find($post_id);
+            if($data->count()){
+                $data = $data->toArray();
+                if(isset($data['token'])){
+                    $data['leilao'] = (new LeilaoController)->is_linked_leilao($data['token'],true);
+                }
+            }
+        }
+        // $event_divide = 'onkeyup=divideHoras(this)';
+        $event_divide = '';
+        $ret = [
+            'ID'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'post_type'=>['label'=>'tipo de post','active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>$this->post_type],
+            'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'config[cliente]'=>[
+                'label'=>'Nome do cliente*',
+                'active'=>true,
+                'type'=>'select',
+                'arr_opc'=>Qlib::sql_array("SELECT * FROM users WHERE ativo='s' AND id_permission>'4'",'name','id','email',' | Email: '),'exibe_busca'=>'d-block',
+                'event'=>'required',
+                'tam'=>'12',
+                'exibe_busca'=>true,
+                'option_select'=>true,
+                'class'=>'select2',
+                'value'=>@$_GET['config']['cliente'],
+                'cp_busca'=>'config][cliente',
+            ],
+            'post_title'=>['label'=>'Número do contrato','active'=>true,'placeholder'=>'Ex.: 5621.11.2023','type'=>'text','exibe_busca'=>'d-block','event'=>'required onkeyup=lib_typeSlug(this)','tam'=>'12','title'=>'Identificador do contrado pode ser nome ou número'],
+            'config[total_horas]'=>['label'=>'Qtd. Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'4','cp_busca'=>'config][total_horas','title'=>'Número total de horas que serão leiloadas'],
+            'config[valor_r]'=>['label'=>'Valor da Rescisão','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required '.$event_divide,'tam'=>'4','cp_busca'=>'config][valor_r','title'=>'Valor da rescisão, este também será o valor de lance inicial quando o cliente criar o leilão'],
+            'config[incremento]'=>['label'=>'Incremento','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'4','cp_busca'=>'config][incremento','class'=>'','title'=>'Valor de incremento em cada lançe do Leilão'],
+            // 'config[valor_h]'=>['label'=>'Valor Hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][valor_h','title'=>'Valor do hora no contrato'],
+            // 'config[lance_unit]'=>['label'=>'Lance por hora','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onkeyup=multiplicaHorasLance(this)','tam'=>'3','cp_busca'=>'config][lance_unit','title'=>'Valor unitário do Lançe'],
+            // 'config[lance_total]'=>['label'=>'Lance total','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'3','cp_busca'=>'config][lance_total','title'=>'Valor unitário do Lançe mutiplicado pela quantidade de horas'],
+            'config[valor_venda]'=>['label'=>'Compre já','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required onchange=verific_cvalor_venda(this.value)','tam'=>'6','cp_busca'=>'config][valor_venda','title'=>'Valor para venda sem leilão'],
+            'config[valor_atual]'=>['label'=>'Valor Atual','active'=>true,'placeholder'=>'','type'=>'moeda','exibe_busca'=>'d-block','event'=>'required','tam'=>'6','cp_busca'=>'config][valor_atual','title'=>'Valor atual do pacote no Aeroclube'],
+            // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'4'],
+            'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
+            //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
+            'post_content'=>['label'=>'Descrição','active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor.' required','tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
+            'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
+        ];
+        if(isset($data['post_status']) && $data['post_status']=='publish'){
+            $ret['add_leilao'] = [
+                'label'=>__('sessao para adicionar leilão'),
+                'type'=>'html',
+                'active'=>false,
+                'script'=>'admin.leilao.contratos.add_leilao',
+                'script_show'=>'admin.leilao.contratos.add_leilao',
+                'dados'=>$data,
+            ];
+        }
+        return $ret;
+    }
     public function campos_leilao($post_id=false,$post_type=false,$data=false){
         $hidden_editor = '';
         $seg1 = request()->segment(1);
@@ -731,6 +792,8 @@ class PostController extends Controller
             $ret = $this->campos_paginas($post_id);
         }elseif($type=='pacotes_lance'){
             $ret = $this->campos_pacotes($post_id);
+        }elseif($type=='componentes'){
+            $ret = $this->campos_componentes($post_id);
         }elseif($type=='leilao' || $type=='leiloes_adm'){
             $ret = $this->campos_leilao($post_id);
         }

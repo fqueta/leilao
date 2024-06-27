@@ -4,8 +4,7 @@
             <div class="col-12 col-lg-3 text-center mb-4 order-1">
                 <img src="{{url('/vendor/adminlte/dist/img/logo-h.png')}}" alt="" class="mb-3">
                 <h4>Aeroclube de Juiz de Fora</h4>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eu ornare risus. Phasellus
-                    sed dolor mi. Donec laoreet convallis diam sed luctus.</p>
+                <p>{{App\Qlib\Qlib::qoption('texto_rodape')}}</p>
             </div>
             <div class="col-12 col-lg-3 text-center text-lg-start px-4 mb-4 order-2">
                 <h6>Atendimento ao cliente</h6>
