@@ -16,11 +16,6 @@ use stdClass;
 
 class LanceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public $routa;
     public $label;
     public $view;

@@ -1166,15 +1166,15 @@ class LeilaoController extends Controller
             if($user){
                 $reder_em = new \App\Mail\leilao\lancesNotific($user);
                 // return $reder_em;
-                $enviar = Mail::send($reder_em);
-                if( count(Mail::failures()) > 0 ) {
-                    $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";
-                    foreach(Mail::failures() as $email_address) {
-                        $ret['mens'] .= " - $email_address <br />";
-                    }
-                } else {
+                try {
+                    Mail::send($reder_em);
                     $ret['exec'] = true;
                     $ret['mens'] = "Sem erros, enviado com sucesso! ".$user->email;
+
+                } catch (\Throwable $e) {
+                    $ret['mens'] = "Houve um ou mais erros. Segue abaixo: <br />";
+                    $ret['mens'] .= $e->getMessage();
+
                 }
             }
         }
