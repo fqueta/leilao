@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\QuickCadController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BairroController;
+use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\EtapaController;
@@ -199,7 +200,7 @@ Route::prefix('ajax')->group(function(){
     Route::post('/session-m',[App\Http\Controllers\admin\sessionController::class,'sessionManagerAction']);
     Route::post('/reciclar-leilao/{leilao_id}',[LeilaoController::class,'reciclar'])->name('leiloes.reciclar');
     Route::post('/tornar-vencedor',[LanceController::class,'tornar_vencedor'])->name('leiloes.tornar_vencedor');
-    // Route::post('/valida-escolas',[UserController::class,'valida_escola'])->name('user.valida_escola');
+    Route::post('/enviar-contato',[ContatoController::class,'enviar_contato'])->name('enviar.contato');
     Route::post('/pre-cadastro-escola',[UserController::class,'pre_cadastro_escola'])->name('user.pre_cadastro_escola');
 });
 Route::prefix('notification')->group(function(){

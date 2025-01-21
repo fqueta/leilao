@@ -1516,5 +1516,17 @@ class Qlib
             return false;
         }
     }
+    /**
+     * Metodo para retornar uma string sql apartide de uma consulta do eloquent
+     * @param object $queryEloquent o objeto da consulta do laravel antes de aplicar o metodo get ou paginate.
+     * @return string $ret
+     */
+    static function get_sql_eloquent($queryEloquent){
+        $sql = $queryEloquent->toSql();
+        $bindings = $queryEloquent->getBindings();
+        // dd(vsprintf(str_replace('?', '%s', $sql), $bindings));
+        $ret = vsprintf(str_replace('?', '%s', $sql), $bindings);
+        return $ret;
+    }
 
 }

@@ -35,6 +35,7 @@
         <input class="form-control" type="hidden" name="d_meta[meta_key]" value="imagem_destacada">
     </div>
 </form>
+
 @elseif($ac=='modal')
 <!-- Modal -->
 <div class="modal fade" id="painel-select-media" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">

@@ -90,6 +90,9 @@ class PostController extends Controller
         $campos = $this->campos(false,$post_type);
         $tituloTabela = 'Lista de todos cadastros';
         $arr_titulo = false;
+        if(Qlib::is_frontend()){
+            $get['origem'] = 'site';
+        }
         if(isset($get['filter'])){
                 $titulo_tab = false;
                 $i = 0;
@@ -139,6 +142,8 @@ class PostController extends Controller
                 if($config['limit']=='todos'){
                     $post = $post->get();
                 }else{
+                    // $sql = Qlib::get_sql_eloquent($post);
+                    // dd($sql);
                     $post = $post->paginate($config['limit']);
                 }
         }else{

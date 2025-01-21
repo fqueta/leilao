@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Qoption;
 use App\Qlib\Qlib;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,14 @@ class QoptionSeeder extends Seeder
      */
     public function run()
     {
+        Qoption::truncate();
         DB::table('qoptions')->insert([
+            [
+                'nome'=>'Emails do administrador',
+                'url'=>'email_gerente',
+                'valor'=>'ger.maisaqui1@gmail.com,suporte@maisaqui.com.br',
+                'obs'=>'Se precisar colocar mais doque um email tem que separar por virgula.',
+            ],
             [
                 'nome'=>'Diretorio dos arquivos',
                 'url'=>'storage_path',
@@ -25,6 +33,12 @@ class QoptionSeeder extends Seeder
                 'nome'=>'Id da permissão do admin',
                 'url'=>'id_permission_admin',
                 'valor'=>1,
+            ],
+            [
+                'nome'=>'Permissão padrão FrontEnd',
+                'url'=>'id_permission_front',
+                'valor'=>'8',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Emails dos gerentes',

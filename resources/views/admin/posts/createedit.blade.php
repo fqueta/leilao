@@ -123,7 +123,6 @@
     </div>
     @endif
 </div>
-
 @stop
 
 @section('css')
@@ -197,5 +196,6 @@
             $('[mask-cep]').inputmask('99.999-999');
         });
     </script>
+
     @include($config['view'].'.js_submit')
 @stop

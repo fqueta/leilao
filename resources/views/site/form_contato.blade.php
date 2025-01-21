@@ -1,4 +1,4 @@
-<form id="frm-contato" method="post">
+<form id="frm-contato" action="/ajax/enviar-contato" method="post">
     <div class="row">
         <div class="col-md-12 mb-2">
             <input type="text" name="nome" required="" class="form-control" value="" placeholder="Seu nome" />
@@ -280,7 +280,7 @@
             <textarea name="obs" required="" class="form-control" placeholder="Sua mensagem" rows="4"></textarea>
         </div>
         <div class="col-md-12">
-            <input type="hidden" name="tag_origem" value="Contato do site Leiloair" />
+            <input type="hidden" name="tag_origem" value="Contato do site leilão" />
             <input type="hidden" name="redirect0" value="https://repasses.leilao.com.br/contato" />
             <input type="hidden" name="redirect1" value="https://repasses.leilao.com.br/obrigado-pelo-contato" />
             <div id="html_element" class="mb-3">
@@ -296,7 +296,7 @@
     function sub_contato(){
         var form = $('#frm-contato');
         $(function(){
-            form.submit(function(e){
+            form.find('button[type="submit"]').on('click', function(e){
                 e.preventDefault();
                 submitFormularioCSRF(form,function(res){
                     try {
@@ -326,6 +326,9 @@
                         console.log(error);
                     }
                 });
+            });
+            form.submit(function(e){
+
             });
         });
     }
