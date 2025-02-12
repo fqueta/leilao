@@ -11,9 +11,9 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
         margin-top:10px;
     }
 </style>
-
  <!-- Content -->
- @if($seg1==$urlB && !$seg2)
+
+@if($seg1==$urlB && !$seg2)
     <style>
         .main-banner{
             background-image: url('{{App\Qlib\Qlib::get_thumbnail_link(@$post['ID'])}}');
@@ -32,7 +32,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
         </div>
         <div class="main-banner-overlay"></div>
     </section>
-    <!-- Info cards -->
+    <!-- Info cards list.b.p-->
     <section class="info-cards mb-5">
         <div class="container">
             <div class="info-cards-content theme-bg-primary rounded">
@@ -68,7 +68,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
             </div>
         </div>
     </section>
-    <section class="bg-video">
+    {{-- <section class="bg-video">
         <div class="container">
             <div class="row justify-content-center py-5">
                 <div class="col-12 col-lg-6">
@@ -82,7 +82,7 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
     <section class="bg-light py-5">
         <div class="container">
             <div class="row">

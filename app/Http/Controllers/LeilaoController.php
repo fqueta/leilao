@@ -662,7 +662,6 @@ class LeilaoController extends Controller
             $dados = [];
             if(isset($queryPost['post']) && $queryPost['post']->count()>0 && is_object($queryPost['post'])){
                 $arrPost = $queryPost['post']->toArray();
-                // dd($arrPost['data']);
                 $meta_pago = Qlib::qoption('meta_pago') ? Qlib::qoption('meta_pago') : 'pago';
                 foreach ($arrPost['data'] as $kp => $vp) {
                     $pago = Qlib::get_postmeta(@$vp['ID'],$meta_pago,true);
@@ -702,6 +701,7 @@ class LeilaoController extends Controller
 
         $view   = '/'.Qlib::get_slug_post_by_id(18);
         //if(isset($queryPost['post']));
+
         $ret = [
             'dados'=>$dados,
             'title'=>$title,

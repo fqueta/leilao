@@ -10,7 +10,7 @@
     <div class="container py-5">
         <div class="banner-page-content">
             <h2>{{@$post['post_title']}}</h2>
-            <p>{{@$post['post_excerpt']}}</p>
+            <p class="text-align-justify">{{@$post['post_excerpt']}}</p>
         </div>
     </div>
     <div class="banner-page-overlay"></div>
