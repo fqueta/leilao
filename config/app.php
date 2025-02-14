@@ -13,10 +13,10 @@ return [
     |
     */
     'dominio' => 'https://leiloair.com.br/',
-    'version' => '1.0.1',
+    'version' => '1.0.2',
     'name' => env('APP_NAME', 'Leiloair'),
     'id_app' => env('ID_APP', 'repasses'),
-    'last_update' => '01/02/2024',
+    'last_update' => '14/02/2025',
     /*
     |--------------------------------------------------------------------------
     | Application Environment
