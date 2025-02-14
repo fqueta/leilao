@@ -99,7 +99,8 @@ class TesteController extends Controller
         // $ret['remove_notific'] = Qlib::update_postmeta($leilao_id,$meta_notific,'n');
         // //Notificar o cliente caso seja permitido
         // $ret['notify'] = (new LeilaoController())->notifica_termino($leilao_id,'ganhador');
-        $ret = (new UserController)->ger_select_ddi();
+        // $ret = (new UserController)->ger_select_ddi();
+        $ret = (new LeilaoController)->categoria_horas_leilao();
         return $ret;
         // dd($ret);
         // dd(NotificWinnerJob::dispatch());

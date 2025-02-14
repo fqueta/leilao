@@ -701,11 +701,12 @@ class LeilaoController extends Controller
 
         $view   = '/'.Qlib::get_slug_post_by_id(18);
         //if(isset($queryPost['post']));
-
+        $arr_select_categorias = $this->categoria_horas_leilao();
         $ret = [
             'dados'=>$dados,
             'title'=>$title,
             'titulo'=>$titulo,
+            'arr_select_categorias'=>$arr_select_categorias,
             'campos_tabela'=>$queryPost['campos'],
             'post_totais'=>$queryPost['post_totais'],
             'titulo_tabela'=>$queryPost['tituloTabela'],
@@ -1901,6 +1902,15 @@ class LeilaoController extends Controller
             $ret['d'] = $d;
         }
         // dd($ret);
+        return $ret;
+    }
+    public function categoria_horas_leilao(){
+        // $ret = Qlib::sql_array("SELECT $key,$label FROM posts WHERE post_status='publish'  AND post_type='categorias'",$label,$key);
+        $d = DB::table('posts')->select('post_title')->distinct()->where('post_type','leiloes_adm')->where('post_status','publish')->get();
+        $ret = [];
+        foreach ($d as $key => $value) {
+            $ret[$value->post_title] = $value->post_title;
+        }
         return $ret;
     }
 }

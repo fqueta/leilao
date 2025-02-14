@@ -1051,6 +1051,8 @@ function renderForm(config,alvo,funCall){
                         if(res.mens){
                             lib_formatMensagem('.mens',res.mens,res.color);
                         }
+                        console.log(res);
+
                         if(res.exec){
                             $(m).modal('hide');
                             alvo.append($('<option>', {

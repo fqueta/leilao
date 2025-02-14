@@ -331,6 +331,23 @@ class PostController extends Controller
             'ID'=>['label'=>'Id','active'=>true,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
             'post_type'=>['label'=>'tipo de post','active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>$this->post_type],
             'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            // 'guid'=>[
+            //     'label'=>'Categoria',
+            //     'active'=>true,
+            //     'type'=>'selector',
+            //     'data_selector'=>[
+            //         'campos'=>$this->campos_categorias(),
+            //         'route_index'=>route('categorias.index'),
+            //         'id_form'=>'frm-categorias',
+            //         'action'=>route('categorias.store'),
+            //         'campo_id'=>'ID',
+            //         'campo_bus'=>'post_title',
+            //         'label'=>'Nome da categorias',
+            //     ],'arr_opc'=>Qlib::sql_array("SELECT ID,post_title FROM posts WHERE post_status='publish' AND post_type='categorias'",'post_title','ID'),'exibe_busca'=>'d-block',
+            //     'event'=>'',
+            //     'tam'=>'12',
+            //     // 'class'=>'select2'
+            // ],
             'config[cliente]'=>[
                 'label'=>'Nome do cliente*',
                 'active'=>true,
@@ -699,6 +716,26 @@ class PostController extends Controller
         ];
         return $ret;
     }
+    public function campos_categorias($sec=false){
+        $hidden_editor = '';
+        if(Qlib::qoption('editor_padrao')=='laraberg'){
+            $hidden_editor = 'hidden';
+        }
+        $ret = [
+            'ID'=>['label'=>'Id','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'post_type'=>['label'=>'tipo de post','js'=>true,'active'=>false,'type'=>'hidden','exibe_busca'=>'d-none','event'=>'','tam'=>'2','value'=>'categorias'],
+            'token'=>['label'=>'token','active'=>false,'type'=>'hidden','exibe_busca'=>'d-block','event'=>'','tam'=>'2'],
+            'post_name'=>['label'=>'Slug','active'=>false,'placeholder'=>'Ex.: nome-do-post','type'=>'hidden','exibe_busca'=>'d-block','event'=>'type_slug=true','tam'=>'12'],
+            'post_title'=>['label'=>'Nome','active'=>true,'placeholder'=>'Ex.: Nome do categoria ','type'=>'text','exibe_busca'=>'d-block','event'=>'onkeyup=lib_typeSlug(this)','tam'=>'12'],
+            // 'config[total_horas]'=>['label'=>'Horas','active'=>true,'placeholder'=>'','type'=>'number','exibe_busca'=>'d-block','event'=>'','tam'=>'2','cp_busca'=>'config][total_horas','title'=>'Número total de horas'],
+            // 'post_date_gmt'=>['label'=>'Data do decreto','active'=>true,'placeholder'=>'','type'=>'date','exibe_busca'=>'d-block','event'=>'','tam'=>'3'],
+            //'post_excerpt'=>['label'=>'Resumo (Opcional)','active'=>true,'placeholder'=>'Uma síntese do um post','type'=>'textarea','exibe_busca'=>'d-block','event'=>'','tam'=>'12'],
+            //'ativo'=>['label'=>'Liberar','active'=>true,'type'=>'chave_checkbox','value'=>'s','valor_padrao'=>'s','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['s'=>'Sim','n'=>'Não']],
+            'post_content'=>['label'=>'Conteudo','js'=>true,'active'=>false,'type'=>'textarea','exibe_busca'=>'d-block','event'=>$hidden_editor,'tam'=>'12','class_div'=>'','class'=>'editor-padrao summernote','placeholder'=>__('Escreva seu conteúdo aqui..')],
+            'post_status'=>['label'=>'Status','active'=>true,'type'=>'chave_checkbox','value'=>'publish','valor_padrao'=>'publish','exibe_busca'=>'d-block','event'=>'','tam'=>'3','arr_opc'=>['publish'=>'Publicado','pending'=>'Despublicado']],
+        ];
+        return $ret;
+    }
     public function campos_paginas($post_id=false){
         $hidden_editor = '';
         $data = false;
@@ -797,6 +834,8 @@ class PostController extends Controller
             $ret = $this->campos_paginas($post_id);
         }elseif($type=='pacotes_lance'){
             $ret = $this->campos_pacotes($post_id);
+        }elseif($type=='categorias'){
+            $ret = $this->campos_categorias($post_id);
         }elseif($type=='componentes'){
             $ret = $this->campos_componentes($post_id);
         }elseif($type=='leilao' || $type=='leiloes_adm'){
@@ -1233,7 +1272,13 @@ class PostController extends Controller
             return redirect()->route('home',$ret);
         }
     }
+    /**
+     * Para salvar a catedoria de um leilao pelo numero de horas no campo guid da tabela post que é usado para armazernar os dados do leilao
+     * @param string $id_leilao
+     */
+    // public function categorizar_leilao(){
 
+    // }
     public function update(StorePostRequest $request, $id)
     {
         $dados = $request->all();

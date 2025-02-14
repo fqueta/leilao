@@ -131,7 +131,7 @@ Route::prefix('admin')->group(function(){
     Route::resource('paginas','\App\Http\Controllers\admin\PostController',['parameters' => [
         'paginas' => 'id'
     ]]);
-    Route::resource('categorias','\App\Http\Controllers\admin\categoryController',['parameters' => [
+    Route::resource('categorias','\App\Http\Controllers\admin\PostController',['parameters' => [
         'categorias' => 'id'
     ]]);
     Route::resource('leiloes_adm','\App\Http\Controllers\admin\PostController',['parameters' => [

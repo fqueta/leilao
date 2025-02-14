@@ -90,8 +90,24 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
                     <div class="search-block rounded mb-5 p-4">
                         <form action="{{url('/')}}/{{App\Qlib\Qlib::get_slug_post_by_id(37)}}">
                             <div class="input-group">
-                                <input type="text" name="filter[post_title]" value="{{@$_GET['filter']['post_title']}}" class="form-control" placeholder="{{__('Buscar leilões')}}"
-                                aria-label="{{__('Buscar leilões')}}" aria-describedby="basic-addon2">
+                                {{-- <input type="text" name="filter[post_title]" value="{{@$_GET['filter']['post_title']}}" class="form-control" placeholder="{{__('Buscar leilões')}}"
+                                aria-label="{{__('Buscar leilões')}}" aria-describedby="basic-addon2"> --}}
+                                @if(isset($arr_select_categorias) && is_array($arr_select_categorias))
+                                    <select name="filter[post_title]" id="sl-filter" class="form-control custom-select">
+                                        <option value="">{{__('Selecione a quantidade de horas que precisa')}}</option>
+                                        @foreach ($arr_select_categorias as $kcat=>$vcat )
+                                            @php
+                                                if(isset($_GET['filter']['post_title']) && $_GET['filter']['post_title'] == $kcat){
+                                                    $selected = 'selected';
+                                                }else{
+                                                    $selected = '';
+                                                }
+                                                // dump($_GET['filter']['post_title'],$kcat,$selected);
+                                            @endphp
+                                            <option {{$selected}} value="{{$kcat}}">{{$vcat}}</option>
+                                        @endforeach
+                                    </select>
+                                @endif
                                 <span class="input-group-btn" id="basic-addon2">
                                     <button id="btn-pesq-jogo" class="btn btn-search" type="submit"><i class="fa fa-search"></i></button>
                                 </span>
@@ -219,6 +235,11 @@ $urlB = App\Qlib\Qlib::get_slug_post_by_id(37); //link da pagina para cosulta de
             var val = $(this).val();
             var url = lib_trataAddUrl('order',val);
             window.location = url;
+        });
+        $('#sl-filter').on('change',function(){
+            if($(this).val() != ''){
+                document.getElementById('btn-pesq-jogo').click();
+            }
         });
     });
 </script>

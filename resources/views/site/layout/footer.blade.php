@@ -58,7 +58,7 @@
     </section>
     <section class="container">
         <div class="copyright text-center">
-            <small><b>Aeroclube de Juiz de Fora</b> | Copyright © 2023 - Todos os direitos reservados.</small>
+            <small><b>Aeroclube de Juiz de Fora</b> | Copyright © {{date('Y')}} - Todos os direitos reservados.</small>
             <small>Desenvolvido por <a href="https://maisaqui.com.br/"><b>Mais Aqui</b></a></small>
         </div>
     </section>

@@ -14,6 +14,7 @@ class MenuSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('menus')->truncate();
         DB::table('menus')->insert([
             [
                 'categoria'=>'',
@@ -49,6 +50,15 @@ class MenuSeeder extends Seeder
                 'actived'=>true,
                 'url'=>'produtos',
                 'route'=>'produtos.index',
+                'pai'=>'cad-produtos'
+            ],
+            [
+                'categoria'=>'',
+                'description'=>'Categorias',
+                'icon'=>'fas fa-list',
+                'actived'=>true,
+                'url'=>'categorias',
+                'route'=>'categorias.index',
                 'pai'=>'cad-produtos'
             ],
             [
@@ -141,15 +151,15 @@ class MenuSeeder extends Seeder
                 'route'=>'componentes.index',
                 'pai'=>'ger-site'
             ],
-            [
-                'categoria'=>'',
-                'description'=>'Categorias',
-                'icon'=>'fas fa-list',
-                'actived'=>true,
-                'url'=>'categorias',
-                'route'=>'categorias.index',
-                'pai'=>'ger-site'
-            ],
+            // [
+            //     'categoria'=>'',
+            //     'description'=>'Categorias',
+            //     'icon'=>'fas fa-list',
+            //     'actived'=>true,
+            //     'url'=>'categorias',
+            //     'route'=>'categorias.index',
+            //     'pai'=>'ger-site'
+            // ],
             [
                 'categoria'=>'SISTEMA',
                 'description'=>'Configurações',
