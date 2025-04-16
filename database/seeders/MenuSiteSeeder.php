@@ -14,6 +14,8 @@ class MenuSiteSeeder extends Seeder
      */
     public function run()
     {
+
+        DB::table('menu_sites')->truncate();
         DB::table('menu_sites')->insert([
             [
                 'categoria'=>'',

@@ -23,16 +23,19 @@ class QoptionSeeder extends Seeder
                 'url'=>'email_gerente',
                 'valor'=>'ger.maisaqui1@gmail.com,suporte@maisaqui.com.br',
                 'obs'=>'Se precisar colocar mais doque um email tem que separar por virgula.',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Diretorio dos arquivos',
                 'url'=>'storage_path',
                 'valor'=>'/storage',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Id da permissão do admin',
                 'url'=>'id_permission_admin',
                 'valor'=>1,
+                'obs'=>'',
             ],
             [
                 'nome'=>'Permissão padrão FrontEnd',
@@ -44,11 +47,13 @@ class QoptionSeeder extends Seeder
                 'nome'=>'Emails dos gerentes',
                 'url'=>'email_gerente',
                 'valor'=>'ger.maisaqui3@gmail.com',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Nome da Empresa',
                 'url'=>'empresa',
                 'valor'=>'Aeroclube de Juiz de fora',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Formas de pagamento',
@@ -58,36 +63,43 @@ class QoptionSeeder extends Seeder
                     'cartao'=>'Cartão de crédito',
                     'pix'=>'PIX',
                 ]),
+                'obs'=>'',
             ],
             [
                 'nome'=>'Token do Asaas',
                 'url'=>'token-asaas',
                 'valor'=>'9d0c7a708698cd8c74b883a37c2a836282672587e7dd34053773e012d7c10b94', //token do sandbox
+                'obs'=>'',
             ],
             [
                 'nome'=>'Url do Asaas',
                 'url'=>'url-asaas',
                 'valor'=>'https://sandbox.asaas.com', //url do sandbox
+                'obs'=>'',
             ],
             [
                 'nome'=>'Prazo máximo de boleto gerado na compra em dias',
                 'url'=>'prazo_boleto',
+                'obs'=>'',
                 'valor'=>1, //url do sandbox
             ],
             [
                 'nome'=>'Debug Front',
                 'url'=>'debug_front',
                 'valor'=>'s', //url do sandbox
+                'obs'=>'',
             ],
             [
                 'nome'=>'Campo Meta para status de pagamento',
                 'url'=>'meta_pago',
                 'valor'=>'pago',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Campo Meta para resumo de pagamento',
                 'url'=>'meta_resumo_pagamento',
                 'valor'=>'resumo_pagamento',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Dados da Empresa',
@@ -104,6 +116,7 @@ class QoptionSeeder extends Seeder
                     'cidade'=>'Juiz de Fora',
                     'estado'=>'MG',
                 ]),
+                'obs'=>'',
             ],
             [
                 'nome'=>'Tipos de páginas',
@@ -116,6 +129,7 @@ class QoptionSeeder extends Seeder
                     'leiloes_publicos'=>'Leilões públicos',
                     'area_cliente'=>'Área do cliente',
                 ]),
+                'obs'=>'',
             ],
             [
                 'nome'=>'Tipos de conteudo',
@@ -129,41 +143,49 @@ class QoptionSeeder extends Seeder
                     'galeria'=>'Galeria',
                     'tags'=>'Tags',
                 ]),
+                'obs'=>'',
             ],
             [
                 'nome'=>'Notificação de lance para seguidor',
                 'url'=>'notific_lance_seguidor',
                 'valor'=>'O leilão <b>{nome_leilao}</b> recebeu um lance ',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Duração máxima do leilao',
                 'url'=>'duracao_max_leilao',
                 'valor'=>'15',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Notiificar usuário sobre cadastro na plataforma',
                 'url'=>'notific_new_user_add',
                 'valor'=>'s',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Texto Card Segurança',
                 'url'=>'texto_card_seguranca',
                 'valor'=>'Nosso site garante total segurança e privacidade em todas as transações de leilão de horas de voo. Viaje tranquilo sabendo que seus dados e informações estão protegidos.',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Texto Card Economia',
                 'url'=>'texto_card_economia',
                 'valor'=>'Economize mais voando: Aproveite a oportunidade de adquirir horas de voo a preços competitivos através de nossos leilões. Maximize seu orçamento e voe mais gastando menos.',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Texto Card Transparência',
                 'url'=>'texto_card_transparencia',
                 'valor'=>'Transparência total: Com nosso sistema de leilão, você tem visibilidade completa sobre todas as ofertas e lances. Nenhuma surpresa, apenas negociações claras e honestas.',
+                'obs'=>'',
             ],
             [
                 'nome'=>'Texto rodapé',
                 'url'=>'texto_rodape',
                 'valor'=>'O Aeroclube de Juiz de Fora é uma das escolas de aviação civil mais tradicionais do Brasil e, desde 1938, já formou mais de 12 mil pilotos.',
+                'obs'=>'',
             ],
         ]);
     }

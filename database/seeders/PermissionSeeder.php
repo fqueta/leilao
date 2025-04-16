@@ -40,6 +40,7 @@ class PermissionSeeder extends Seeder
                 "delete"=>["familias"=>"s","quadras"=>"s","lotes"=>"s","bairros"=>"s","beneficiarios"=>"s","etapas"=>"s","escolaridades"=>"s","estado-civil"=>"s","relatorios_social"=>"s","relatorios_acessos"=>"s","sistema"=>"s","users"=>"s","permissions"=>"s","documentos"=>"s"]
             ],
         ];
+        DB::table('permissions')->truncate();
         DB::table('permissions')->insert([
             [
                 'name'=>'Master',
