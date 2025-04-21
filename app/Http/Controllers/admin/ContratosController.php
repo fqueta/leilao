@@ -20,9 +20,9 @@ class ContratosController extends Controller
     private $token_api;
     public function __construct()
     {
-        $this->url_api = 'https://api.aeroclubejf.com.br/api/v1/';
-        $this->url_webhook = 'https://api.aeroclubejf.com.br/api/webhook/';
-        $this->token_api = '3|XLKG1U2hRFprV2HzavpCZJ9kQ2AbsCx9O9uTAb23';
+        $this->url_api = Qlib::qoption('url_api_crm'); // 'https://api.aeroclubejf.com.br/api/v1/';
+        $this->url_webhook = Qlib::qoption('webhook_api_crm'); //'https://api.aeroclubejf.com.br/api/webhook/';
+        $this->token_api = Qlib::qoption('chave_api_crm');// '3|XLKG1U2hRFprV2HzavpCZJ9kQ2AbsCx9O9uTAb23';
     }
     public function get_contratos_crm(){
 
@@ -154,7 +154,6 @@ class ContratosController extends Controller
                     unset($dcw['password']);
                     $ret['up'] = User::where('id', $id)->update($dcw);
                 }
-                // dd($dcw['rescisao'],$verf_cad[0]);
                 if(isset($dcw['rescisao']) && isset($verf_cad[0]['id'])){
                     $ret = $this->add_contratos($verf_cad[0]['id'],$dcw['token'],$dcw['rescisao']);
                 }
@@ -168,8 +167,11 @@ class ContratosController extends Controller
                     $s_me = (new UserController)->save_meta($id_cli,[
                         'tag_origem'=>'webwook_crm',
                     ]);
-                    $user_cad = User::Find($salvar->id);
-                    Notification::send($user_cad,new notificaNewUser($user_cad));
+                    if(Qlib::qoption('enviar_email_novo_cliente')=='s'){
+                        //Notificar os clientes sobre novo cadastro
+                        $user_cad = User::Find($salvar->id);
+                        Notification::send($user_cad,new notificaNewUser($user_cad));
+                    }
                     $ret = $this->add_contratos($id_cli,$dcw['token'],$dcw['rescisao']);
                 }
 
