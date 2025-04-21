@@ -46,9 +46,14 @@
 </div>
 <div class="row">
     <div class="col-md-6 mt-2">
-        <a href="{{@$as['invoiceUrl']}}" target="blank" class="btn btn-outline-primary">{{__('Detalhes da fatura')}}</a>
+        <a href="{{@$as['invoiceUrl']}}" id="btn-detalhe-fatura" target="blank" class="btn btn-outline-primary">{{__('Detalhes da fatura')}}</a>
     </div>
     <div class="col-md-6 mt-2">
         <a href="{{@$as['transactionReceiptUrl']}}" target="blank" class="btn btn-outline-secondary">{{__('Comprovante')}}</a>
     </div>
 </div>
+@if(isset($as['invoiceUrl']) && !empty($as['invoiceUrl']))
+<script>
+    window.location = '{{ $as['invoiceUrl'] }}';
+</script>
+@endif

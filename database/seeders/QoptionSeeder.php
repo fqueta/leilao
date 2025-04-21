@@ -52,19 +52,19 @@ class QoptionSeeder extends Seeder
             [
                 'nome'=>'SandBox da Api do CRM',
                 'url'=>'webhook_api_crm',
-                'valor'=>'http://localhost:8000/api/webhook/',
+                'valor'=>'http://localhost:8001/api/webhook/',
                 'obs'=>'',
             ],
             [
                 'nome'=>'Url da Api do CRM',
                 'url'=>'url_api_crm',
-                'valor'=>'http://localhost:8000/api/v1',
+                'valor'=>'http://localhost:8001/api/v1/',
                 'obs'=>'',
             ],
             [
                 'nome'=>'Chave da Api do CRM',
                 'url'=>'chave_api_crm',
-                'valor'=>'1|m48U0c4zZbE0MBJNQo4QsAGN8vFE669gFbe5EgKD95fdd6e5',
+                'valor'=>'1|m48U0c4zZbE0MBJNQo4QsAGN8vFE669gFbe5EgKD95fdd6e5', //sandbox
                 'obs'=>'',
             ],
             [
@@ -92,13 +92,13 @@ class QoptionSeeder extends Seeder
             [
                 'nome'=>'Token do Asaas',
                 'url'=>'token-asaas',
-                'valor'=>'9d0c7a708698cd8c74b883a37c2a836282672587e7dd34053773e012d7c10b94', //token do sandbox
+                'valor'=>'$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojc4Y2I3MmNmLThjM2ItNDVjNS1iZDc4LTZiODJhNzI4YzhjZDo6JGFhY2hfYzNhNWUxNjYtYWI5Zi00YWYyLTkyOWUtMjMwMWNhYjRmMTJh', //token do sandbox
                 'obs'=>'',
             ],
             [
                 'nome'=>'Url do Asaas',
                 'url'=>'url-asaas',
-                'valor'=>'https://sandbox.asaas.com', //url do sandbox
+                'valor'=>'https://api-sandbox.asaas.com', //url do sandbox
                 'obs'=>'',
             ],
             [

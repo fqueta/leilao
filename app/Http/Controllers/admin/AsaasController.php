@@ -23,6 +23,7 @@ class AsaasController extends Controller
 	public function credenciais(){
 		$this->Api_key = Qlib::qoption('token-asaas');
 		$this->url = Qlib::qoption('url-asaas');//Produção : https://www.asaas.com
+        $this->url .= '/v3';
 		$this->campo_cad_asaas = 'id_asaas';//campo para salvar id do cliente no asaas
     }
 	public function webhook(){
@@ -207,7 +208,7 @@ class AsaasController extends Controller
 	}
 	public function cunsultarClienteEmail($confi=false){
 			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers?email=".$confi['email']."&cpfCnpj=&externalReference=&offset=&limit=");
+			curl_setopt($ch, CURLOPT_URL, $this->url."/customers?email=".$confi['email']."&cpfCnpj=&externalReference=&offset=&limit=");
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($ch, CURLOPT_HEADER, FALSE);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -220,7 +221,7 @@ class AsaasController extends Controller
 	}
 	public function cunsultarClienteDocumento($confi=false){
 			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers?cpfCnpj=".$confi['cpfCnpj']."&externalReference=&offset=&limit=");
+			curl_setopt($ch, CURLOPT_URL, $this->url."/customers?cpfCnpj=".$confi['cpfCnpj']."&externalReference=&offset=&limit=");
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($ch, CURLOPT_HEADER, FALSE);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -233,7 +234,7 @@ class AsaasController extends Controller
 	}
 	public function cunsultarCliente($confi=false){
 			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers/".$confi['id_cliente_asaas']."");
+			curl_setopt($ch, CURLOPT_URL, $this->url."/customers/".$confi['id_cliente_asaas']."");
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($ch, CURLOPT_HEADER, FALSE);
 
@@ -244,12 +245,11 @@ class AsaasController extends Controller
 
 			$response = curl_exec($ch);
 			curl_close($ch);
-
-			var_dump($response);
+			return json_decode($response,true);
 	}
 	public function localizarPagamento($id_pagamento){
 			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/payments?installment=".$id_pagamento."&limit=12");
+			curl_setopt($ch, CURLOPT_URL, $this->url."/payments?installment=".$id_pagamento."&limit=12");
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($ch, CURLOPT_HEADER, FALSE);
 
@@ -470,7 +470,7 @@ class AsaasController extends Controller
 	public function credCardTest(){
 		$ch = curl_init();
 
-		curl_setopt($ch, CURLOPT_URL,  $this->url."/api/v3/payments");
+		curl_setopt($ch, CURLOPT_URL,  $this->url."/payments");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_HEADER, FALSE);
 
@@ -539,7 +539,7 @@ class AsaasController extends Controller
 			$json_confic = json_encode($confic,JSON_UNESCAPED_UNICODE);//exit;
 			$ret['confic'] = $confic;
 			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/payments");
+			curl_setopt($ch, CURLOPT_URL, $this->url."/payments");
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($ch, CURLOPT_HEADER, FALSE);
 			curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -598,7 +598,7 @@ class AsaasController extends Controller
 				$confic['notifyCustomer']	= isset($confi['notifyCustomer']) ? $confi['notifyCustomer'] : false;
 				//id da fatura do lcf_entradas
 				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/payments/".$reg_asaas['id']."/receiveInCash");
+				curl_setopt($ch, CURLOPT_URL, $this->url."/payments/".$reg_asaas['id']."/receiveInCash");
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 				curl_setopt($ch, CURLOPT_HEADER, FALSE);
 				curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -639,7 +639,7 @@ class AsaasController extends Controller
 			if(is_array($reg_asaas)){
 				//id da fatura do lcf_entradas
 				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/payments/".$reg_asaas['id']);
+				curl_setopt($ch, CURLOPT_URL, $this->url."/payments/".$reg_asaas['id']);
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 				curl_setopt($ch, CURLOPT_HEADER, FALSE);
 				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -773,10 +773,10 @@ class AsaasController extends Controller
 			$confic['interest'] = isset($confi['juros']) ? $confi['juros'] : array('value'=>0,'dueDateLimitDays'=>0); //Informações de multa para pagamento após o vencimento
 			**/
 			if(isset($confic['id'])){
-				$url = $this->url."/api/v3/payments/".$confic['id'];
+				$url = $this->url."/payments/".$confic['id'];
 				unset($confic['id']);
 			}else{
-				$url = $this->url."/api/v3/payments";
+				$url = $this->url."/payments";
 			}
 			//echo $url;
 			//exit;
@@ -801,10 +801,10 @@ class AsaasController extends Controller
 	public function cobrancaPix($confic=false){
 		// dd($co)
 		if(isset($confic['id'])){
-			$url = $this->url."/api/v3/payments/".$confic['id'];
+			$url = $this->url."/payments/".$confic['id'];
 			unset($confic['id']);
 		}else{
-			$url = $this->url."/api/v3/payments";
+			$url = $this->url."/payments";
 		}
 		$ret['exec'] = false;
 		if(isset($confic)){
@@ -837,7 +837,7 @@ class AsaasController extends Controller
 	public function get_pix_qrcode($payment_id=false){
 		$ret = false;
 		if($payment_id){
-			$url = $this->url."/api/v3/payments/{id}/pixQrCode";
+			$url = $this->url."/payments/{id}/pixQrCode";
 			$url = str_replace('{id}',$payment_id,$url);
 
 			$curl = curl_init();
@@ -882,9 +882,10 @@ class AsaasController extends Controller
 						$schemaAsaas = $this->schemaCustomerAsaas(false,$dadosCli);
                         $ret['schemaAsaas'] = $schemaAsaas;
                         $ret['id_asaas'] = $id_asaas;
+
 						if((!$id_asaas) || ($id_asaas && empty($id_asaas))){
-							$url = $this->url."/api/v3/customers";
-							$ch = curl_init();
+                            $url = $this->url."/customers";
+                           $ch = curl_init();
 
 							curl_setopt($ch, CURLOPT_URL, $url );
 							curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -904,11 +905,14 @@ class AsaasController extends Controller
 							if(isset($ret['cad_asaas']['id']) && !empty($ret['cad_asaas']['id'])){
                                 $id_asaas = $ret['cad_asaas']['id'];
 								$ret['exec'] = Qlib::update_usermeta($id_cliente,$this->campo_cad_asaas,$id_asaas);
+                                $ret['id_asaas'] = $id_asaas;
 							}
+                            // dd($ret,$id_asaas,$url);
+
 						}else{
 							if($confere && $schemaAsaas){
 								$ch = curl_init();
-								curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers/".$id_asaas);
+								curl_setopt($ch, CURLOPT_URL, $this->url."/customers/".$id_asaas);
 								curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 								curl_setopt($ch, CURLOPT_HEADER, FALSE);
 								curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -940,7 +944,7 @@ class AsaasController extends Controller
             $id_asaas = Qlib::get_usermeta($id_cliente,$this->campo_cad_asaas);
 			if(!empty($id_asaas)){
 				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $this->url."/api/v3/customers/".$dadosCli[0]['id_asaas']);
+				curl_setopt($ch, CURLOPT_URL, $this->url."/customers/".$dadosCli[0]['id_asaas']);
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 				curl_setopt($ch, CURLOPT_HEADER, FALSE);
 				curl_setopt($ch, CURLOPT_POST, TRUE);
