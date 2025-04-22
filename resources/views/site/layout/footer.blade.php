@@ -10,7 +10,7 @@
                 <h6>Atendimento ao cliente</h6>
                 <ul>
                     <li>
-                        <a href="https://aeroclubejf.com.br/politica-de-privacidade/">
+                        <a href="{{url('/politica-de-privacidade')}}">
                             <i class="fa-solid fa-angle-right"></i> Política de privacidade
                         </a>
                     </li>
@@ -20,7 +20,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="https://contate.me/saibamaisacjf">
+                        <a href="{{url('/faq')}}">
+                            <i class="fa-solid fa-angle-right"></i> FAQ
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{url('/contato')}}">
                             <i class="fa-solid fa-angle-right"></i> Suporte
                         </a>
                     </li>

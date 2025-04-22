@@ -139,6 +139,7 @@ class siteController extends Controller
                     ];
                 }
 
+                // return 'agora'.$ret;
                 $arr_short = [];
                 $arr_k = explode('[sc ac="',$ret);
                 if(isset($arr_k[1]) && !empty($arr_k[1])){
