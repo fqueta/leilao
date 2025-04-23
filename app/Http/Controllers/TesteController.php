@@ -139,7 +139,7 @@ class TesteController extends Controller
         // return $ret;
         // $up = Qlib::update_postmeta(45,'notifica_termino_leilao','n');
         // $me = Qlib::get_postmeta(36,'notifica_termino_leilao',true);
-        // dd($me);
+        // dd($me);'
         // dd(config('app.debug'));
         // $p = (new LanceController)->marca_lance_superado(36);
         // dd($p);
