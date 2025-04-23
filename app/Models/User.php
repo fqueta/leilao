@@ -73,10 +73,5 @@ class User extends Authenticatable implements MustVerifyEmail
             $routa = $_REQUEST['r'];
         }
         return $routa;
-        // return match((int)$this->role_id) {
-        //     1 => 'student.dashboard',
-        //     2 => 'teacher.dashboard',
-        //     // ...
-        // };
     }
 }

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -33,6 +34,14 @@ class UserSeeder extends Seeder
                 'id_permission' => '2',
             ],
             [
+                'name' => 'Renan Coimbra Campos',
+                'email' => 'renan@aeroclubejf.com.br',
+                'password' => Hash::make('mudar123'),
+                'status' => 'actived',
+                'verificado' => 's',
+                'id_permission' => '2',
+            ],
+            [
                 'name' => 'primeiro cliente de teste',
                 'email' => 'teste@aeroclubejf.com.br',
                 'password' => Hash::make('mudar123'),
@@ -41,6 +50,7 @@ class UserSeeder extends Seeder
                 'id_permission' => '5',
             ],
         ];
+        DB::table('usermeta')->truncate();
         User::truncate();
         foreach ($arr as $key => $value) {
             User::create($value);

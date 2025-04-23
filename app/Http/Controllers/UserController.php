@@ -259,6 +259,9 @@ class UserController extends Controller
                     'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script_'=>'<p class="pt-2 mb-3">'.$termo.'</p>','script_show'=>'<p class="mb-3">'.$termo.'</p>'
                 ];
                 unset($ret['meta[termo]']);
+                if($this->aceito_politica(@$dados['id'],'html')){
+                    unset($ret['meta[politica]']);
+                }
             }else{
                 $ret['ttermo']=[
                     'label'=>'Termos',
@@ -300,18 +303,35 @@ class UserController extends Controller
                 $ret['tipo_pessoa']['value'] = $sec;
             }
             $ret['sep3']=[
-                'label'=>'Termos',
+                'label'=>'Termos e Políticas',
                 'active'=>false,
                 'type'=>'html_script',
                 'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<h6 class="text-left pt-2">'.__('Termos').'</h6><hr class="mt-0">',
                 'script_show'=>''
             ];
+            $ret['texto_termo']=[
+                'label'=>'Termos',
+                'active'=>false,
+                'type'=>'html_script',
+                'exibe_busca'=>'d-none','event'=>'','tam'=>'12','script'=>'<b class="text-justify pt-2">'.__('Li e concordo com os Termos e Condições de Uso, bem como com a Política de Privacidade do site de leilão de horas de voo do Aeroclube de Juiz de Fora. Estou ciente de que lances são compromissos de compra e que a utilização das horas adquiridas está sujeita à disponibilidade operacional do Aeroclube.').'</b><hr class="mt-0">',
+                'script_show'=>''
+            ];
             $ret['meta[termo]']=[
-                'label'=>'Concordo com os <a href="'.url('/termos-do-site').'" target="_blank">termos do site</a>',
+                'label'=>'Aceito os <a href="'.url('/termos-do-site').'" target="_blank">Termos de Uso</a>',
                 'active'=>false,
                 'type'=>'checkbox',
                 'exibe_busca'=>'d-block',
                 'name'=>'meta[termos_site]',
+                'event'=>'required',
+                'value'=>'s',
+                'tam'=>'12'
+            ];
+            $ret['meta[politica]']=[
+                'label'=>'Aceito a <a href="'.url('/politica-de-privacidade').'" target="_blank">Política de Privacidade</a>',
+                'active'=>false,
+                'type'=>'checkbox',
+                'exibe_busca'=>'d-block',
+                'name'=>'meta[politicass_site]',
                 'event'=>'required',
                 'value'=>'s',
                 'tam'=>'12'
@@ -326,6 +346,9 @@ class UserController extends Controller
                         'script_show'=>''
                     ];
                     unset($ret['meta[termo]']);
+                }
+                if($this->aceito_politica(@$dados['id'],'html')){
+                    unset($ret['meta[politica]']);
                 }
             }else{
 
@@ -1006,10 +1029,10 @@ class UserController extends Controller
                 if(is_array($v)){
                     $v = Qlib::lib_array_json($v);
                 }
-                if($k == 'termo' && $v=='s'){
+                if(($k == 'termo' && $v=='s') || ($k == 'politica' && $v=='s') ){
                     //aceitação dos termos
                     $v = Qlib::lib_array_json([
-                        'aceito_termo' => 's',
+                        'aceito_'.$k => 's',
                         'data' => Qlib::dataLocal(),
                         'ip' => $_SERVER['REMOTE_ADDR'],
                     ]);
@@ -1026,12 +1049,47 @@ class UserController extends Controller
     public function aceito_termo($user_id,$type='')
     {
         $termo = Qlib::get_usermeta($user_id,'termo',true);
+        $politica = Qlib::get_usermeta($user_id,'politica',true);
         $ret = false;
         if($termo){
             $arr_t = Qlib::lib_json_array($termo);
             if(@$arr_t['aceito_termo']=='s'){
                 if($type=='html'){
                     $ret = '<span class="text-success">Termos aceitos pelo usuário em {data} :: {ip}</span>';
+                    $ret = str_replace('{data}',$arr_t['data'],$ret);
+                    $ret = str_replace('{ip}',$arr_t['ip'],$ret);
+                }else{
+                    $ret = true;
+                }
+            }
+        }
+        if($politica){
+            $arr_t = Qlib::lib_json_array($politica);
+            if(@$arr_t['aceito_politica']=='s'){
+                if($type=='html'){
+                    $ret .= '<br><span class="text-success">Política aceita pelo usuário em {data} :: {ip}</span>';
+                    $ret = str_replace('{data}',$arr_t['data'],$ret);
+                    $ret = str_replace('{ip}',$arr_t['ip'],$ret);
+                }else{
+                    $ret = true;
+                }
+            }
+        }
+        return $ret;
+    }
+    /**
+     * Metodo para verifica se usuario aceito os termos
+     * @param int $user_id,$type=tipo de retorno se for html resultado será um html
+     */
+    public function aceito_politica($user_id,$type='')
+    {
+        $politica = Qlib::get_usermeta($user_id,'politica',true);
+        $ret = false;
+        if($politica){
+            $arr_t = Qlib::lib_json_array($politica);
+            if(@$arr_t['aceito_politica']=='s'){
+                if($type=='html'){
+                    $ret = '<br><span class="text-success">Política aceita pelo usuário em {data} :: {ip}</span>';
                     $ret = str_replace('{data}',$arr_t['data'],$ret);
                     $ret = str_replace('{ip}',$arr_t['ip'],$ret);
                 }else{
