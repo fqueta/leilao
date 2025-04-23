@@ -100,8 +100,8 @@ class TesteController extends Controller
         // //Notificar o cliente caso seja permitido
         // $ret['notify'] = (new LeilaoController())->notifica_termino($leilao_id,'ganhador');
         // $ret = (new UserController)->ger_select_ddi();
-        $ret = (new LeilaoController)->categoria_horas_leilao();
-        return $ret;
+        // $ret = (new LeilaoController)->categoria_horas_leilao();
+        // return $ret;
         // dd($ret);
         // dd(NotificWinnerJob::dispatch());
         // session(['user'=>'s']);
@@ -124,9 +124,12 @@ class TesteController extends Controller
         //     'mensagem' => 'Ola mensagem',
         //     // 'link_pagamento' => $link_pagamento,
         // ]);
-        // $ret['salv'] = (new ContratosController)->update_tokenCRM(5550,[
-        //     'token_externo' => '54233',
-        // ]);
+        $id = $request->get('id');
+        $token_externo = $request->get('token_externo');
+        $ret['salv'] = (new ContratosController)->update_tokenCRM($id,[
+            'token_externo' => $token_externo,
+        ]);
+        return $ret;
         // // $notific = (new LanceController)->notifica_superado($leilao_id,$id_a);
         // $ret = (new LeilaoController)->notifica_termino(62,'admin');
         // dd($ret);

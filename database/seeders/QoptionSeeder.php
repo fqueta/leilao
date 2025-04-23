@@ -64,7 +64,7 @@ class QoptionSeeder extends Seeder
             [
                 'nome'=>'Chave da Api do CRM',
                 'url'=>'chave_api_crm',
-                'valor'=>'1|m48U0c4zZbE0MBJNQo4QsAGN8vFE669gFbe5EgKD95fdd6e5', //sandbox
+                'valor'=>'', //sandbox
                 'obs'=>'',
             ],
             [

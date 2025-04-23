@@ -61,6 +61,8 @@ class ContratosController extends Controller
     }
     /**
      * Metodo para atualizar token externo
+     * @param $id id da matrucula no crm
+     * @param $dado corpo da requisição Ex: $dados['token_externo'] ou body{"token_externo":"id do contrato"}
      */
     public function update_tokenCRM($id,$dados=[]){
         $ret['exec'] = false;
