@@ -67,36 +67,27 @@ class ContratosController extends Controller
      */
     public function update_tokenCRM($id,$dados=[]){
         $ret['exec'] = false;
+        $ret['status'] = false;
+        $ret['mens'] = 'Erro ao atualizar o token';
         if($id && is_array($dados)){
-            $dados['id'] = $id;
-            // $json_dados = Qlib::lib_array_json($dados);
-            // $url = $this->url .'matriculas/'.$id;
-            $url = $this->url_webhook . 'crm';
-            // dd($url);
-            // $curl = curl_init();
-
-            // curl_setopt_array($curl, array(
-            // CURLOPT_URL => $url,
-            // CURLOPT_RETURNTRANSFER => true,
-            // CURLOPT_ENCODING => '',
-            // CURLOPT_MAXREDIRS => 10,
-            // CURLOPT_TIMEOUT => 0,
-            // CURLOPT_FOLLOWLOCATION => true,
-            // CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            // CURLOPT_CUSTOMREQUEST => 'PUT',
-            // CURLOPT_POSTFIELDS =>$json_dados,
-            // CURLOPT_HTTPHEADER => array(
-            //     'Accept: application/json',
-            //     'Content-Type: application/json',
-            //     'Authorization: Bearer '.$this->token_api
-            // ),
-            // ));
-
-            // $response = curl_exec($curl);
-
-            // curl_close($curl);
-            $response = Http::withToken($this->token_api)->post($url,$dados);
-            $ret = Qlib::lib_json_array($response);
+            try {
+                $url = $this->url_webhook . 'crm';
+                $dados['id'] = $id;
+                $response = Http::post($url,$dados);
+                // $ret = Qlib::lib_json_array($response);
+                $status = $response->status();
+                $successful = $response->successful();
+                $ret['status'] = $status;
+                $ret['status'] = $status;
+                if($status==200){
+                    $ret['exec'] = $successful;
+                    $ret['mens'] = 'Atualizado com sucesso!';
+                }
+                dd($dados,$url,$ret);
+            } catch (\Throwable $th) {
+                $ret['error'] = $th->getMessage();
+                $ret['status'] = 500;
+            }
         }
         return $ret;
     }
