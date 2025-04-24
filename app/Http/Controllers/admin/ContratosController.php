@@ -77,7 +77,7 @@ class ContratosController extends Controller
                 // $ret = Qlib::lib_json_array($response);
                 $status = $response->status();
                 $successful = $response->successful();
-                $ret['status'] = $status;
+                $ret['response'] = $response;
                 $ret['status'] = $status;
                 if($status==200){
                     $ret['exec'] = $successful;

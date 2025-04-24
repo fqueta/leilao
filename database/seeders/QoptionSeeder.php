@@ -90,6 +90,16 @@ class QoptionSeeder extends Seeder
                 'obs'=>'',
             ],
             [
+                'nome'=>'Credenciais Zapguru',
+                'url'=>'credenciais_zapguru',
+                'valor'=>Qlib::lib_array_json([
+                    'key'=>'',
+                    'account_id'=>'',
+                    'phone_id'=>'',
+                ]),
+                'obs'=>'',
+            ],
+            [
                 'nome'=>'Token do Asaas',
                 'url'=>'token-asaas',
                 'valor'=>'$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojc4Y2I3MmNmLThjM2ItNDVjNS1iZDc4LTZiODJhNzI4YzhjZDo6JGFhY2hfYzNhNWUxNjYtYWI5Zi00YWYyLTkyOWUtMjMwMWNhYjRmMTJh', //token do sandbox

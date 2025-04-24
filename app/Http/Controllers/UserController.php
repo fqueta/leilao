@@ -1442,7 +1442,14 @@ class UserController extends Controller
     public function get_ddi(){
         $ret = false;
         $link_ddi = 'https://api.aeroclubejf.com.br/api/ddi';
-		$js_ddi = file_get_contents($link_ddi);
+        $arrContextOptions=array(
+            "ssl"=>array(
+                "verify_peer"=>false,
+                "verify_peer_name"=>false,
+            ),
+        );
+
+		$js_ddi = file_get_contents($link_ddi, false, stream_context_create($arrContextOptions));
 		$ret = Qlib::lib_json_array($js_ddi);
         return $ret;
     }
