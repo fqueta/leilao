@@ -17,6 +17,7 @@ use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -124,12 +125,21 @@ class TesteController extends Controller
         //     'mensagem' => 'Ola mensagem',
         //     // 'link_pagamento' => $link_pagamento,
         // ]);
-        $id = $request->get('id');
-        $token_externo = $request->get('token_externo');
-        $ret['salv'] = (new ContratosController)->update_tokenCRM($id,[
-            'token_externo' => $token_externo,
-        ]);
-        return $ret;
+        // $id = $request->get('id');
+        // $token_externo = $request->get('token_externo');
+        // $ret['salv'] = (new ContratosController)->update_tokenCRM($id,[
+        //     'token_externo' => $token_externo,
+        // ]);
+        // return $ret;
+        $response = Http::get('https://pintopolis.amsloja.com.br/api/v1/documents?page=0&limit=50&type=portarias&year=2024');
+
+        if ($response->ok()) {
+            $data = $response->json();
+        } else {
+            $data['exec'] = false;
+            $data['response'] = $response;
+        }
+        dd($data);
         // // $notific = (new LanceController)->notifica_superado($leilao_id,$id_a);
         // $ret = (new LeilaoController)->notifica_termino(62,'admin');
         // dd($ret);
