@@ -83,7 +83,6 @@ class ContratosController extends Controller
                     $ret['exec'] = $successful;
                     $ret['mens'] = 'Atualizado com sucesso!';
                 }
-                dd($dados,$url,$ret);
             } catch (\Throwable $th) {
                 $ret['error'] = $th->getMessage();
                 $ret['status'] = 500;
