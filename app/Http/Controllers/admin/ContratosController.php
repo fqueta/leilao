@@ -11,6 +11,7 @@ use App\Qlib\Qlib;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\notificaNewUser;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 class ContratosController extends Controller
@@ -67,29 +68,34 @@ class ContratosController extends Controller
     public function update_tokenCRM($id,$dados=[]){
         $ret['exec'] = false;
         if($id && is_array($dados)){
-            $json_dados = Qlib::lib_array_json($dados);
-            $curl = curl_init();
+            $dados['id'] = $id;
+            // $json_dados = Qlib::lib_array_json($dados);
+            // $url = $this->url .'matriculas/'.$id;
+            $url = $this->url_webhook . 'crm';
+            // dd($url);
+            // $curl = curl_init();
 
-            curl_setopt_array($curl, array(
-            CURLOPT_URL => $this->url_api.'matriculas/'.$id,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'PUT',
-            CURLOPT_POSTFIELDS =>$json_dados,
-            CURLOPT_HTTPHEADER => array(
-                'Accept: application/json',
-                'Content-Type: application/json',
-                'Authorization: Bearer '.$this->token_api
-            ),
-            ));
+            // curl_setopt_array($curl, array(
+            // CURLOPT_URL => $url,
+            // CURLOPT_RETURNTRANSFER => true,
+            // CURLOPT_ENCODING => '',
+            // CURLOPT_MAXREDIRS => 10,
+            // CURLOPT_TIMEOUT => 0,
+            // CURLOPT_FOLLOWLOCATION => true,
+            // CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            // CURLOPT_CUSTOMREQUEST => 'PUT',
+            // CURLOPT_POSTFIELDS =>$json_dados,
+            // CURLOPT_HTTPHEADER => array(
+            //     'Accept: application/json',
+            //     'Content-Type: application/json',
+            //     'Authorization: Bearer '.$this->token_api
+            // ),
+            // ));
 
-            $response = curl_exec($curl);
+            // $response = curl_exec($curl);
 
-            curl_close($curl);
+            // curl_close($curl);
+            $response = Http::withToken($this->token_api)->post($url,$dados);
             $ret = Qlib::lib_json_array($response);
         }
         return $ret;
