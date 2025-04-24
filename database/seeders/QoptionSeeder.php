@@ -50,15 +50,15 @@ class QoptionSeeder extends Seeder
                 'obs'=>'Se a opção estiver "s" todos os novos cadastros de clientes receberão um email de notificação',
             ],
             [
-                'nome'=>'SandBox da Api do CRM',
+                'nome'=>'Webhook da Api do CRM',
                 'url'=>'webhook_api_crm',
-                'valor'=>'http://localhost:8001/api/webhook/',
+                'valor'=>'https://api.aeroclubejf.com.br/api/webhook/',
                 'obs'=>'',
             ],
             [
                 'nome'=>'Url da Api do CRM',
                 'url'=>'url_api_crm',
-                'valor'=>'http://localhost:8001/api/v1/',
+                'valor'=>'https://api.aeroclubejf.com.br/api/v1/',
                 'obs'=>'',
             ],
             [
@@ -70,7 +70,7 @@ class QoptionSeeder extends Seeder
             [
                 'nome'=>'Emails dos gerentes',
                 'url'=>'email_gerente',
-                'valor'=>'ger.maisaqui3@gmail.com',
+                'valor'=>'ger.maisaqui3@gmail.com,quetafernando1@gmail.com',
                 'obs'=>'',
             ],
             [
