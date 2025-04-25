@@ -19,10 +19,10 @@
             <div class="col-12 col-md-5 order-1 order-md-0">
                 <div class="banner-page-sidebar">
                     <div class="banner-page-item-cover p-1 bg-light rounded text-center">
-                        <img src="{{$dados['link_thumbnail']}}" alt="{{$dados['post_title']}}" class="img-fluid rounded mb-3">
+                        <img src="{{@$dados['link_thumbnail']}}" alt="{{@$dados['post_title']}}" class="img-fluid rounded mb-3">
                         <h3><i class="fa-solid fa-gavel"></i> {{__('Lance Atual')}}</h3>
                         <p class="display-6 text-muted mb-0">{!!$dados['lance_atual']!!}</p>
-                        <button type="button" class="btn btn-link p-0" id="btn-ver_lances">{{__('Ver Lances')}} ({{$dados['total_lances']}})</button>
+                        <button type="button" class="btn btn-link p-0" id="btn-ver_lances">{{__('Ver Lances')}} ({{@$dados['total_lances']}})</button>
                     </div>
                 </div>
             </div>
