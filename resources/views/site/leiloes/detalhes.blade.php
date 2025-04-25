@@ -17,7 +17,7 @@
     <section>
         <div class="container">
             <div class="row">
-                <div class="col-12 mt-4">
+                <div class="col-12 mt-4" style="min-height: 300px;padding-top: 43px;">
                     <div class="alert alert-warning" role="alert">
                         <strong>{{ __('Alerta') }}</strong> {{ __('Leilão em edição ou dados insuficientes') }}
                     </div>
@@ -26,7 +26,6 @@
         </div>
     </section>
 @else
-
     <section class="banner-page">
         <div class="container">
             <div class="row py-5">
